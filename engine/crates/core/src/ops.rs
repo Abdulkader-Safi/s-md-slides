@@ -197,10 +197,7 @@ fn valid_id(id: &str) -> bool {
 type Changes = (Vec<(String, AttrVal)>, Vec<String>);
 
 /// Turn op attribute maps into (key, value) pairs to set and keys to remove.
-fn attr_changes(
-    set: &Map<String, Value>,
-    remove: &[String],
-) -> Result<Changes, EngineError> {
+fn attr_changes(set: &Map<String, Value>, remove: &[String]) -> Result<Changes, EngineError> {
     let mut out = Vec::new();
     let mut gone: Vec<String> = Vec::new();
     for k in remove {

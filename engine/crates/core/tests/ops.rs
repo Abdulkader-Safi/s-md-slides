@@ -440,3 +440,52 @@ fn every_op_variant_round_trips_through_json() {
         assert_eq!(back, o);
     }
 }
+
+#[test]
+fn queries_elements_at_search_assets() {
+    let src = "---\ntheme: themes/brand.json\n---\n<!-- slide bg=assets/hero.jpg -->\n<!-- shape id=low kind=rect x=0 y=0 w=200 h=200 -->\n<!-- shape id=high kind=rect x=100 y=100 w=200 h=200 -->\n<!-- shape id=spin kind=rect x=500 y=500 w=200 h=20 rot=90 -->\n<!-- image id=i1 x=0 y=0 w=10 h=10 -->\n![Chart](assets/chart.png)\n<!-- text id=t1 x=0 y=0 w=10 h=10 -->\nSee ![again](assets/chart.png) and ![web](https://x.com/a.png)\n<!-- video id=v1 x=0 y=0 w=10 h=10 src=assets/demo.mp4 poster=assets/demo.jpg -->\n\n<!-- notes -->\nMention the Chart.\n";
+    let d = Deck::parse(src).deck;
+    // FR-OPS-05: overlapping shapes come back top first.
+    assert_eq!(d.elements_at(0, 150.0, 150.0), ["high", "low"]);
+    // Rotated 90 degrees: the 200x20 bar now stands upright around its center (600, 510).
+    assert_eq!(d.elements_at(0, 600.0, 590.0), ["spin"]);
+    assert!(d.elements_at(0, 690.0, 510.0).is_empty());
+
+    let hits = d.search("chart");
+    assert_eq!(
+        hits.iter()
+            .map(|h| (h.element.as_deref(), h.field))
+            .collect::<Vec<_>>(),
+        [
+            (Some("i1"), s_md_slides::HitField::Body),
+            (Some("t1"), s_md_slides::HitField::Body),
+            (None, s_md_slides::HitField::Notes),
+        ]
+    );
+
+    // FR-ASSET-03: every path once, URLs skipped.
+    let assets: Vec<_> = d
+        .assets()
+        .into_iter()
+        .map(|a| (a.path, a.kind, a.used_by))
+        .collect();
+    use s_md_slides::AssetKind::*;
+    assert_eq!(
+        assets,
+        [
+            (
+                "themes/brand.json".to_string(),
+                Theme,
+                vec!["front".to_string()]
+            ),
+            ("assets/hero.jpg".into(), Background, vec!["slide:0".into()]),
+            (
+                "assets/chart.png".into(),
+                Image,
+                vec!["i1".into(), "t1".into()]
+            ),
+            ("assets/demo.mp4".into(), Video, vec!["v1".into()]),
+            ("assets/demo.jpg".into(), Poster, vec!["v1".into()]),
+        ]
+    );
+}
