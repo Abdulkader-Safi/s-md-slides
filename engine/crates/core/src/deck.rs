@@ -17,6 +17,7 @@ pub const MAX_ATTR_VALUE_BYTES: usize = 4 * 1024;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum LineEnding {
     Lf,
     Crlf,
@@ -33,6 +34,7 @@ impl LineEnding {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(into = "String")]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, type = "string"))]
 pub enum Kind {
     Text,
     Image,
@@ -108,6 +110,7 @@ impl ElementSrc {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Element {
     pub id: String,
     pub kind: Kind,
@@ -150,6 +153,7 @@ impl Element {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(into = "String")]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, type = "string"))]
 pub enum MasterSetting {
     Inherit,
     None,
@@ -206,6 +210,7 @@ pub(crate) struct DefSrc {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Slide {
     pub index: usize,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -229,6 +234,7 @@ pub struct Slide {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Master {
     pub id: String,
     pub attrs: Vec<Attr>,
@@ -238,6 +244,7 @@ pub struct Master {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Placeholder {
     pub id: String,
     pub kind: String,
@@ -249,6 +256,7 @@ pub struct Placeholder {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Layout {
     pub id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -260,6 +268,7 @@ pub struct Layout {
 }
 
 #[derive(Debug, Clone, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Deck {
     #[serde(skip)]
     pub(crate) source: String,

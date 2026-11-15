@@ -4,6 +4,7 @@ use serde::Serialize;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum Severity {
     Error,
     Warning,
@@ -12,6 +13,7 @@ pub enum Severity {
 
 /// One problem, with a 1-based line and column (column counts characters, not bytes).
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Diagnostic {
     pub severity: Severity,
     /// Stable code such as `E-ATTR-VALUE` or `W-OFF-CANVAS`.
@@ -29,6 +31,7 @@ pub struct Diagnostic {
 
 /// Error returned by operations. The deck is unchanged when one comes back.
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct EngineError {
     pub code: &'static str,
     pub message: String,

@@ -9,6 +9,7 @@ use std::collections::BTreeMap;
 pub const FORMAT_VERSION: u32 = 1;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Canvas {
     pub width: u32,
     pub height: u32,
@@ -48,6 +49,7 @@ impl Canvas {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum Dir {
     #[default]
     Auto,
@@ -67,6 +69,7 @@ impl Dir {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct FrontMatter {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,

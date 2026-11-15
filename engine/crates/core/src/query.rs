@@ -6,6 +6,7 @@ use serde_json::Value;
 
 /// Where a search match was found.
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Hit {
     pub slide: usize,
     /// The element, or `None` for a match in the notes.
@@ -16,6 +17,7 @@ pub struct Hit {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum HitField {
     Body,
     Notes,
@@ -23,6 +25,7 @@ pub enum HitField {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum AssetKind {
     Image,
     Video,
@@ -33,6 +36,7 @@ pub enum AssetKind {
 
 /// A file the deck points at, by its path as written (relative to the deck).
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct AssetRef {
     pub path: String,
     pub kind: AssetKind,

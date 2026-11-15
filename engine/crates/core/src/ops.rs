@@ -16,6 +16,7 @@ use std::ops::Range;
 /// Where `SetZ` moves an element: an index in its slide (0 is the back) or a step.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum ZTo {
     Index(usize),
     Step(ZStep),
@@ -23,6 +24,7 @@ pub enum ZTo {
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum ZStep {
     Front,
     Back,
@@ -32,6 +34,7 @@ pub enum ZStep {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case")]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum Op {
     /// Insert a slide before `index` (or at the end). Empty, from a layout, or raw text.
     AddSlide {
