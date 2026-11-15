@@ -55,6 +55,22 @@ PDF text layer (copy and search). Noto Sans Arabic builds letters from shared do
 
 Recommendation for M5: draw text with the direct path (parley glyph runs into krilla with parley's cluster ranges, ligature continuations merged) and keep krilla-svg for everything that is not text. It renders identically, puts parley's exact glyphs in the PDF instead of a second shaping pass, and has the best text layer in every viewer tested. This keeps krilla and krilla-svg, but changes how text reaches krilla, so it needs a yes before M5. Perfect Arabic search in every viewer is likely out of reach with this font; the rendering itself is correct everywhere.
 
+### Pinned versions (done)
+
+Every dependency the spec names is pinned with `=x.y.z` in `[workspace.dependencies]` of `Cargo.toml`, checked on crates.io on 2026-11-15, and they all resolve together. The highest MSRV among them is krilla's 1.92, below ours (1.95).
+
+Where the pin differs from the version family in the spec:
+
+| Crate | Spec | Pinned | Why |
+| --- | --- | --- | --- |
+| serde-saphyr | 1.3.x | 2.1.1 | Latest stable. The WASM spike measured this version |
+| parley, fontique | 0.9.x | 0.13.0 | Latest stable. The layout spike used this version |
+| resvg, usvg | latest | 0.47.0 | krilla-svg 0.8.1 is built on usvg 0.47; one SVG tree for PNG and PDF |
+| notify, notify-debouncer-full | 8.2, 0.7 | 8.2.2, 0.7.0 | As the spec says. 9.0 and 0.8 are release candidates |
+| giallo | Could | not pinned | EUPL-1.2, syntect 5.3.0 is pinned instead |
+
+parley 0.13 and krilla 0.8 depend on different versions of the font stack (skrifa 0.49 and 0.42, read-fonts, font-types). That only adds native binary size, and the core crate is not affected.
+
 ### License check (done)
 
 | Item | License | Verdict |
