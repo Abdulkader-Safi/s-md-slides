@@ -1,0 +1,100 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostics, })"
+---
+{
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "c1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "80"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "800"
+              },
+              {
+                "key": "lines",
+                "value": "2"
+              }
+            ],
+            "body": "```markdown\n---\n<!-- text id=not-a-directive x=1 y=1 w=1 h=1 -->\nStill inside the fence.\n```\n",
+            "h": 800.0,
+            "id": "c1",
+            "kind": "code",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 80.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "900"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "100"
+              }
+            ],
+            "body": "~~~\n--- also inside a tilde fence\n~~~\n",
+            "h": 100.0,
+            "id": "t1",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 900.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": []
+}

@@ -1,0 +1,107 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostics, })"
+---
+{
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "rtl",
+      "lang": "ar"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "80"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              },
+              {
+                "key": "size",
+                "value": "64"
+              }
+            ],
+            "body": "# مراجعة الربع الثالث\n",
+            "h": 200.0,
+            "id": "t1",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 80.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t2"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "320"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "400"
+              },
+              {
+                "key": "dir",
+                "value": "ltr"
+              }
+            ],
+            "body": "English inside an Arabic deck.\n",
+            "dir": "ltr",
+            "h": 400.0,
+            "id": "t2",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 320.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit",
+        "notes": "ابدأ بأرقام الكويت.\n"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": []
+}

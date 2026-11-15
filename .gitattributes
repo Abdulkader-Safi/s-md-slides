@@ -1,0 +1,2 @@
+# Golden decks are byte-exact fixtures (CRLF, BOM). Never convert them.
+engine/tests/decks/** -text

@@ -1,0 +1,118 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostics, })"
+---
+{
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1350,
+        "width": 1080
+      },
+      "dir": "auto"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "s1"
+              },
+              {
+                "key": "kind",
+                "value": "rect"
+              },
+              {
+                "key": "x",
+                "value": "-200"
+              },
+              {
+                "key": "y",
+                "value": "100"
+              },
+              {
+                "key": "w",
+                "value": "400"
+              },
+              {
+                "key": "h",
+                "value": "400"
+              },
+              {
+                "key": "fill",
+                "value": "accent1"
+              }
+            ],
+            "body": "",
+            "h": 400.0,
+            "id": "s1",
+            "kind": "shape",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 400.0,
+            "x": -200.0,
+            "y": 100.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "s2"
+              },
+              {
+                "key": "kind",
+                "value": "arrow"
+              },
+              {
+                "key": "x",
+                "value": "100"
+              },
+              {
+                "key": "y",
+                "value": "1200"
+              },
+              {
+                "key": "w",
+                "value": "600"
+              },
+              {
+                "key": "stroke",
+                "value": "#e11"
+              }
+            ],
+            "body": "",
+            "h": 0.0,
+            "id": "s2",
+            "kind": "shape",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 600.0,
+            "x": 100.0,
+            "y": 1200.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": [
+    {
+      "code": "W-OFF-CANVAS",
+      "column": 1,
+      "element": "s1",
+      "line": 5,
+      "message": "This element reaches outside the 1080x1350 canvas.",
+      "severity": "warning",
+      "slide": 0
+    }
+  ]
+}

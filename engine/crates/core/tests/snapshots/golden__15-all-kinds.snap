@@ -1,0 +1,397 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostics, })"
+---
+{
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto",
+      "title": "Every kind"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "60"
+              },
+              {
+                "key": "w",
+                "value": "800"
+              },
+              {
+                "key": "h",
+                "value": "120"
+              }
+            ],
+            "body": "# Every element kind\n",
+            "h": 120.0,
+            "id": "t1",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 800.0,
+            "x": 120.0,
+            "y": 60.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "i1"
+              },
+              {
+                "key": "x",
+                "value": "1000"
+              },
+              {
+                "key": "y",
+                "value": "60"
+              },
+              {
+                "key": "w",
+                "value": "800"
+              },
+              {
+                "key": "h",
+                "value": "450"
+              },
+              {
+                "key": "fit",
+                "value": "cover"
+              }
+            ],
+            "body": "![Team photo](assets/team.jpg)\n",
+            "h": 450.0,
+            "id": "i1",
+            "kind": "image",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 800.0,
+            "x": 1000.0,
+            "y": 60.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "s1"
+              },
+              {
+                "key": "kind",
+                "value": "ellipse"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "220"
+              },
+              {
+                "key": "w",
+                "value": "300"
+              },
+              {
+                "key": "h",
+                "value": "300"
+              },
+              {
+                "key": "fill",
+                "value": "accent2"
+              }
+            ],
+            "body": "",
+            "h": 300.0,
+            "id": "s1",
+            "kind": "shape",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 300.0,
+            "x": 120.0,
+            "y": 220.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "c1"
+              },
+              {
+                "key": "x",
+                "value": "460"
+              },
+              {
+                "key": "y",
+                "value": "220"
+              },
+              {
+                "key": "w",
+                "value": "500"
+              },
+              {
+                "key": "h",
+                "value": "300"
+              },
+              {
+                "key": "lines",
+                "value": "1,3-4"
+              }
+            ],
+            "body": "```rust\nfn main() {\n    println!(\"hi\");\n}\n```\n",
+            "h": 300.0,
+            "id": "c1",
+            "kind": "code",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 500.0,
+            "x": 460.0,
+            "y": 220.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "b1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "560"
+              },
+              {
+                "key": "w",
+                "value": "800"
+              },
+              {
+                "key": "h",
+                "value": "300"
+              }
+            ],
+            "body": "| Region | Q2 | Q3 |\n|--------|---:|---:|\n| Kuwait | 10 | 12 |\n",
+            "h": 300.0,
+            "id": "b1",
+            "kind": "table",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 800.0,
+            "x": 120.0,
+            "y": 560.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "d1"
+              },
+              {
+                "key": "x",
+                "value": "1000"
+              },
+              {
+                "key": "y",
+                "value": "560"
+              },
+              {
+                "key": "w",
+                "value": "400"
+              },
+              {
+                "key": "h",
+                "value": "300"
+              }
+            ],
+            "body": "```mermaid\ngraph LR\n  A --> B\n```\n",
+            "h": 300.0,
+            "id": "d1",
+            "kind": "diagram",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 400.0,
+            "x": 1000.0,
+            "y": 560.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "m1"
+              },
+              {
+                "key": "x",
+                "value": "1440"
+              },
+              {
+                "key": "y",
+                "value": "560"
+              },
+              {
+                "key": "w",
+                "value": "360"
+              },
+              {
+                "key": "h",
+                "value": "120"
+              }
+            ],
+            "body": "$$E = mc^2$$\n",
+            "h": 120.0,
+            "id": "m1",
+            "kind": "math",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 360.0,
+            "x": 1440.0,
+            "y": 560.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "v1"
+              },
+              {
+                "key": "x",
+                "value": "1440"
+              },
+              {
+                "key": "y",
+                "value": "700"
+              },
+              {
+                "key": "w",
+                "value": "360"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              },
+              {
+                "key": "src",
+                "value": "assets/demo.mp4"
+              },
+              {
+                "key": "poster",
+                "value": "assets/demo.jpg"
+              },
+              {
+                "key": "muted",
+                "value": null
+              },
+              {
+                "key": "loop",
+                "value": null
+              }
+            ],
+            "body": "",
+            "h": 200.0,
+            "id": "v1",
+            "kind": "video",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 360.0,
+            "x": 1440.0,
+            "y": 700.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "e1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "900"
+              },
+              {
+                "key": "w",
+                "value": "400"
+              },
+              {
+                "key": "h",
+                "value": "150"
+              },
+              {
+                "key": "src",
+                "value": "https://www.youtube-nocookie.com/embed/xyz"
+              },
+              {
+                "key": "poster",
+                "value": "assets/yt.jpg"
+              }
+            ],
+            "body": "",
+            "h": 150.0,
+            "id": "e1",
+            "kind": "embed",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 400.0,
+            "x": 120.0,
+            "y": 900.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "g1"
+              },
+              {
+                "key": "items",
+                "value": "s1,c1"
+              }
+            ],
+            "body": "",
+            "h": 0.0,
+            "id": "g1",
+            "kind": "group",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 0.0,
+            "x": 0.0,
+            "y": 0.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": []
+}

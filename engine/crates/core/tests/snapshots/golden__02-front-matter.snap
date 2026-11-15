@@ -1,0 +1,70 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostics, })"
+---
+{
+  "deck": {
+    "front": {
+      "author": "Safi",
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto",
+      "extra": {
+        "team": "growth"
+      },
+      "lang": "en",
+      "theme": "themes/default.json",
+      "title": "Q3 review",
+      "transition": "fade"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "80"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              }
+            ],
+            "body": "# Q3 review\n",
+            "h": 200.0,
+            "id": "t1",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 80.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": []
+}

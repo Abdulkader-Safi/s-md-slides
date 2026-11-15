@@ -1,0 +1,82 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostics, })"
+---
+{
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [],
+            "body": "# A plain note\n\nWritten without any directives.\n",
+            "h": 972.0,
+            "id": "t1",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      },
+      {
+        "elements": [
+          {
+            "attrs": [],
+            "body": "## Second section\n\n- one\n- two\n",
+            "h": 972.0,
+            "id": "t2",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 1,
+        "master": "inherit"
+      },
+      {
+        "elements": [
+          {
+            "attrs": [],
+            "body": "Closing words.\n",
+            "h": 972.0,
+            "id": "t3",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 2,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": []
+}

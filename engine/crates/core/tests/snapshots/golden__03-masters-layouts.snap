@@ -1,0 +1,336 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostics, })"
+---
+{
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto"
+    },
+    "layouts": [
+      {
+        "attrs": [
+          {
+            "key": "id",
+            "value": "title-body"
+          },
+          {
+            "key": "master",
+            "value": "brand"
+          }
+        ],
+        "id": "title-body",
+        "master": "brand",
+        "placeholders": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "title"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "80"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              }
+            ],
+            "h": 200.0,
+            "id": "title",
+            "kind": "text",
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 80.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "body"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "320"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "640"
+              }
+            ],
+            "h": 640.0,
+            "id": "body",
+            "kind": "text",
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 320.0
+          }
+        ]
+      }
+    ],
+    "line_ending": "lf",
+    "masters": [
+      {
+        "attrs": [
+          {
+            "key": "id",
+            "value": "brand"
+          }
+        ],
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "logo"
+              },
+              {
+                "key": "x",
+                "value": "1720"
+              },
+              {
+                "key": "y",
+                "value": "40"
+              },
+              {
+                "key": "w",
+                "value": "160"
+              },
+              {
+                "key": "h",
+                "value": "60"
+              }
+            ],
+            "body": "![Brand logo](assets/logo.svg)\n",
+            "h": 60.0,
+            "id": "logo",
+            "kind": "image",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 160.0,
+            "x": 1720.0,
+            "y": 40.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "footer"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "1000"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "40"
+              },
+              {
+                "key": "size",
+                "value": "20"
+              }
+            ],
+            "body": "{slide} / {total}\n",
+            "h": 40.0,
+            "id": "footer",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 1000.0
+          }
+        ],
+        "id": "brand"
+      }
+    ],
+    "slides": [
+      {
+        "attrs": [
+          {
+            "key": "layout",
+            "value": "title-body"
+          },
+          {
+            "key": "transition",
+            "value": "fade"
+          }
+        ],
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "80"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              },
+              {
+                "key": "enter",
+                "value": "fade"
+              }
+            ],
+            "body": "# Quarterly review\n",
+            "h": 200.0,
+            "id": "t1",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 80.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t2"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "320"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "640"
+              }
+            ],
+            "body": "- First point\n- Second point\n",
+            "h": 640.0,
+            "id": "t2",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 320.0
+          }
+        ],
+        "index": 0,
+        "layout": "title-body",
+        "master": "inherit",
+        "transition": "fade"
+      },
+      {
+        "attrs": [
+          {
+            "key": "master",
+            "value": "none"
+          },
+          {
+            "key": "hide",
+            "value": "logo,footer"
+          },
+          {
+            "key": "bg",
+            "value": "#0b1020"
+          }
+        ],
+        "bg": "#0b1020",
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t3"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "80"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              },
+              {
+                "key": "color",
+                "value": "#ffffff"
+              }
+            ],
+            "body": "# Full bleed\n",
+            "h": 200.0,
+            "id": "t3",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 80.0
+          }
+        ],
+        "hide": [
+          "logo",
+          "footer"
+        ],
+        "index": 1,
+        "master": "none"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": []
+}
