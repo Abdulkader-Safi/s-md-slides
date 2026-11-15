@@ -22,6 +22,27 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 - 2026-11-15: one branch and one PR per milestone. Commits after each task.
 - 2026-11-15: approved after review. Native PDF export draws text by passing parley glyph runs straight to krilla (`draw_glyphs` with parley's cluster ranges, ligature continuations merged, glyph y offsets negated). krilla-svg draws everything that is not text. PNG export keeps the flattened SVG through resvg.
 
+## M1 results
+
+Code: `crates/core` (crate `s-md-slides`), probe for the size gate: `crates/wasm-probe`. The M0 writer spike is folded in and `spikes/core` and `spikes/wasm` are gone.
+
+Decisions:
+
+- Undo is one low-level op, `Replace { at, old, new }`. It checks that the bytes at `at` still equal `old` before swapping, so undo is byte-exact by construction and fails with `E-STALE` instead of corrupting the file when applied out of order. This replaces the spike's `SetDirective` and `InsertRaw`. Offsets are UTF-8 byte offsets; a TypeScript port must count bytes the same way. M2 can still return semantic inverses on top if hosts want them.
+- Every op is planned as one contiguous byte range plus its replacement, so an op only ever touches its own element's bytes.
+- Elements without `id=` get an in-memory id (kind letter plus counter, skipping used ids). Across edits the id follows the element: ids are keyed by where the element starts, and those offsets shift past each splice. Editing such an element writes its id. A duplicate id gets a fresh in-memory id plus `E-DUP-ID`.
+- Implicit text (markdown before a slide's first directive) fills a safe area of 5% margins: x=96 y=54 w=1728 h=972 on 16:9. The spec names a safe area without numbers. The first edit writes a full `<!-- text ... -->` line above it.
+- Trailing blank lines after a body belong to the gap between elements, not the body, so `SetBody` keeps the spacing and `RemoveElement` takes the gap with it.
+- An empty file, or one with only front matter, has no slides. A trailing `---` still makes an empty last slide.
+- Over a limit (20 MB, 5,000 slides, 2,000 elements on a slide), the deck opens read-only with `E-LIMIT`. Ops refuse to run, and the text is untouched.
+- Columns in diagnostics count characters, not bytes. YAML errors are mapped through byte offsets because YAML counts a lone CR as a line break and the rest of the engine does not (found by the fuzzer).
+- A newer format version gives `E-VERSION` with error severity, so `validate` exits 1 for decks this engine can't edit.
+- Directives in the wrong place (a `placeholder` outside a layout, a second `<!-- slide -->`) give `W-MISPLACED` and are read as text, so nothing goes missing from the model.
+
+For M5: parley's default `system` feature pulls in fontique's fontconfig backend, which needs the fontconfig library at build time on Linux. CI excludes `spike-layout` from clippy and tests until then. The render crate needs either fontconfig installed in CI or fontique's dlopen option.
+
+Open question from M0, settled: removing the first element of a file whose next line is `---` is still refused (`E-STRUCTURE`), because the file would start with `---` and turn into front matter. A deck with front matter is unaffected.
+
 ## M0 results
 
 ### Layout match and RTL spike (done)
