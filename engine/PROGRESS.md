@@ -29,7 +29,7 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 | --- | --- | --- |
 | giallo 0.6.0 | EUPL-1.2 | Not used. EUPL is copyleft and would bind the MIT binaries. FR-EL-11 uses the spec's fallback, syntect |
 | syntect 5.3.0 | MIT | OK |
-| syntect bundled grammars (sublimehq/Packages) | Permissive custom notice ("permission to copy, use, modify, sell and distribute"), with per-file exceptions marked by a `-license` file | OK. Recheck the exceptions if FR-EL-11 is built in M5 |
+| syntect bundled grammars (sublimehq/Packages) | Permissive custom notice (copy, use, modify, sell, distribute), with per-file exceptions marked by a `-license` file | OK. Recheck the exceptions if FR-EL-11 is built in M5 |
 | Noto Sans, Noto Sans Arabic | OFL-1.1 | OK, ship OFL.txt next to the fonts |
 | KaTeX fonts (ratex-katex-fonts, via ratex-svg) | OFL-1.1 | OK, same as above |
 | mermaid-rs-renderer 0.3.1, ratex-svg 0.1.15 | MIT | OK |
@@ -49,7 +49,7 @@ Code: `spikes/wasm`, gate: `scripts/wasm-size.sh <package>`. The spike wraps the
 | Without serde-saphyr                     | 343 KB | 135 KB |
 | Without the pulldown-cmark HTML renderer | 735 KB | 290 KB |
 
-Result: under 1 MB, so M0 passes. serde-saphyr is about 400 KB of it, most likely from its `deserialize` feature pulling in annotate-snippets and encoding_rs. The full core adds ops, themes, the timeline, export and the sanitizer on top, with about 280 KB of headroom. If the gate trips in a later milestone, the spec's fallback (a flat front matter scanner instead of serde-saphyr) wins back roughly 400 KB.
+Result: under 1 MB, so M0 passes. serde-saphyr is about 400 KB of it, most likely from its `deserialize` feature pulling in annotate-snippets and encoding_rs. The full core adds ops, themes, the timeline, export code plus the sanitizer on top, with about 280 KB of headroom. If the gate trips in a later milestone, the spec's fallback (a flat front matter scanner instead of serde-saphyr) wins back roughly 400 KB.
 
 `strip = true` removed the `target_features` section wasm-bindgen reads, so the release profile uses `strip = "debuginfo"`.
 
