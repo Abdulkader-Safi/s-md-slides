@@ -1,11 +1,11 @@
 ---
 id: "m1-full-scanner-2026-11-15"
-status: "todo"
+status: "done"
 priority: "high"
 assignee: "claude"
 dueDate: null
 created: "2026-11-15T12:00:00.000Z"
-modified: "2026-11-15T12:00:00.000Z"
+modified: "2026-11-15T09:45:32.000Z"
 labels: ["engine", "m1"]
 order: 1
 ---
@@ -16,4 +16,8 @@ Fences, BOM, CRLF, front matter, sections, directives, attributes, bodies, impli
 
 ## Done when
 
-- [ ] The sample deck parses into the expected model
+- [x] The sample deck parses into the expected model
+
+## Result
+
+Done 2026-11-15 in `crates/core` (`deck.rs`, `attrs.rs`, `frontmatter.rs`, `ops.rs`, `diag.rs`). Checked by `crates/core/tests/acceptance.rs` and the proptest suite in `tests/roundtrip.rs`.

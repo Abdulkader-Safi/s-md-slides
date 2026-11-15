@@ -6,8 +6,8 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 
 | Milestone                     | Status              |
 | ----------------------------- | ------------------- |
-| M0 de-risk                    | in progress (PR #1) |
-| M1 format core                | not started         |
+| M0 de-risk                    | done (PR #1)        |
+| M1 format core                | in progress         |
 | M2 operations                 | not started         |
 | M3 elements and style         | not started         |
 | M4 animation and HTML export  | not started         |

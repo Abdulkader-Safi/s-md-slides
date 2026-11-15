@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["spikes/core", "spikes/wasm", "spikes/layout"]
+members = ["crates/core", "crates/wasm-probe", "spikes/layout"]
 
 [workspace.package]
 edition = "2024"
