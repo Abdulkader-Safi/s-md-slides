@@ -480,10 +480,20 @@ impl Deck {
                 Some(j) => {
                     let close = &lines[j + 1];
                     let text = &src[lines[0].next..close.start];
-                    let parsed = frontmatter::parse(text, 2);
+                    let base = lines[0].next;
+                    let parsed = frontmatter::parse(text);
                     deck.front = parsed.front;
                     deck.version = parsed.version;
-                    cx.diags.extend(parsed.diagnostics);
+                    for i in parsed.issues {
+                        cx.push(
+                            Severity::Error,
+                            i.code,
+                            i.message,
+                            base + i.offset,
+                            None,
+                            None,
+                        );
+                    }
                     first = j + 2;
                 }
                 None => cx.push(

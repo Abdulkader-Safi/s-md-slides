@@ -22,14 +22,21 @@ fn decks() -> Vec<(String, String)> {
 #[test]
 fn golden_decks_round_trip_and_match_snapshots() {
     let all = decks();
-    assert!(all.len() >= 15, "expected at least 15 golden decks, found {}", all.len());
+    assert!(
+        all.len() >= 15,
+        "expected at least 15 golden decks, found {}",
+        all.len()
+    );
     for (name, src) in all {
         let p = Deck::parse(&src);
         assert_eq!(p.deck.text(), src, "{name} did not round-trip");
-        insta::assert_json_snapshot!(name.clone(), serde_json::json!({
-            "deck": p.deck,
-            "diagnostics": p.diagnostics,
-        }));
+        insta::assert_json_snapshot!(
+            name.clone(),
+            serde_json::json!({
+                "deck": p.deck,
+                "diagnostics": p.diagnostics,
+            })
+        );
     }
 }
 
@@ -39,10 +46,21 @@ fn golden_decks_undo_every_move() {
         let mut d = Deck::parse(&src).deck;
         let ids: Vec<String> = d.elements().map(|e| e.id.clone()).collect();
         for id in ids {
-            let op = Op::SetGeometry { id: id.clone(), x: Some(7.0), y: Some(9.5), w: None, h: None, rot: None };
+            let op = Op::SetGeometry {
+                id: id.clone(),
+                x: Some(7.0),
+                y: Some(9.5),
+                w: None,
+                h: None,
+                rot: None,
+            };
             let undo = d.apply(op).unwrap_or_else(|e| panic!("{name} {id}: {e}"));
             d.apply(undo).unwrap();
-            assert_eq!(d.text(), src, "{name}: undo of a move on {id} changed bytes");
+            assert_eq!(
+                d.text(),
+                src,
+                "{name}: undo of a move on {id} changed bytes"
+            );
         }
     }
 }

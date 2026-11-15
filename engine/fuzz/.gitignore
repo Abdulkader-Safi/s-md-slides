@@ -1,0 +1,7 @@
+corpus/*
+!corpus/fuzz_parse/
+corpus/fuzz_parse/*
+!corpus/fuzz_parse/*.md
+artifacts/
+target/
+coverage/

@@ -1,7 +1,6 @@
 //! YAML front matter, read with serde-saphyr. Never written from the model: edits
 //! splice key lines (M2).
 
-use crate::diag::{Diagnostic, Severity};
 use serde::Serialize;
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -90,29 +89,57 @@ pub struct FrontMatter {
 pub(crate) struct ParsedFront {
     pub front: FrontMatter,
     pub version: u32,
-    pub diagnostics: Vec<Diagnostic>,
+    /// Errors with byte offsets relative to the front matter text.
+    pub issues: Vec<Issue>,
 }
 
-fn diag(code: &'static str, message: String, line: u32, column: u32) -> Diagnostic {
-    Diagnostic {
-        severity: Severity::Error,
+pub(crate) struct Issue {
+    pub code: &'static str,
+    pub message: String,
+    pub offset: usize,
+}
+
+fn issue(code: &'static str, message: String, offset: usize) -> Issue {
+    Issue {
         code,
         message,
-        line,
-        column,
-        element: None,
-        slide: None,
+        offset,
     }
 }
 
-/// Line (1-based) where `key:` starts at the top level, for diagnostics.
-fn key_line(text: &str, key: &str, first_line: u32) -> u32 {
-    text.lines()
-        .position(|l| {
-            l.strip_prefix(key)
-                .is_some_and(|r| r.trim_start().starts_with(':'))
-        })
-        .map_or(first_line, |i| first_line + i as u32)
+/// Byte offset where top-level `key:` starts, for diagnostics.
+fn key_offset(text: &str, key: &str) -> usize {
+    let mut at = 0;
+    for l in text.split_inclusive('\n') {
+        if l.strip_prefix(key)
+            .is_some_and(|r| r.trim_start().starts_with(':'))
+        {
+            return at;
+        }
+        at += l.len();
+    }
+    0
+}
+
+/// Byte offset of a 1-based YAML line and column. YAML counts `\r\n`, `\r` and `\n`
+/// as line breaks, so this walks breaks the same way.
+fn yaml_offset(text: &str, line: u64, column: u64) -> usize {
+    let b = text.as_bytes();
+    let (mut i, mut l) = (0, 1);
+    while l < line && i < b.len() {
+        if b[i] == b'\r' && b.get(i + 1) == Some(&b'\n') {
+            i += 1;
+        }
+        if b[i] == b'\n' || b[i] == b'\r' {
+            l += 1;
+        }
+        i += 1;
+    }
+    let rest = &text[i.min(text.len())..];
+    i + rest
+        .char_indices()
+        .nth(column.saturating_sub(1) as usize)
+        .map_or(rest.len(), |(o, _)| o)
 }
 
 fn as_string(v: &Value) -> Option<String> {
@@ -124,12 +151,12 @@ fn as_string(v: &Value) -> Option<String> {
     }
 }
 
-/// `text` is the front matter content; `first_line` is its 1-based line in the file.
-pub(crate) fn parse(text: &str, first_line: u32) -> ParsedFront {
+/// `text` is the front matter content between the `---` lines.
+pub(crate) fn parse(text: &str) -> ParsedFront {
     let mut out = ParsedFront {
         front: FrontMatter::default(),
         version: FORMAT_VERSION,
-        diagnostics: Vec::new(),
+        issues: Vec::new(),
     };
     if text.trim().is_empty() {
         return out;
@@ -138,43 +165,37 @@ pub(crate) fn parse(text: &str, first_line: u32) -> ParsedFront {
         Ok(Value::Object(map)) => map,
         Ok(Value::Null) => return out,
         Ok(_) => {
-            out.diagnostics.push(diag(
+            out.issues.push(issue(
                 "E-FRONTMATTER",
                 "Front matter must be a mapping of keys to values.".into(),
-                first_line,
-                1,
+                0,
             ));
             return out;
         }
         Err(e) => {
-            let (line, column) = e.location().map_or((first_line, 1), |l| {
-                (
-                    first_line + l.line().saturating_sub(1) as u32,
-                    l.column().max(1) as u32,
-                )
-            });
+            let offset = e
+                .location()
+                .map_or(0, |l| yaml_offset(text, l.line(), l.column()));
             let msg = e.to_string();
             let msg = msg.lines().next().unwrap_or("invalid YAML").trim();
-            out.diagnostics.push(diag(
+            out.issues.push(issue(
                 "E-FRONTMATTER",
                 format!("Front matter is not valid YAML: {msg}"),
-                line,
-                column,
+                offset,
             ));
             return out;
         }
     };
     let f = &mut out.front;
     for (key, value) in map {
-        let line = || key_line(text, &key, first_line);
+        let at = || key_offset(text, &key);
         match key.as_str() {
             "s-md-slides" => match value.as_u64() {
                 Some(v) if v >= 1 => out.version = v.min(u32::MAX as u64) as u32,
-                _ => out.diagnostics.push(diag(
+                _ => out.issues.push(issue(
                     "E-FRONTMATTER",
                     "s-md-slides must be a whole number such as 1.".into(),
-                    line(),
-                    1,
+                    at(),
                 )),
             },
             "title" => f.title = as_string(&value),
@@ -184,20 +205,18 @@ pub(crate) fn parse(text: &str, first_line: u32) -> ParsedFront {
             "theme" => f.theme = Some(value),
             "canvas" => match as_string(&value).as_deref().and_then(Canvas::parse) {
                 Some(c) => f.canvas = c,
-                None => out.diagnostics.push(diag(
+                None => out.issues.push(issue(
                     "E-CANVAS",
                     "canvas must be 16:9, 4:5 or WxH such as 1200x800. Using 16:9.".into(),
-                    line(),
-                    1,
+                    at(),
                 )),
             },
             "dir" => match as_string(&value).as_deref().and_then(Dir::parse) {
                 Some(d) => f.dir = d,
-                None => out.diagnostics.push(diag(
+                None => out.issues.push(issue(
                     "E-ATTR-VALUE",
                     "dir must be auto, ltr or rtl. Using auto.".into(),
-                    line(),
-                    1,
+                    at(),
                 )),
             },
             _ => {
@@ -206,14 +225,13 @@ pub(crate) fn parse(text: &str, first_line: u32) -> ParsedFront {
         }
     }
     if out.version > FORMAT_VERSION {
-        out.diagnostics.push(diag(
+        out.issues.push(issue(
             "E-VERSION",
             format!(
                 "This deck uses format version {}, newer than {FORMAT_VERSION}. It opens read-only.",
                 out.version
             ),
-            key_line(text, "s-md-slides", first_line),
-            1,
+            key_offset(text, "s-md-slides"),
         ));
     }
     out
@@ -252,11 +270,8 @@ mod tests {
 
     #[test]
     fn reads_known_and_unknown_keys() {
-        let p = parse(
-            "s-md-slides: 1\ntitle: Q3\ncanvas: 4:5\ndir: rtl\nfoo: bar\n",
-            2,
-        );
-        assert!(p.diagnostics.is_empty(), "{:?}", p.diagnostics);
+        let p = parse("s-md-slides: 1\ntitle: Q3\ncanvas: 4:5\ndir: rtl\nfoo: bar\n");
+        assert!(p.issues.is_empty());
         assert_eq!(p.front.title.as_deref(), Some("Q3"));
         assert_eq!(p.front.canvas.height, 1350);
         assert_eq!(p.front.dir, Dir::Rtl);
@@ -264,11 +279,18 @@ mod tests {
     }
 
     #[test]
+    fn yaml_positions_count_lone_cr() {
+        assert_eq!(yaml_offset("a\rb\r\nc\nd", 4, 1), 7);
+        assert_eq!(yaml_offset("ab\ncd", 2, 2), 4);
+        assert_eq!(yaml_offset("ab", 9, 9), 2);
+    }
+
+    #[test]
     fn newer_version_and_bad_yaml() {
-        let p = parse("s-md-slides: 2\n", 2);
+        let p = parse("s-md-slides: 2\n");
         assert_eq!(p.version, 2);
-        assert_eq!(p.diagnostics[0].code, "E-VERSION");
-        let p = parse("title: [unclosed\n", 2);
-        assert_eq!(p.diagnostics[0].code, "E-FRONTMATTER");
+        assert_eq!(p.issues[0].code, "E-VERSION");
+        let p = parse("title: [unclosed\n");
+        assert_eq!(p.issues[0].code, "E-FRONTMATTER");
     }
 }

@@ -4,7 +4,7 @@
 # Usage: scripts/wasm-size.sh [package] [limit-bytes]
 set -eu
 cd "$(dirname "$0")/.."
-pkg=${1:-s-md-slides}
+pkg=${1:-wasm-probe}
 limit=${2:-1572864} # 1.5 MB
 target=1048576      # 1 MB
 lib=$(echo "$pkg" | tr - _)
