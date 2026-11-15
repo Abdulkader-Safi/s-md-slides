@@ -4,16 +4,16 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 
 ## Milestones
 
-| Milestone | Status |
-| --- | --- |
-| M0 de-risk | in progress (PR #1) |
-| M1 format core | not started |
-| M2 operations | not started |
-| M3 elements and style | not started |
-| M4 animation and HTML export | not started |
-| M5 native render | not started |
-| M6 CLI | not started |
-| M7 conformance, docs, release | not started |
+| Milestone                     | Status              |
+| ----------------------------- | ------------------- |
+| M0 de-risk                    | in progress (PR #1) |
+| M1 format core                | not started         |
+| M2 operations                 | not started         |
+| M3 elements and style         | not started         |
+| M4 animation and HTML export  | not started         |
+| M5 native render              | not started         |
+| M6 CLI                        | not started         |
+| M7 conformance, docs, release | not started         |
 
 ## Decisions
 
@@ -22,6 +22,20 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 - 2026-11-15: one branch and one PR per milestone. Commits after each task.
 
 ## M0 results
+
+### WASM size spike (done)
+
+Code: `spikes/wasm`, gate: `scripts/wasm-size.sh <package>`. The spike wraps the writer spike, serde-saphyr (front matter into a struct with flattened unknown keys), pulldown-cmark HTML with tables, strikethrough, tasklists and math, serde_json, and a 40 KB placeholder for the presentation runtime (the real one is not written yet). Built with the workspace release profile (`opt-level = "z"`, LTO, one codegen unit, `panic = "abort"`), wasm-bindgen 0.2.130, then `wasm-opt -Oz` from binaryen.
+
+| Build                                    | Size   | gzip   |
+| ---------------------------------------- | ------ | ------ |
+| Full spike                               | 745 KB | 295 KB |
+| Without serde-saphyr                     | 343 KB | 135 KB |
+| Without the pulldown-cmark HTML renderer | 735 KB | 290 KB |
+
+Result: under 1 MB, so M0 passes. serde-saphyr is about 400 KB of it, most likely from its `deserialize` feature pulling in annotate-snippets and encoding_rs. The full core adds ops, themes, the timeline, export and the sanitizer on top, with about 280 KB of headroom. If the gate trips in a later milestone, the spec's fallback (a flat front matter scanner instead of serde-saphyr) wins back roughly 400 KB.
+
+`strip = true` removed the `target_features` section wasm-bindgen reads, so the release profile uses `strip = "debuginfo"`.
 
 ### Lossless writer spike (done)
 

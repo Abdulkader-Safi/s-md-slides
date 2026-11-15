@@ -1,11 +1,11 @@
 ---
 id: "m0-wasm-size-spike-2026-11-15"
-status: "todo"
+status: "done"
 priority: "critical"
 assignee: "claude"
 dueDate: null
 created: "2026-11-15T12:00:00.000Z"
-modified: "2026-11-15T12:00:00.000Z"
+modified: "2026-11-15T09:15:25.000Z"
 labels: ["engine", "m0"]
 order: 1
 ---
@@ -16,6 +16,10 @@ Build a core crate stub with the scanner stub, serde-saphyr, pulldown-cmark, ser
 
 ## Done when
 
-- [ ] Under 1 MB: pass
+- [x] Under 1 MB: pass
 - [ ] 1 to 1.5 MB: continue and log it in PROGRESS.md
 - [ ] Over 1.5 MB: replace serde-saphyr with a flat front matter scanner and re-measure. Still over: stop and report
+
+## Result
+
+Done 2026-11-15. 745 KB after `wasm-opt -Oz` (295 KB gzip). serde-saphyr is about 400 KB of that. Run it with `scripts/wasm-size.sh spike-wasm`. Details in `engine/PROGRESS.md`.
