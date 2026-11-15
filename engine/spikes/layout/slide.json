@@ -1,0 +1,14 @@
+{
+  "width": 1920,
+  "height": 1080,
+  "font_size": 40,
+  "line_height": 1.3,
+  "boxes": [
+    { "id": "en", "x": 100, "y": 80, "w": 820, "dir": "ltr",
+      "text": "Slide decks you can read in any text editor. Every box sits exactly where you dragged it, and the whole deck is one markdown file that diffs cleanly in git." },
+    { "id": "ar", "x": 1000, "y": 80, "w": 820, "dir": "rtl",
+      "text": "عروض شرائح يمكنك قراءتها في أي محرر نصوص. يبقى كل مربع في المكان الذي سحبته إليه، والعرض كله ملف ماركداون واحد يسهل تتبع تغييراته." },
+    { "id": "mixed", "x": 100, "y": 620, "w": 1720, "dir": "ltr",
+      "text": "Revenue grew 18% في الربع الثالث compared to Q2, and the team shipped نسخة عربية كاملة of the editor before the deadline in October." }
+  ]
+}

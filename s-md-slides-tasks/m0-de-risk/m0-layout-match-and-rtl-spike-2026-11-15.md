@@ -1,11 +1,11 @@
 ---
 id: "m0-layout-match-and-rtl-spike-2026-11-15"
-status: "in-progress"
+status: "review"
 priority: "critical"
 assignee: "claude"
 dueDate: null
 created: "2026-11-15T12:00:00.000Z"
-modified: "2026-11-15T09:16:41.000Z"
+modified: "2026-11-15T09:30:44.000Z"
 labels: ["engine", "m0"]
 order: 3
 ---
@@ -16,7 +16,18 @@ One slide with English and Arabic paragraphs plus a mixed-direction line. Export
 
 ## Done when
 
-- [ ] Line breaks match, or differ only at the last word, with the same fonts
-- [ ] Arabic is shaped and right to left in the PNG
-- [ ] Arabic text is selectable in the PDF
+- [x] Line breaks match, or differ only at the last word, with the same fonts
+- [x] Arabic is shaped and right to left in the PNG
+- [x] Arabic text is selectable in the PDF
 - [ ] If Arabic fails in krilla or resvg: stop and report before M1
+
+## Result
+
+Waiting for review, 2026-11-15.
+
+- [x] Line breaks match Chrome exactly in all three boxes
+- [x] Arabic shaped and right to left in the PNG (`engine/spikes/layout/results/native.png` next to `browser.png`)
+- [x] Arabic renders correctly in the PDF and is selectable
+
+> [!faq]- Decision needed: PDF text path
+> Arabic copy and search from the PDF depends on the viewer. Drawing parley glyphs straight into krilla gives the best text layer in every viewer tested (poppler gets every letter right), while krilla-svg keeps drawing everything else. This changes how text reaches krilla, so it needs a yes before M5. Full table in `engine/PROGRESS.md`.

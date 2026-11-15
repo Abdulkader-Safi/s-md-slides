@@ -23,6 +23,38 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 
 ## M0 results
 
+### Layout match and RTL spike (review)
+
+Code: `spikes/layout`. Run `cargo run -p spike-layout --release -- target/spike-layout`, then `python3 spikes/layout/compare.py target/spike-layout`. One 1920 x 1080 slide with an English box, an Arabic box (`dir=rtl`) and a mixed English and Arabic line, all at 40 px with line height 1.3, using bundled Noto Sans and Noto Sans Arabic only (system fonts off on the native side).
+
+Native path: parley 0.13 lays out each box, then every glyph run becomes one SVG `<text>` at its parley position. One usvg tree feeds resvg (PNG) and krilla-svg (PDF).
+
+Results:
+
+- Line breaks match Chrome exactly in all three boxes (4, 3 and 2 lines). Not just the last word: every line is identical.
+- Arabic in the PNG is shaped (joined letters) and right to left, punctuation on the correct side, right-aligned in its box. The PNG and Chrome's screenshot look the same apart from macOS font smoothing.
+- The PNG renders in 70 to 85 ms (NFR-01 allows 300 ms).
+- Arabic in the PDF renders correctly and is selectable. Copy and search of Arabic is viewer-dependent; see below.
+
+Three fixes were needed to get usvg to draw parley runs faithfully, and M5 needs all of them:
+
+1. Place every run by its left edge. Each run has one bidi level, so that is enough.
+2. usvg 0.47 runs bidi with a fixed LTR base and ignores `direction` and `unicode-bidi`. RTL runs are wrapped in RLO ... PDF (U+202E, U+202C) so neutrals such as the Arabic comma stay where parley put them.
+3. Bidi rule L1 moves edge whitespace to the base level even inside an override, so edge spaces are trimmed and x moves by the width parley gave them.
+
+Also: krilla-svg 0.8.1 depends on usvg 0.47, so resvg and usvg are pinned to 0.47.0 (latest is 0.50) to keep one SVG tree for PNG and PDF.
+
+PDF text layer (copy and search). Noto Sans Arabic builds letters from shared dotless bases plus dot marks, so one glyph stands for several letters. krilla handles that with ActualText spans, which only some viewers read. Tested two ways of putting text in the PDF:
+
+| Viewer engine | SVG path (krilla-svg) | Direct path (parley glyphs into krilla) |
+| --- | --- | --- |
+| English, all viewers | Copy and search work | Copy and search work |
+| PDFKit (macOS Preview) | Wrong letters, RLO/PDF characters leak into the text | Wrong letters, no control characters |
+| poppler (pdftotext, many Linux viewers) | Letters split apart, control characters leak | Every letter correct, logical order, extra spaces between some letter groups |
+| pdfium (Chrome) | Lines broken up, wrong letters | Every letter correct, some words reversed |
+
+Recommendation for M5: draw text with the direct path (parley glyph runs into krilla with parley's cluster ranges, ligature continuations merged) and keep krilla-svg for everything that is not text. It renders identically, puts parley's exact glyphs in the PDF instead of a second shaping pass, and has the best text layer in every viewer tested. This keeps krilla and krilla-svg, but changes how text reaches krilla, so it needs a yes before M5. Perfect Arabic search in every viewer is likely out of reach with this font; the rendering itself is correct everywhere.
+
 ### License check (done)
 
 | Item | License | Verdict |
