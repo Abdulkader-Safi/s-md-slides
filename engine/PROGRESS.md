@@ -23,6 +23,22 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 
 ## M0 results
 
+### License check (done)
+
+| Item | License | Verdict |
+| --- | --- | --- |
+| giallo 0.6.0 | EUPL-1.2 | Not used. EUPL is copyleft and would bind the MIT binaries. FR-EL-11 uses the spec's fallback, syntect |
+| syntect 5.3.0 | MIT | OK |
+| syntect bundled grammars (sublimehq/Packages) | Permissive custom notice ("permission to copy, use, modify, sell and distribute"), with per-file exceptions marked by a `-license` file | OK. Recheck the exceptions if FR-EL-11 is built in M5 |
+| Noto Sans, Noto Sans Arabic | OFL-1.1 | OK, ship OFL.txt next to the fonts |
+| KaTeX fonts (ratex-katex-fonts, via ratex-svg) | OFL-1.1 | OK, same as above |
+| mermaid-rs-renderer 0.3.1, ratex-svg 0.1.15 | MIT | OK |
+| tiny-skia 0.12.0 | BSD-3-Clause | OK |
+| jpeg-encoder 0.7.1 | (MIT OR Apache-2.0) AND IJG | OK, IJG needs an attribution line in the notices |
+| notify 8.2.2 | CC0-1.0 | OK |
+
+No GPL or AGPL anywhere. cargo-deny in M7 needs EUPL-1.2 on its deny list so giallo can't slip back in.
+
 ### WASM size spike (done)
 
 Code: `spikes/wasm`, gate: `scripts/wasm-size.sh <package>`. The spike wraps the writer spike, serde-saphyr (front matter into a struct with flattened unknown keys), pulldown-cmark HTML with tables, strikethrough, tasklists and math, serde_json, and a 40 KB placeholder for the presentation runtime (the real one is not written yet). Built with the workspace release profile (`opt-level = "z"`, LTO, one codegen unit, `panic = "abort"`), wasm-bindgen 0.2.130, then `wasm-opt -Oz` from binaryen.
