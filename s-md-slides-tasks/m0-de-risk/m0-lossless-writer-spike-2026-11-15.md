@@ -1,11 +1,11 @@
 ---
 id: "m0-lossless-writer-spike-2026-11-15"
-status: "todo"
+status: "done"
 priority: "critical"
 assignee: "claude"
 dueDate: null
 created: "2026-11-15T12:00:00.000Z"
-modified: "2026-11-15T12:00:00.000Z"
+modified: "2026-11-15T09:13:53.000Z"
 labels: ["engine", "m0"]
 order: 2
 ---
@@ -16,4 +16,8 @@ Scanner, source map and writer for front matter, separators, text elements and t
 
 ## Done when
 
-- [ ] Zero byte differences across all proptest cases
+- [x] Zero byte differences across all proptest cases
+
+## Result
+
+Done 2026-11-15. 1,000 proptest decks, about 3,400 ops per run, zero byte differences after undo. Details and open questions in `engine/PROGRESS.md`.
