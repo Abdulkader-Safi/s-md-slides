@@ -20,10 +20,11 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 - 2026-11-15: the Cargo workspace lives in `engine/`, not at the git root. The git repo also holds the task board, and the spec puts the GPUI app, npm package and Obsidian plugin in their own repos later.
 - 2026-11-15: MSRV is 1.95 (latest stable 1.97.1 minus two).
 - 2026-11-15: one branch and one PR per milestone. Commits after each task.
+- 2026-11-15: approved after review. Native PDF export draws text by passing parley glyph runs straight to krilla (`draw_glyphs` with parley's cluster ranges, ligature continuations merged, glyph y offsets negated). krilla-svg draws everything that is not text. PNG export keeps the flattened SVG through resvg.
 
 ## M0 results
 
-### Layout match and RTL spike (review)
+### Layout match and RTL spike (done)
 
 Code: `spikes/layout`. Run `cargo run -p spike-layout --release -- target/spike-layout`, then `python3 spikes/layout/compare.py target/spike-layout`. One 1920 x 1080 slide with an English box, an Arabic box (`dir=rtl`) and a mixed English and Arabic line, all at 40 px with line height 1.3, using bundled Noto Sans and Noto Sans Arabic only (system fonts off on the native side).
 
