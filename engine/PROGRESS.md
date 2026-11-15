@@ -7,7 +7,7 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 | Milestone                     | Status              |
 | ----------------------------- | ------------------- |
 | M0 de-risk                    | done (PR #1)        |
-| M1 format core                | in progress         |
+| M1 format core                | done (PR #2)        |
 | M2 operations                 | not started         |
 | M3 elements and style         | not started         |
 | M4 animation and HTML export  | not started         |
@@ -23,6 +23,8 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 - 2026-11-15: approved after review. Native PDF export draws text by passing parley glyph runs straight to krilla (`draw_glyphs` with parley's cluster ranges, ligature continuations merged, glyph y offsets negated). krilla-svg draws everything that is not text. PNG export keeps the flattened SVG through resvg.
 
 ## M1 results
+
+Acceptance boxes ticked in the build spec: FR-FMT-01 to FR-FMT-08, FR-CANVAS-01, FR-CANVAS-02, FR-DIR-01, FR-PKG-02. FR-NOTES-01 stays open until M4: notes parse and round-trip now, but its check also needs the HTML presenter view. Exit criteria: all 15 golden decks round-trip, `fuzz_parse` passed 1,000,000 cases, the WASM gate passes at 572 KB, and CI is green on macOS, Windows and Linux.
 
 Code: `crates/core` (crate `s-md-slides`), probe for the size gate: `crates/wasm-probe`. The M0 writer spike is folded in and `spikes/core` and `spikes/wasm` are gone.
 
