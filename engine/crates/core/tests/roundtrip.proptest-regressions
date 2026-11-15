@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 26c2d7409e81b6e46ccc87841f839567a542ac5979f63e44f794b35c55c949b7 # shrinks to src = "---\r\n---\r\n\r\n--- \r\n<!-- text -->\r\n<!-- text -->\r\n--- \r\n<!-- slide bg=#0b1020 -->\r\n<!-- fix this later -->\r\n<!-- text -->\r\n<!-- text -->\r\n<!-- text -->\r\n--- \r\n<!-- slide bg=#0b1020 -->\r\nمرحبا بالعالم\r\n", picks = [Missing, Geometry(14388430428888646328, Some(2234), None, None, None), Remove(16321284974097108650), Body(592960084482165363, ["```js\n---\n<!-- text id=inside -->\n```"]), Body(858294731825490520, ["```js\n---\n<!-- text id=inside -->\n```"])]

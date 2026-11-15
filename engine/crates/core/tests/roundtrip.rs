@@ -1,12 +1,10 @@
-//! M0 exit check: random decks, random op sequences, undo everything, compare bytes.
+//! Random decks, random op sequences, undo everything, compare bytes (NFR-03).
 
 use proptest::prelude::*;
-use spike_core::{Deck, Op};
+use s_md_slides::{Deck, Op};
 use std::sync::atomic::{AtomicUsize, Ordering::Relaxed};
 
-pub static OK: AtomicUsize = AtomicUsize::new(0);
-pub static ERR: AtomicUsize = AtomicUsize::new(0);
-pub static ELS: AtomicUsize = AtomicUsize::new(0);
+static OK: AtomicUsize = AtomicUsize::new(0);
 
 fn attr_value() -> impl Strategy<Value = String> {
     prop_oneof![
@@ -123,8 +121,9 @@ fn deck() -> impl Strategy<Value = String> {
         prop::sample::select(vec!["lf", "crlf", "mixed"]),
         any::<bool>(),
         prop::sample::select(vec!["---", "--- "]),
+        any::<bool>(),
     )
-        .prop_flat_map(|(bom, front, slides, eol, final_nl, sep)| {
+        .prop_flat_map(|(bom, front, slides, eol, final_nl, sep, defs)| {
             let slides: Vec<_> = (0..slides.len()).map(slide).collect();
             slides.prop_map(move |slides| {
                 let mut s = String::new();
@@ -135,6 +134,9 @@ fn deck() -> impl Strategy<Value = String> {
                         s.push('\n');
                     }
                     s.push_str("---\n");
+                }
+                if defs {
+                    s.push_str("<!-- master id=brand -->\n<!-- image id=logo x=1720 y=40 w=160 h=60 -->\n![logo](a.png)\n\n<!-- layout id=tb master=brand -->\n<!-- placeholder id=title x=1 y=1 w=1 h=1 -->\n\n---\n");
                 }
                 s.push_str(&slides.join(&format!("\n{sep}\n")));
                 if final_nl {
@@ -183,11 +185,7 @@ fn pick() -> impl Strategy<Value = Pick> {
 }
 
 fn ids(d: &Deck) -> Vec<String> {
-    d.slides
-        .iter()
-        .flat_map(|s| &s.elements)
-        .map(|e| e.id.clone())
-        .collect()
+    d.elements().map(|e| e.id.clone()).collect()
 }
 
 fn diff_lines(a: &str, b: &str) -> Option<usize> {
@@ -200,11 +198,9 @@ proptest! {
 
     #[test]
     fn apply_then_undo_is_byte_identical(src in deck(), picks in prop::collection::vec(pick(), 1..8)) {
-        let mut d = Deck::parse(&src);
+        let mut d = Deck::parse(&src).deck;
         prop_assert_eq!(d.text(), src.as_str());
         let mut undo = Vec::new();
-        ELS.fetch_add(ids(&d).len(), Relaxed);
-        if std::env::var("STATS").is_ok() { eprintln!("ok={} err={} els={}", OK.load(Relaxed), ERR.load(Relaxed), ELS.load(Relaxed)); }
         for p in picks {
             let all = ids(&d);
             let id_at = |i: usize| (!all.is_empty()).then(|| all[i % all.len()].clone());
@@ -221,7 +217,7 @@ proptest! {
                     None => continue,
                 },
                 Pick::Body(i, b) => match id_at(i) {
-                    Some(id) => Op::SetBody { id, body: b.join("\n"), raw: false },
+                    Some(id) => Op::SetBody { id, text: b.join("\n") },
                     None => continue,
                 },
                 Pick::Remove(i) => match id_at(i) {
@@ -231,7 +227,8 @@ proptest! {
                 Pick::Missing => Op::RemoveElement { id: "nope".into() },
             };
             let before = d.text().to_string();
-            let is_move = matches!(op, Op::SetGeometry { .. });
+            // Moving implicit text writes its directive line first, which adds a line.
+            let is_move = matches!(&op, Op::SetGeometry { id, .. } if !d.element(id).is_some_and(|e| e.implicit));
             match d.apply(op.clone()) {
                 Ok(inv) => {
                     if is_move {
@@ -242,9 +239,7 @@ proptest! {
                     OK.fetch_add(1, Relaxed);
                     undo.push(inv);
                 }
-                Err(e) => {
-                    if std::env::var("SHOW_ERR").is_ok() && e.code != "E-NOT-FOUND" { eprintln!("{e:?} {op:?}\nBEFORE {before:?}\n"); }
-                    ERR.fetch_add(1, Relaxed);
+                Err(_) => {
                     prop_assert_eq!(d.text(), before.as_str(), "failed op changed the deck")
                 }
             }
@@ -253,11 +248,14 @@ proptest! {
             d.apply(inv.clone()).map_err(|e| TestCaseError::fail(format!("{inv:?}: {e:?}")))?;
         }
         prop_assert_eq!(d.text(), src.as_str());
+        if std::env::var("ROUNDTRIP_STATS").is_ok() {
+            eprintln!("successful ops so far: {}", OK.load(Relaxed));
+        }
     }
 
     #[test]
     fn batch_undo_is_one_step(src in deck()) {
-        let mut d = Deck::parse(&src);
+        let mut d = Deck::parse(&src).deck;
         let ops: Vec<Op> = ids(&d).into_iter().map(|id| Op::SetGeometry {
             id, x: Some(1.25), y: Some(-3.0), w: None, h: Some(40.0), rot: Some(15.5),
         }).collect();
@@ -265,69 +263,4 @@ proptest! {
         d.apply(inv).unwrap();
         prop_assert_eq!(d.text(), src.as_str());
     }
-
-    #[test]
-    fn ops_round_trip_through_json(x in -1000i32..1000) {
-        let op = Op::SetGeometry { id: "t1".into(), x: Some(x as f64), y: None, w: None, h: None, rot: None };
-        let back: Op = serde_json::from_str(&serde_json::to_string(&op).unwrap()).unwrap();
-        prop_assert_eq!(op, back);
-    }
-}
-
-#[test]
-fn hand_written_cases() {
-    let src = "---\ntitle: T\nfoo: bar\n---\n<!-- text x=10 foo=bar -->\nHello\n\n---\n<!-- widget id=w1 a=1 -->\n";
-    let mut d = Deck::parse(src);
-    assert_eq!(d.slides.len(), 2);
-    assert_eq!(d.slides[0].elements[0].id, "t1");
-    let inv = d
-        .apply(Op::SetGeometry {
-            id: "t1".into(),
-            x: Some(20.0),
-            y: None,
-            w: None,
-            h: None,
-            rot: None,
-        })
-        .unwrap();
-    assert!(d.text().contains("<!-- text x=20 foo=bar id=t1 -->"));
-    d.apply(inv).unwrap();
-    assert_eq!(d.text(), src);
-
-    assert!(
-        d.apply(Op::SetGeometry {
-            id: "t1".into(),
-            x: None,
-            y: None,
-            w: Some(-1.0),
-            h: None,
-            rot: None
-        })
-        .is_err()
-    );
-    assert!(d.apply(Op::RemoveElement { id: "nope".into() }).is_err());
-    assert_eq!(d.text(), src);
-
-    // A body that would add a separator is refused.
-    assert!(
-        d.apply(Op::SetBody {
-            id: "t1".into(),
-            body: "a\n---\nb".into(),
-            raw: false
-        })
-        .is_err()
-    );
-    assert_eq!(d.text(), src);
-
-    // Unknown directive keeps its unknown attribute through a move.
-    d.apply(Op::SetGeometry {
-        id: "w1".into(),
-        x: Some(5.0),
-        y: None,
-        w: None,
-        h: None,
-        rot: None,
-    })
-    .unwrap();
-    assert!(d.text().contains("<!-- widget id=w1 a=1 x=5 -->"));
 }

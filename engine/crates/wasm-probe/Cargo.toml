@@ -1,7 +1,8 @@
 [package]
-name = "spike-wasm"
+name = "wasm-probe"
 version = "0.0.0"
 publish = false
+description = "Size gate only: the core crate behind wasm-bindgen exports, measured by scripts/wasm-size.sh"
 edition.workspace = true
 rust-version.workspace = true
 
@@ -9,9 +10,6 @@ rust-version.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-spike-core = { path = "../core" }
-serde.workspace = true
+s-md-slides = { path = "../core" }
 serde_json.workspace = true
-serde-saphyr.workspace = true
-pulldown-cmark.workspace = true
 wasm-bindgen.workspace = true

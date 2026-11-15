@@ -1,0 +1,23 @@
+[package]
+name = "s-md-slides-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "=0.4.13"
+s-md-slides = { path = "../crates/core" }
+
+# Its own workspace, so nightly-only fuzzing stays out of the main build.
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "fuzz_parse"
+path = "fuzz_targets/fuzz_parse.rs"
+test = false
+doc = false
+bench = false

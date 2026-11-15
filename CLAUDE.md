@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Workflow rules (from the user, always follow)
 
 - Track every task on the md-kanban board in `s-md-slides-tasks/` with the `md-kanban` skill (`/mdk`). Before starting a task set its `status` to `in-progress`. When it is finished set `done`, or `review` if the user should check it. Refresh `modified` on every edit.
-- Work on one branch per milestone (`m0-de-risk`, `m1-format-core` and so on). Commit after each finished task, push to GitHub, and keep one open PR per milestone that lists its tasks as a checklist. End the milestone with a commit naming it.
+- Work on one branch per milestone (`m0-de-risk`, `m1-format-core` and so on). Commit after each finished task, push to GitHub, and keep one open PR per milestone that lists its tasks as a checklist. End the milestone with a commit naming it. When every task in the milestone is done (none left in review), merge its PR into main and start the next milestone's branch from main.
 - Write every piece of prose (README, docs, code comments, task cards, commit messages, PR bodies, the skill file) with the `ai-writing-rules:anti-ai-writing` skill: plain US English, sentence-case headings, no em dashes, straight quotes. Use `ai-writing-rules:copywrite` for README and other reader-facing copy.
 - Keep `engine/PROGRESS.md` current: milestone status, decisions, deviations from the spec and why.
 - Do not add features outside the spec. If something seems missing, note it in `PROGRESS.md` and ask. If a spec decision turns out wrong in practice, stop and tell the user. Never swap a stack choice quietly.

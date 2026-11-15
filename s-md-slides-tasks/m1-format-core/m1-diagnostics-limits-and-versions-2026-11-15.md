@@ -1,11 +1,11 @@
 ---
 id: "m1-diagnostics-limits-and-versions-2026-11-15"
-status: "todo"
+status: "done"
 priority: "high"
 assignee: "claude"
 dueDate: null
 created: "2026-11-15T12:00:00.000Z"
-modified: "2026-11-15T12:00:00.000Z"
+modified: "2026-11-15T09:45:32.000Z"
 labels: ["engine", "m1"]
 order: 4
 ---
@@ -16,5 +16,9 @@ Diagnostic codes with line and column. Limits: 20 MB, 5,000 slides, 2,000 elemen
 
 ## Done when
 
-- [ ] `x=abc` on slide 3 gives one error at the right line and column
-- [ ] A version 2 deck is read-only
+- [x] `x=abc` on slide 3 gives one error at the right line and column
+- [x] A version 2 deck is read-only
+
+## Result
+
+Done 2026-11-15 in `crates/core` (`deck.rs`, `attrs.rs`, `frontmatter.rs`, `ops.rs`, `diag.rs`). Checked by `crates/core/tests/acceptance.rs` and the proptest suite in `tests/roundtrip.rs`.
