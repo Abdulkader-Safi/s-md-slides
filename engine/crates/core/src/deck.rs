@@ -172,6 +172,37 @@ pub(crate) struct SlideSrc {
     pub span: Range<usize>,
     /// The `<!-- slide ... -->` line, if any.
     pub directive: Option<Range<usize>>,
+    /// Where slide content starts (after the slide directive line, if any).
+    pub content_start: usize,
+    /// The notes area: from the first `<!-- notes -->` line to the end of its body.
+    pub notes: Option<NotesSrc>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq)]
+pub(crate) struct NotesSrc {
+    /// Start of the first notes directive line.
+    pub start: usize,
+    /// Body of the first notes directive, without trailing blank lines.
+    pub body: Range<usize>,
+    /// How many notes directives the slide has.
+    pub count: usize,
+    /// End of the notes block (next directive or end of the slide).
+    pub end: usize,
+}
+
+/// One `---`-separated section in file order.
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) struct SectionInfo {
+    pub span: Range<usize>,
+    /// Slide index, or `None` for a definitions section.
+    pub slide: Option<usize>,
+}
+
+/// Where a master or layout block sits: its directive line to the next definition.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub(crate) struct DefSrc {
+    pub block: Range<usize>,
+    pub section: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -202,6 +233,8 @@ pub struct Master {
     pub id: String,
     pub attrs: Vec<Attr>,
     pub elements: Vec<Element>,
+    #[serde(skip)]
+    pub(crate) src: DefSrc,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -222,6 +255,8 @@ pub struct Layout {
     pub master: Option<String>,
     pub attrs: Vec<Attr>,
     pub placeholders: Vec<Placeholder>,
+    #[serde(skip)]
+    pub(crate) src: DefSrc,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -238,6 +273,14 @@ pub struct Deck {
     pub(crate) diagnostics: Vec<Diagnostic>,
     #[serde(skip)]
     pub(crate) read_only: bool,
+    /// Front matter content between the `---` lines.
+    #[serde(skip)]
+    pub(crate) front_span: Option<Range<usize>>,
+    #[serde(skip)]
+    pub(crate) sections: Vec<SectionInfo>,
+    /// 3 when the file starts with a BOM, else 0.
+    #[serde(skip)]
+    pub(crate) bom: usize,
 }
 
 /// Result of [`Deck::parse`]: always a deck, plus whatever went wrong.
@@ -441,6 +484,9 @@ impl Deck {
             line_ending: LineEnding::Lf,
             diagnostics: Vec::new(),
             read_only: false,
+            front_span: None,
+            sections: Vec::new(),
+            bom: 0,
         };
         if src.len() > MAX_FILE_BYTES {
             cx.push(
@@ -459,6 +505,7 @@ impl Deck {
             return deck;
         }
         let bom = if src.starts_with('\u{feff}') { 3 } else { 0 };
+        deck.bom = bom;
         let lines = split_lines(src, bom);
         let crlf = lines.iter().filter(|l| l.next > l.end + 1).count();
         let lf = lines.iter().filter(|l| l.next == l.end + 1).count();
@@ -481,6 +528,7 @@ impl Deck {
                     let close = &lines[j + 1];
                     let text = &src[lines[0].next..close.start];
                     let base = lines[0].next;
+                    deck.front_span = Some(base..close.start);
                     let parsed = frontmatter::parse(text);
                     deck.front = parsed.front;
                     deck.version = parsed.version;
@@ -585,6 +633,10 @@ impl Deck {
                 .first()
                 .is_some_and(|(_, _, d)| d.kind == "master" || d.kind == "layout");
             if defs {
+                deck.sections.push(SectionInfo {
+                    span: sec.span.clone(),
+                    slide: None,
+                });
                 build_definitions(&mut cx, &mut deck, sec);
             } else {
                 if slide_sections == MAX_SLIDES {
@@ -600,6 +652,10 @@ impl Deck {
                     break;
                 }
                 slide_sections += 1;
+                deck.sections.push(SectionInfo {
+                    span: sec.span.clone(),
+                    slide: Some(deck.slides.len()),
+                });
                 let slide = build_slide(&mut cx, &mut deck, sec);
                 deck.slides.push(slide);
             }
@@ -643,6 +699,8 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
         src: SlideSrc {
             span: sec.span.clone(),
             directive: None,
+            content_start: sec.span.start,
+            notes: None,
         },
     };
     let mut content_start = sec.span.start;
@@ -677,6 +735,7 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
                 slide.attrs = d.attrs;
                 slide.src.directive = Some(line);
                 content_start = next;
+                slide.src.content_start = next;
             }
             "notes" => boundaries.push((line, next, d)),
             k if is_element_kind(k) => boundaries.push((line, next, d)),
@@ -734,7 +793,18 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
         let (line, next, d) = &boundaries[k];
         if d.kind == "notes" {
             let (body, _) = body_ranges(src, *next, to);
-            let text = &src[body];
+            let text = &src[body.clone()];
+            match &mut slide.src.notes {
+                Some(n) => n.count += 1,
+                None => {
+                    slide.src.notes = Some(NotesSrc {
+                        start: line.start,
+                        body,
+                        count: 1,
+                        end: to,
+                    })
+                }
+            }
             if notes_seen {
                 cx.push(
                     Severity::Warning,
@@ -818,8 +888,17 @@ fn build_definitions(cx: &mut Ctx, deck: &mut Deck, sec: Section) {
         }
     }
     let mut open: Option<Open> = None;
+    let section = deck.sections.len().saturating_sub(1);
     for k in 0..kept.len() {
         let to = kept.get(k + 1).map_or(sec.span.end, |(l, _, _)| l.start);
+        let block_end = kept[k + 1..]
+            .iter()
+            .find(|(_, _, d)| d.kind == "master" || d.kind == "layout")
+            .map_or(sec.span.end, |(l, _, _)| l.start);
+        let def_src = DefSrc {
+            block: kept[k].0.start..block_end,
+            section,
+        };
         let (line, next, d) = &kept[k];
         let id = || d.get("id").and_then(|a| a.value.clone());
         match d.kind.as_str() {
@@ -849,6 +928,7 @@ fn build_definitions(cx: &mut Ctx, deck: &mut Deck, sec: Section) {
                     id,
                     attrs: d.attrs.clone(),
                     elements: Vec::new(),
+                    src: def_src,
                 });
                 open = Some(Open::Master(deck.masters.len() - 1));
             }
@@ -879,6 +959,7 @@ fn build_definitions(cx: &mut Ctx, deck: &mut Deck, sec: Section) {
                     master: d.get("master").and_then(|a| a.value.clone()),
                     attrs: d.attrs.clone(),
                     placeholders: Vec::new(),
+                    src: def_src,
                 });
                 open = Some(Open::Layout(deck.layouts.len() - 1));
             }
