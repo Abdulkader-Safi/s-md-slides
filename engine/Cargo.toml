@@ -1,0 +1,49 @@
+[workspace]
+resolver = "3"
+members = ["spikes/core", "spikes/wasm", "spikes/layout"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.95"
+license = "MIT"
+repository = "https://github.com/Abdulkader-Safi/s-md-slides"
+
+# Every version pinned exactly, checked on crates.io on 2026-11-15.
+# Upgrades go in their own commits. See PROGRESS.md for why some are not the latest.
+[workspace.dependencies]
+# core (WASM-safe)
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.154"
+serde-saphyr = { version = "=2.1.1", default-features = false, features = ["deserialize"] }
+pulldown-cmark = { version = "=0.13.6", default-features = false, features = ["html"] }
+ts-rs = "=12.0.1"
+wasm-bindgen = "=0.2.130"
+# render (native)
+parley = "=0.13.0"
+fontique = "=0.13.0"
+resvg = "=0.47.0"
+usvg = "=0.47.0"
+tiny-skia = "=0.12.0"
+jpeg-encoder = "=0.7.1"
+gif = "=0.14.2"
+krilla = "=0.8.2"
+krilla-svg = "=0.8.1"
+mermaid-rs-renderer = { version = "=0.3.1", default-features = false }
+ratex-svg = "=0.1.15"
+syntect = { version = "=5.3.0", default-features = false, features = ["default-fancy"] }
+# cli
+clap = { version = "=4.6.7", features = ["derive"] }
+notify = "=8.2.2"
+notify-debouncer-full = "=0.7.0"
+tiny_http = "=0.12.0"
+# tests and benches
+insta = "=1.49.0"
+proptest = "=1.12.0"
+criterion = "=0.8.2"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"
