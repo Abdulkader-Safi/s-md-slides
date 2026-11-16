@@ -10,7 +10,7 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 | M1 format core                | done (PR #2)        |
 | M2 operations                 | done (PR #3)        |
 | M3 elements and style         | done (PR #4)        |
-| M4 animation and HTML export  | not started         |
+| M4 animation and HTML export  | done (PR #5)        |
 | M5 native render              | not started         |
 | M6 CLI                        | not started         |
 | M7 conformance, docs, release | not started         |
@@ -22,6 +22,27 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 - 2026-11-15: one branch and one PR per milestone. Commits after each task.
 - 2026-11-16: keep serde-saphyr (about 400 KB of WASM) and nested inline themes. Spec 04 set a 150 KB limit for it; the build spec only replaces it above 1.5 MB total, and the core is 677 KB. The flat front matter reader stays the fallback if a later milestone trips the size gate. Decided by the user.
 - 2026-11-15: approved after review. Native PDF export draws text by passing parley glyph runs straight to krilla (`draw_glyphs` with parley's cluster ranges, ligature continuations merged, glyph y offsets negated). krilla-svg draws everything that is not text. PNG export keeps the flattened SVG through resvg.
+
+## M4 results
+
+Acceptance boxes ticked: FR-ANIM-01 to FR-ANIM-04, FR-DIR-02, FR-EXP-01, FR-EXP-02, FR-EXP-07, FR-ASSET-01 to FR-ASSET-03, plus the export halves of FR-NOTES-01, FR-EL-01, FR-EL-03 to FR-EL-05, FR-STYLE-01 and FR-STYLE-03 to FR-STYLE-05. Still open until M5: FR-EL-06 to FR-EL-09, whose checks need native rendering or PNG posters. Exit criteria: both example decks present fully from one offline HTML file in Chrome, Firefox and Safari; keyboard-only use works; axe-core finds no WCAG 2.2 AA violations on the controls.
+
+Code: `crates/core/src/timeline.rs`, `crates/core/src/export/` (sanitizer, slide HTML, browser SVG, presentation), the runtime in `runtime/` (TypeScript, built into `crates/core/src/runtime/`), example decks in `examples/`, and the export example `cargo run -p s-md-slides --example export -- deck.md out.html --embed`.
+
+Decisions:
+
+- Each timeline entry carries its from and to state. Rust's `state_at` and the runtime both blend them with ease-out cubic, frame by frame. Spec 04 says the runtime emits CSS animations; one shared formula in data form is a stronger match for FR-ANIM-04 (the HTML export and the GIF play the same numbers), and the runtime stays at 7 KB.
+- Steps: elements without `order` animate when the slide appears (step 0). Each distinct `order` is one click. An element with both `enter` and `exit` exits on the click after its entrance; one with only `exit` exits at its `order`. The spec doesn't say how `exit` is timed.
+- Fly effects start or end just off the canvas edge (fly-left from x = -w, and so on). `scale` grows from half size while fading in.
+- A slide's transition length is its `dur=` attribute (default 400 ms). The deck default transition is front matter `transition:`, else fade.
+- Headings inside a text box use the box's `size`, set in the heading font, instead of the browser's 2em for h1. A box with `size=72` shows its `# Title` at 72 px, as the spec's examples expect.
+- Mermaid and math show their source in a labeled box in HTML and browser SVG. Drawing them needs the native renderer (M5) or the host (Obsidian renders them itself, per spec).
+- Asset URLs and embed `src` are scheme-checked at export: `javascript:` and other unsafe schemes become the gray placeholder, and embeds must be https. YouTube links are rewritten to youtube-nocookie.
+- Security review fixes (2026-11-16): the sanitizer escapes `<` in every text it echoes and treats an unquoted `<` inside a would-be tag as text; every style attribute is attribute-escaped; `resolved_style` replaces values that failed validation with defaults; font names are limited to letters, digits, spaces and `-_.`. `fuzz_parse` now renders every fuzzed deck to HTML and SVG and fails on any `<script` in slide markup: 1,000,000 runs, none found.
+- The CSP pins the runtime by its SHA-256 (`crates/core/src/runtime/runtime.sha256`, written by the build). CI rebuilds the runtime and fails if the committed copy differs.
+- Presentation controls stay fully opaque. They faded to 35% when idle at first, which failed axe's color contrast check on dark slides.
+- WASM: the size probe now calls every export, so the linker keeps them. The core measures 953 KB with the runtime, under the 1 MB target.
+- The browser check (`node runtime/test/check.mjs`) exports both example decks with embedded assets into a temp folder with no assets beside them, then checks the clicks, effects, transitions, rtl keys, reduced motion, presenter view, CSP errors and axe-core in headless Chrome and Firefox (`BROWSER=firefox FIREFOX_PATH=...`). Safari runs the same checks through `safaridriver` with `node runtime/test/safari.mjs` (needs Develop > Allow Remote Automation, so it isn't in CI); Safari 26.6 passed all 21 on 2026-11-16. It skips reduced motion and console errors, which WebDriver can't reach in Safari.
 
 ## M3 results
 
@@ -61,7 +82,7 @@ Decisions:
 
 ## M1 results
 
-Acceptance boxes ticked in the build spec: FR-FMT-01 to FR-FMT-08, FR-CANVAS-01, FR-CANVAS-02, FR-DIR-01, FR-PKG-02. FR-NOTES-01 stays open until M4: notes parse and round-trip now, but its check also needs the HTML presenter view. Exit criteria: all 15 golden decks round-trip, `fuzz_parse` passed 1,000,000 cases, the WASM gate passes at 572 KB, and CI is green on macOS, Windows and Linux.
+Acceptance boxes ticked in the build spec: FR-FMT-01 to FR-FMT-08, FR-CANVAS-01, FR-CANVAS-02, FR-DIR-01, FR-PKG-02. FR-NOTES-01 stays open until M4: notes parse and round-trip now, but its check also needs the HTML presenter view. Exit criteria: all 15 golden decks round-trip, `fuzz_parse` passed 1,000,000 cases, the WASM gate passes at 572 KB, and CI is green on all three operating systems.
 
 Code: `crates/core` (crate `s-md-slides`), probe for the size gate: `crates/wasm-probe`. The M0 writer spike is folded in and `spikes/core` and `spikes/wasm` are gone.
 

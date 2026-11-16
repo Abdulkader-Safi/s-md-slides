@@ -1,11 +1,11 @@
 ---
 id: "m4-assets-and-embed-mode-2026-11-15"
-status: "todo"
+status: "done"
 priority: "medium"
 assignee: "claude"
 dueDate: null
 created: "2026-11-15T12:00:00.000Z"
-modified: "2026-11-15T12:00:00.000Z"
+modified: "2026-11-16T07:03:27.000Z"
 labels: ["engine", "m4"]
 order: 5
 ---
@@ -16,4 +16,8 @@ AssetResolver, data-URI embed mode, asset listing with missing warnings, plus vi
 
 ## Done when
 
-- [ ] Embedded HTML works offline with the deck folder deleted
+- [x] Embedded HTML works offline with the deck folder deleted
+
+## Result
+
+Done 2026-11-16. Checked by `crates/core/tests/export.rs` and `runtime/test/check.mjs` in Chrome and Firefox (also in CI).

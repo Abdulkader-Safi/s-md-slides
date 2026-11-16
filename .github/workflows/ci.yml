@@ -68,3 +68,27 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y binaryen
       - name: Core WASM size (fails above 1.5 MB)
         run: scripts/wasm-size.sh wasm-probe | tee -a "$GITHUB_STEP_SUMMARY"
+
+  runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.MSRV }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: engine
+      - name: Build the runtime and check the committed copy is current
+        run: |
+          cd runtime
+          npm ci
+          npm run build
+          git diff --exit-code -- ../crates/core/src/runtime
+      - name: Browser check (headless Chrome, axe-core)
+        run: CHROME_PATH=$(which google-chrome) node runtime/test/check.mjs
+      - name: Browser check (headless Firefox)
+        run: BROWSER=firefox FIREFOX_PATH=$(which firefox) node runtime/test/check.mjs

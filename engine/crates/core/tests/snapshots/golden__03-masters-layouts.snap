@@ -208,6 +208,11 @@ expression: "serde_json::json!({\n    \"deck\": p.deck, \"diagnostics\": p.diagn
         ],
         "elements": [
           {
+            "anim": {
+              "delay": 0,
+              "dur": 400,
+              "enter": "fade"
+            },
             "attrs": [
               {
                 "key": "id",

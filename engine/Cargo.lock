@@ -1195,6 +1195,7 @@ dependencies = [
  "insta",
  "proptest",
  "pulldown-cmark",
+ "roxmltree 0.20.0",
  "serde",
  "serde-saphyr",
  "serde_json",

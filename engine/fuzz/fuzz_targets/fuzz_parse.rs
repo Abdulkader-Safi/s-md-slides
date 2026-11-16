@@ -17,4 +17,11 @@ fuzz_target!(|data: &[u8]| {
     for e in p.deck.elements() {
         let _ = p.deck.resolved_dir(e);
     }
+    // Export never panics, and no raw HTML in a deck becomes a live script tag.
+    let html = s_md_slides::export::presentation_html(&p.deck, &Default::default()).text;
+    let slides = html.split("<script type=\"application/json\"").next().unwrap_or("");
+    assert!(!slides.to_ascii_lowercase().contains("<script"), "script tag in slide markup");
+    for i in 0..p.deck.slides.len().min(3) {
+        let _ = s_md_slides::export::slide_svg(&p.deck, i, s_md_slides::export::Frame::At(250), &Default::default());
+    }
 });
