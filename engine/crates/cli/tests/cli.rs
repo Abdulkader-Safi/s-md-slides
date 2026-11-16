@@ -329,6 +329,24 @@ fn fr_cli_03_serve_reloads_and_never_writes() {
         "GET / HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n",
     );
     assert!(page.contains("Growth now"), "the page shows the new text");
+    // One save, one reload: serving the page (which reads files) must not set off more.
+    reader
+        .get_mut()
+        .set_read_timeout(Some(Duration::from_millis(1200)))
+        .unwrap();
+    let mut extra = Vec::new();
+    loop {
+        line.clear();
+        match reader.read_line(&mut line) {
+            Ok(n) if n > 0 => {
+                if line.starts_with("event:") {
+                    extra.push(line.clone());
+                }
+            }
+            _ => break,
+        }
+    }
+    assert!(extra.is_empty(), "reload loop: {extra:?}");
 
     // A broken save shows the diagnostics overlay.
     std::fs::write(&deck, text.replace("x=120 y=80", "x=oops y=80")).unwrap();

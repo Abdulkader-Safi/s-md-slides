@@ -3,7 +3,7 @@
 
 use crate::resolver::Folder;
 use crate::{IO, has_errors, print};
-use notify::RecursiveMode;
+use notify::{EventKind, RecursiveMode};
 use notify_debouncer_full::{DebounceEventResult, new_debouncer};
 use s_md_slides::export::{Options, mime_for, presentation_html};
 use s_md_slides::{Deck, Diagnostic, Severity};
@@ -170,7 +170,15 @@ pub fn run(deck: &Path, host: &str, port: u16, open: bool) -> ExitCode {
         move |res: DebounceEventResult| {
             let Ok(events) = res else { return };
             let watched = p2.lock().map(|p| p.watched.clone()).unwrap_or_default();
-            let hit = events.iter().flat_map(|e| e.paths.iter()).any(|p| {
+            // Only content changes count. Linux also reports reads (open, close), and
+            // every rebuild reads the deck, so reacting to them would reload forever.
+            let changes = events.iter().filter(|e| {
+                matches!(
+                    e.kind,
+                    EventKind::Create(_) | EventKind::Modify(_) | EventKind::Remove(_)
+                )
+            });
+            let hit = changes.flat_map(|e| e.paths.iter()).any(|p| {
                 watched.contains(p)
                     || watched
                         .iter()
