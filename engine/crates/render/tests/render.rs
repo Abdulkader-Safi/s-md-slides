@@ -308,3 +308,25 @@ fn missing_assets_warn_once() {
     assert_eq!(files.1.borrow().len(), 1);
     let _ = Path::new("");
 }
+
+#[test]
+fn svg_images_never_read_local_files() {
+    // A Mermaid or math SVG that pointed at a file would be drawn through usvg; only
+    // data URIs may load. Probe the loader directly with a local href.
+    let fonts = Fonts::bundled();
+    let d = Deck::parse("<!-- image id=i x=0 y=0 w=100 h=100 -->\n![A](assets/chart.png)\n").deck;
+    let svg = String::from_utf8(
+        flatten_svg(&d, 0, Frame::End, &Folder::new("examples"), &fonts)
+            .unwrap()
+            .bytes,
+    )
+    .unwrap();
+    assert!(
+        svg.contains("href=\"data:image/png;base64,"),
+        "assets arrive as data URIs"
+    );
+    assert!(
+        !svg.contains("href=\"assets/"),
+        "no file paths in the flattened SVG"
+    );
+}

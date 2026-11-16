@@ -108,10 +108,7 @@ pub(crate) fn draw_scene(
     cache: &mut FontCache,
 ) -> Result<(), String> {
     let (w, h) = (scene.width as f32, scene.height as f32);
-    let opt = usvg::Options {
-        fontdb: fonts.inner.borrow().db.clone(),
-        ..Default::default()
-    };
+    let opt = crate::raster::svg_options(fonts);
     let wrap = |inner: &str| {
         format!(
             "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{w}\" height=\"{h}\" viewBox=\"0 0 {w} {h}\">{inner}</svg>"
