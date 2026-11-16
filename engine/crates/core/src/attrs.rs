@@ -85,7 +85,7 @@ pub fn parse_directive(line: &str, base: usize) -> Option<Directive> {
     }
     let kind = t[kind_start..i].to_string();
     let mut insert_at = i;
-    let mut attrs = Vec::new();
+    let mut attrs = Vec::with_capacity(8);
     let mut error_at = None;
     'tokens: loop {
         while i < end && (b[i] == b' ' || b[i] == b'\t') {

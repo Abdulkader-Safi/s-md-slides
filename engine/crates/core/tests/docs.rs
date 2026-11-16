@@ -26,13 +26,23 @@ fn examples(doc: &str) -> Vec<(usize, String)> {
 }
 
 fn check(path: &str, min: usize) {
-    let full = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").join(path);
+    let full = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(path);
     let doc = std::fs::read_to_string(&full).unwrap_or_else(|_| panic!("{path} missing"));
     let ex = examples(&doc);
-    assert!(ex.len() >= min, "{path}: expected at least {min} examples, found {}", ex.len());
+    assert!(
+        ex.len() >= min,
+        "{path}: expected at least {min} examples, found {}",
+        ex.len()
+    );
     for (line, body) in ex {
         let p = Deck::parse(&body);
-        assert!(p.diagnostics.is_empty(), "{path}:{line}: {:?}", p.diagnostics);
+        assert!(
+            p.diagnostics.is_empty(),
+            "{path}:{line}: {:?}",
+            p.diagnostics
+        );
         assert_eq!(p.deck.text(), body);
     }
 }

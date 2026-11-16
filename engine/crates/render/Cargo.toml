@@ -28,3 +28,8 @@ pulldown-cmark.workspace = true
 [dev-dependencies]
 resvg.workspace = true
 gif.workspace = true
+criterion.workspace = true
+
+[[bench]]
+name = "png"
+harness = false

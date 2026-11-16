@@ -862,13 +862,15 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
     }
 
     let mut notes_seen = false;
-    for k in 0..boundaries.len() {
-        let to = boundaries
-            .get(k + 1)
-            .map_or(sec.span.end, |(l, _, _)| l.start);
-        let (line, next, d) = &boundaries[k];
+    let ends: Vec<usize> = boundaries
+        .iter()
+        .skip(1)
+        .map(|(l, _, _)| l.start)
+        .chain([sec.span.end])
+        .collect();
+    for ((line, next, d), to) in boundaries.into_iter().zip(ends) {
         if d.kind == "notes" {
-            let (body, _) = body_ranges(src, *next, to);
+            let (body, _) = body_ranges(src, next, to);
             let text = &src[body.clone()];
             match &mut slide.src.notes {
                 Some(n) => n.count += 1,
@@ -922,7 +924,7 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
             deck.read_only = true;
             break;
         }
-        let e = build_element(cx, line.clone(), *next, to, d, Some(index));
+        let e = build_element(cx, line, next, to, d, Some(index));
         slide.elements.push(e);
     }
     slide
@@ -1082,7 +1084,7 @@ fn build_definitions(cx: &mut Ctx, deck: &mut Deck, sec: Section) {
                 let Some(Open::Master(mi)) = open else {
                     continue;
                 };
-                let e = build_element(cx, line.clone(), *next, to, d, None);
+                let e = build_element(cx, line.clone(), *next, to, d.clone(), None);
                 deck.masters[mi].elements.push(e);
             }
         }
@@ -1150,7 +1152,7 @@ fn build_element(
     line: Range<usize>,
     next: usize,
     to: usize,
-    d: &Directive,
+    d: Directive,
     slide: Option<usize>,
 ) -> Element {
     let src = cx.src;
@@ -1159,9 +1161,9 @@ fn build_element(
     let label = written_id.clone();
     let label = label.as_deref();
 
-    let mut seen = HashSet::new();
-    for a in &d.attrs {
-        if !seen.insert(a.key.as_str()) {
+    // Elements have about ten attributes: a scan beats hashing each key.
+    for (i, a) in d.attrs.iter().enumerate() {
+        if d.attrs[..i].iter().any(|b| b.key == a.key) {
             cx.push(
                 Severity::Warning,
                 "W-DUP-ATTR",
@@ -1205,7 +1207,7 @@ fn build_element(
         );
     let g = geometry(
         cx,
-        d,
+        &d,
         !shape_line,
         known && kind != Kind::Group,
         label,
@@ -1284,7 +1286,7 @@ fn build_element(
     let (body, end) = body_ranges(src, next, to);
     let (style, content, anim) = crate::kinds::check(
         &kind,
-        d,
+        &d,
         &src[body.clone()],
         body.start,
         &mut |sev, code, msg, at| cx.push(sev, code, msg, at, label, slide),
@@ -1301,7 +1303,7 @@ fn build_element(
         locked,
         name: d.get("name").and_then(|a| a.value.clone()),
         dir,
-        attrs: d.attrs.clone(),
+        attrs: d.attrs,
         style,
         content,
         anim,
@@ -1320,7 +1322,6 @@ fn build_element(
 /// Give every element a deck-unique id. Written ids win; duplicates and elements without
 /// one get an in-memory id (kind letter plus counter), reused from `carry` when possible.
 fn assign_ids(cx: &mut Ctx, deck: &mut Deck, carry: &Carry) {
-    let mut used: HashSet<String> = HashSet::new();
     let mut needs: Vec<usize> = Vec::new();
     let mut all: Vec<&mut Element> = deck
         .masters
@@ -1328,6 +1329,7 @@ fn assign_ids(cx: &mut Ctx, deck: &mut Deck, carry: &Carry) {
         .flat_map(|m| m.elements.iter_mut())
         .chain(deck.slides.iter_mut().flat_map(|s| s.elements.iter_mut()))
         .collect();
+    let mut used: HashSet<String> = HashSet::with_capacity(all.len());
     for (i, e) in all.iter_mut().enumerate() {
         match &e.src.written_id {
             Some(id) if valid_id(id) && !used.contains(id) => {

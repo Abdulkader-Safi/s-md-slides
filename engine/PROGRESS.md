@@ -233,3 +233,18 @@ Open questions for M1:
 - Removing the first element of the file when the next line is `---` is refused, because the file would then start with `---` and read as front matter. A deck can't have an empty first slide followed by a separator unless it has front matter. Options: always write front matter when this happens, or accept the refusal.
 - Undo of an attribute edit restores the whole directive line as written (`SetDirective`). The spec's op list has no such op. M2 either keeps it as an internal op in the JSON schema or makes `SetAttrs` carry raw values.
 - In-memory ids for elements without `id=` are assigned by file order on every scan, so removing an element with an explicit id can shift the ids of id-less elements. M1 needs a stable mapping (FR-FMT-07).
+
+### M7 benchmarks (NFR-01), measured 2026-11-16 on an Apple M2 Pro
+
+`cargo bench -p s-md-slides --bench deck` and `cargo bench -p s-md-slides-render --bench png`.
+
+| Check | Budget | Measured |
+| --- | --- | --- |
+| Parse plus save, 200 slides and 2,000 elements (155 KB) | 50 ms | 4.5 ms |
+| One op plus save on that deck | 5 ms | 5.0 ms |
+| One 1920 x 1080 PNG | 300 ms | 45 ms |
+| `serve` reload | 500 ms | checked by the M6 test |
+
+The op number started at 7.0 ms. Every op re-parses the whole deck to check its structure, so an op costs one parse. Profiling showed the parser cloning each element's attributes and hashing every attribute key to find duplicates; moving instead of cloning and scanning instead of hashing took parse from 6.4 to 4.5 ms. What is left is mostly allocation (37% of parse time goes to malloc, free and copies: about 25 small strings per element).
+
+Open: on an M1, which is slower than this machine, one op on a 2,000-element deck will land around 6 ms, over the 5 ms budget. Getting under it needs a design change, so it waits for the user.

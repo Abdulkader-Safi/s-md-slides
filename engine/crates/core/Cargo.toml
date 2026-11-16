@@ -26,3 +26,8 @@ proptest.workspace = true
 insta = { workspace = true, features = ["json"] }
 serde_json.workspace = true
 roxmltree.workspace = true
+criterion.workspace = true
+
+[[bench]]
+name = "deck"
+harness = false
