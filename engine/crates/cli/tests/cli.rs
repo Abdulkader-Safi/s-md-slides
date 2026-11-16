@@ -359,3 +359,41 @@ fn fr_cli_03_serve_reloads_and_never_writes() {
         .contains("smd-diagnostics")
     );
 }
+
+/// Ctrl-C during an export stops it at the next frame and exits 4.
+#[cfg(unix)]
+#[test]
+fn ctrl_c_cancels_an_export_with_exit_4() {
+    let dir = workdir("cancel");
+    let deck = dir.join("pitch-16x9.md");
+    let child = bin()
+        .args([
+            "export",
+            deck.to_str().unwrap(),
+            "--to",
+            "gif",
+            "--slide",
+            "2",
+            "--fps",
+            "60",
+            "--scale",
+            "2",
+        ])
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    let pid = child.id().to_string();
+    std::thread::sleep(Duration::from_millis(1500));
+    let sent = Instant::now();
+    Command::new("kill").args(["-INT", &pid]).status().unwrap();
+    let out = child.wait_with_output().unwrap();
+    assert_eq!(out.status.code(), Some(4), "cancelled exit code");
+    assert!(
+        sent.elapsed() < Duration::from_secs(2),
+        "stopped within a frame or two"
+    );
+    assert!(
+        !dir.join("pitch-16x9-2.gif").exists(),
+        "nothing half-written"
+    );
+}

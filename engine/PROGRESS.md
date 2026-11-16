@@ -37,7 +37,7 @@ Decisions:
 - File serving: GET only, files under the deck's folder after resolving symlinks, no `..` segments, no directory listing. A host other than 127.0.0.1, localhost or ::1 prints a network warning.
 - `export` writes next to the deck by default (`deck.pdf`, `deck-3.png`); `-o` names a file, or a folder when several images are written. `--to png|jpeg|gif` without `--slide` exports every slide. It exits 1 if the deck has errors, after writing.
 - `apply` accepts one op or a list, prints the inverse batch on stdout, and writes through a temp file plus rename, so a crash never leaves half a deck.
-- Not built: exit code 4 on Ctrl-C. The standard library has no signal handler and the spec's dependency list has none, so Ctrl-C kills the process normally. The library still returns `E-CANCELLED` through `Progress`, and the CLI maps that to 4. Adding the `ctrlc` crate would close this; it needs a yes.
+- Ctrl-C during `export` stops at the next page or frame, writes nothing half-done, and exits 4. A second Ctrl-C quits at once. Uses the `ctrlc` crate (3.5.2, MIT or Apache-2.0), added with the user's approval on 2026-11-16; only `export` installs the handler, so Ctrl-C still stops `serve` normally.
 
 ## M5 results
 
@@ -51,6 +51,7 @@ Decisions:
 - `flatten_svg` therefore outputs outlines rather than positioned `<text>` runs. Anything that needs selectable text uses the PDF or the browser SVG from the core.
 - GIFs pause 600 ms (`GIF_HOLD_MS`) after each step and sample by step with the new core method `Timeline::state_at_step`. Without that, steps made of `appear` (zero duration) all show in the first frame, since `state_at(t)` can't tell zero-length steps apart.
 - Mermaid (mermaid-rs-renderer) and math (ratex, KaTeX fonts embedded) run behind `catch_unwind`; a failure shows the source in a code box with `W-DIAGRAM`.
+- Native export never requests URLs, and the SVG loader only accepts `data:` images (usvg's default reads local files for other hrefs, and Mermaid and math SVG come from deck text). Colors are escaped in the flattened SVG as a second guard. Both from a security review.
 - Native export never requests URLs: only relative paths go to the resolver, so embeds and remote images become gray boxes or posters.
 - Bundled fonts: Noto Sans, Noto Sans Arabic and Noto Sans Mono, each in regular and bold (OFL-1.1). Italic is synthesized by parley and drawn as a skew. `Fonts::with_system()` adds installed fonts; tests use `Fonts::bundled()` so output is identical everywhere.
 - Linux builds of the render crate need the fontconfig library (`libfontconfig1-dev`) for parley's system-font support. CI installs it.
