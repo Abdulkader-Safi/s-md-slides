@@ -1,8 +1,14 @@
 ---
 source: crates/core/tests/golden.rs
-expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostics, })"
+expression: "serde_json::json!({\n    \"deck\": p.deck, \"diagnostics\": p.diagnostics, \"resolved\":\n    p.deck.elements().map(|e|\n    (e.id.clone(),\n    p.deck.resolved_style(&e.id))).collect::<std::collections::BTreeMap<_,\n    _>>(), \"backgrounds\":\n    (0..p.deck.slides.len()).map(|i|\n    p.deck.background(i)).collect::<Vec<_>>(),\n})"
 ---
 {
+  "backgrounds": [
+    {
+      "color": "#ffffff",
+      "type": "color"
+    }
+  ],
   "deck": {
     "front": {
       "canvas": {
@@ -453,5 +459,207 @@ expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostic
     ],
     "version": 1
   },
-  "diagnostics": []
+  "diagnostics": [],
+  "resolved": {
+    "b1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 24.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "c1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": "#f3f4f6",
+      "font": "Noto Sans Mono",
+      "line-height": 1.3,
+      "padding": [
+        24.0,
+        24.0,
+        24.0,
+        24.0
+      ],
+      "radius": 0.0,
+      "size": 24.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "d1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "e1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "g1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "i1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "m1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "s1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": "#db2777",
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "t1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "v1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    }
+  }
 }

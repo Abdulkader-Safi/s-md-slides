@@ -1,0 +1,176 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({\n    \"deck\": p.deck, \"diagnostics\": p.diagnostics, \"resolved\":\n    p.deck.elements().map(|e|\n    (e.id.clone(),\n    p.deck.resolved_style(&e.id))).collect::<std::collections::BTreeMap<_,\n    _>>(), \"backgrounds\":\n    (0..p.deck.slides.len()).map(|i|\n    p.deck.background(i)).collect::<Vec<_>>(),\n})"
+---
+{
+  "backgrounds": [
+    {
+      "color": "#0b1020",
+      "type": "color"
+    }
+  ],
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto",
+      "theme": {
+        "background": "background",
+        "colors": {
+          "accent1": "#f59e0b",
+          "background": "#0b1020",
+          "text": "#e6e8ee"
+        },
+        "fonts": {
+          "body": "Inter",
+          "heading": "Inter"
+        }
+      }
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "80"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              },
+              {
+                "key": "font",
+                "value": "heading"
+              },
+              {
+                "key": "color",
+                "value": "accent1"
+              }
+            ],
+            "body": "# Dark theme\n",
+            "h": 200.0,
+            "id": "t1",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "style": {
+              "color": "accent1",
+              "font": "heading"
+            },
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 80.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "s1"
+              },
+              {
+                "key": "kind",
+                "value": "rect"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "400"
+              },
+              {
+                "key": "w",
+                "value": "400"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              }
+            ],
+            "body": "",
+            "content": {
+              "shape": "rect",
+              "type": "shape"
+            },
+            "h": 200.0,
+            "id": "s1",
+            "kind": "shape",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 400.0,
+            "x": 120.0,
+            "y": 400.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": [],
+  "resolved": {
+    "s1": {
+      "align": "start",
+      "color": "#e6e8ee",
+      "dir": "ltr",
+      "fill": "#f59e0b",
+      "font": "Inter",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "t1": {
+      "align": "start",
+      "color": "#f59e0b",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Inter",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    }
+  }
+}

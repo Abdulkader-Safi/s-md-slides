@@ -261,7 +261,7 @@ fn check_known(set: &[(String, AttrVal)]) -> Result<(), EngineError> {
             AttrVal::Val(s) => s.as_str(),
             AttrVal::Flag => "",
         };
-        let num = || s.parse::<f32>().ok().filter(|f| f.is_finite());
+        let num = || s.parse::<f64>().ok().filter(|f| f.is_finite());
         let ok = match k.as_str() {
             "id" => return Err(err("E-ATTR-ID", "Ids can't be changed with SetAttrs.")),
             "x" | "y" | "rot" => num().is_some(),
@@ -640,9 +640,9 @@ impl Deck {
 
     /// A directive line for implicit text: id and geometry, then `set`.
     fn implicit_line(&self, e: &Element, set: &[(String, AttrVal)]) -> String {
-        let get = |k: &str, v: f32| match set.iter().find(|(key, _)| key == k) {
+        let get = |k: &str, v: f64| match set.iter().find(|(key, _)| key == k) {
             Some((_, AttrVal::Val(s))) => s.clone(),
-            _ => fmt_num(v as f64),
+            _ => fmt_num(v),
         };
         let mut line = format!(
             "<!-- text id={} x={} y={} w={} h={}",
@@ -852,10 +852,10 @@ impl Deck {
         let new_id = self.fresh_id(e.kind.name(), &mut HashSet::new());
         let mut set = vec![("id".to_string(), AttrVal::Val(new_id.clone()))];
         if let Some(dx) = dx {
-            set.push(("x".into(), AttrVal::Val(fmt_num(e.x as f64 + dx))));
+            set.push(("x".into(), AttrVal::Val(fmt_num(e.x + dx))));
         }
         if let Some(dy) = dy {
-            set.push(("y".into(), AttrVal::Val(fmt_num(e.y as f64 + dy))));
+            set.push(("y".into(), AttrVal::Val(fmt_num(e.y + dy))));
         }
         let line = match &e.src.line {
             Some(l) => self.edit_line(l, &e.attrs, e.src.insert_at, &set, &[]),
@@ -1192,10 +1192,10 @@ impl Deck {
                         .collect();
                     t.push_str(&format!(
                         "{eol}<!-- {kind} id={id} x={} y={} w={} h={}{extra} -->{eol}",
-                        fmt_num(p.x as f64),
-                        fmt_num(p.y as f64),
-                        fmt_num(p.w as f64),
-                        fmt_num(p.h as f64)
+                        fmt_num(p.x),
+                        fmt_num(p.y),
+                        fmt_num(p.w),
+                        fmt_num(p.h)
                     ));
                 }
                 t
@@ -1500,22 +1500,16 @@ impl Deck {
         if members.is_empty() {
             return Err(err("E-GROUP", "This group has no members.").on(&g.id));
         }
-        let gx = members
-            .iter()
-            .map(|m| m.x as f64)
-            .fold(f64::INFINITY, f64::min);
-        let gy = members
-            .iter()
-            .map(|m| m.y as f64)
-            .fold(f64::INFINITY, f64::min);
+        let gx = members.iter().map(|m| m.x).fold(f64::INFINITY, f64::min);
+        let gy = members.iter().map(|m| m.y).fold(f64::INFINITY, f64::min);
         let gw = members
             .iter()
-            .map(|m| (m.x + m.w) as f64)
+            .map(|m| m.x + m.w)
             .fold(f64::NEG_INFINITY, f64::max)
             - gx;
         let gh = members
             .iter()
-            .map(|m| (m.y + m.h) as f64)
+            .map(|m| m.y + m.h)
             .fold(f64::NEG_INFINITY, f64::max)
             - gy;
         let scale = |want: Option<f64>, have: f64| -> Result<f64, EngineError> {
@@ -1535,10 +1529,10 @@ impl Deck {
             .iter()
             .map(|m| Op::SetGeometry {
                 id: m.id.clone(),
-                x: (x.is_some() || w.is_some()).then_some(nx + (m.x as f64 - gx) * sx),
-                y: (y.is_some() || h.is_some()).then_some(ny + (m.y as f64 - gy) * sy),
-                w: w.map(|_| m.w as f64 * sx),
-                h: h.map(|_| m.h as f64 * sy),
+                x: (x.is_some() || w.is_some()).then_some(nx + (m.x - gx) * sx),
+                y: (y.is_some() || h.is_some()).then_some(ny + (m.y - gy) * sy),
+                w: w.map(|_| m.w * sx),
+                h: h.map(|_| m.h * sy),
                 rot: None,
             })
             .collect())

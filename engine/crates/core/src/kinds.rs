@@ -72,7 +72,7 @@ pub enum Content {
         alt: String,
         fit: String,
         #[serde(skip_serializing_if = "Option::is_none")]
-        crop: Option<[f32; 4]>,
+        crop: Option<[f64; 4]>,
     },
     Shape {
         shape: String,
@@ -129,16 +129,16 @@ pub fn is_color(s: &str) -> bool {
 }
 
 /// `linear(angle,color,color[,color])`.
-pub fn parse_gradient(s: &str) -> Option<(f32, Vec<String>)> {
+pub fn parse_gradient(s: &str) -> Option<(f64, Vec<String>)> {
     let inner = s.strip_prefix("linear(")?.strip_suffix(')')?;
     let mut parts = inner.split(',').map(str::trim);
-    let angle = parts.next()?.trim_end_matches("deg").parse::<f32>().ok()?;
+    let angle = parts.next()?.trim_end_matches("deg").parse::<f64>().ok()?;
     let stops: Vec<String> = parts.map(str::to_string).collect();
     ((2..=3).contains(&stops.len()) && stops.iter().all(|c| is_color(c))).then_some((angle, stops))
 }
 
-fn num(s: &str) -> Option<f32> {
-    s.parse::<f32>().ok().filter(|v| v.is_finite())
+fn num(s: &str) -> Option<f64> {
+    s.parse::<f64>().ok().filter(|v| v.is_finite())
 }
 
 /// `1,3-5` into inclusive ranges.
@@ -395,7 +395,7 @@ pub(crate) fn check(
                 bad("fit", "contain, cover or fill", report);
             }
             let crop = get("crop").and_then(|c| {
-                let n: Vec<f32> = c.split(',').filter_map(|p| num(p.trim())).collect();
+                let n: Vec<f64> = c.split(',').filter_map(|p| num(p.trim())).collect();
                 if n.len() == 4 && n[2] >= 0.0 && n[3] >= 0.0 {
                     Some([n[0], n[1], n[2], n[3]])
                 } else {

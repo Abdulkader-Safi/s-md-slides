@@ -1,0 +1,236 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({\n    \"deck\": p.deck, \"diagnostics\": p.diagnostics, \"resolved\":\n    p.deck.elements().map(|e|\n    (e.id.clone(),\n    p.deck.resolved_style(&e.id))).collect::<std::collections::BTreeMap<_,\n    _>>(), \"backgrounds\":\n    (0..p.deck.slides.len()).map(|i|\n    p.deck.background(i)).collect::<Vec<_>>(),\n})"
+---
+{
+  "backgrounds": [
+    {
+      "color": "#ffffff",
+      "type": "color"
+    }
+  ],
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "c1"
+              },
+              {
+                "key": "x",
+                "value": "100"
+              },
+              {
+                "key": "y",
+                "value": "100"
+              },
+              {
+                "key": "w",
+                "value": "900"
+              },
+              {
+                "key": "h",
+                "value": "500"
+              },
+              {
+                "key": "lines",
+                "value": "2,4-5"
+              },
+              {
+                "key": "size",
+                "value": "22"
+              }
+            ],
+            "body": "```python\ndef greet(name):\n    return f\"hello {name}\"\n\nprint(greet(\"deck\"))\nprint(\"done\")\n```\n",
+            "content": {
+              "code": "def greet(name):\n    return f\"hello {name}\"\n\nprint(greet(\"deck\"))\nprint(\"done\")\n",
+              "lang": "python",
+              "lines": [
+                [
+                  2,
+                  2
+                ],
+                [
+                  4,
+                  5
+                ]
+              ],
+              "type": "code"
+            },
+            "h": 500.0,
+            "id": "c1",
+            "kind": "code",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "style": {
+              "size": "22"
+            },
+            "w": 900.0,
+            "x": 100.0,
+            "y": 100.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "b1"
+              },
+              {
+                "key": "x",
+                "value": "1100"
+              },
+              {
+                "key": "y",
+                "value": "100"
+              },
+              {
+                "key": "w",
+                "value": "700"
+              },
+              {
+                "key": "h",
+                "value": "400"
+              }
+            ],
+            "body": "| Region | Q2 | Q3 |\n|:-------|---:|---:|\n| Kuwait | 10 | 12 |\n| UAE    |  8 | 11 |\n",
+            "content": {
+              "header": true,
+              "type": "table"
+            },
+            "h": 400.0,
+            "id": "b1",
+            "kind": "table",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 700.0,
+            "x": 1100.0,
+            "y": 100.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "b2"
+              },
+              {
+                "key": "x",
+                "value": "1100"
+              },
+              {
+                "key": "y",
+                "value": "600"
+              },
+              {
+                "key": "w",
+                "value": "700"
+              },
+              {
+                "key": "h",
+                "value": "300"
+              },
+              {
+                "key": "header",
+                "value": "false"
+              }
+            ],
+            "body": "| a | b |\n|---|---|\n| c | d |\n",
+            "content": {
+              "header": false,
+              "type": "table"
+            },
+            "h": 300.0,
+            "id": "b2",
+            "kind": "table",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 700.0,
+            "x": 1100.0,
+            "y": 600.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": [],
+  "resolved": {
+    "b1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 24.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "b2": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 24.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "c1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": "#f3f4f6",
+      "font": "Noto Sans Mono",
+      "line-height": 1.3,
+      "padding": [
+        24.0,
+        24.0,
+        24.0,
+        24.0
+      ],
+      "radius": 0.0,
+      "size": 22.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    }
+  }
+}

@@ -37,6 +37,7 @@ Decisions:
 - Which master a slide gets: its own `master=`, else its layout's master, else the first master in the deck. `master=none` gives none.
 - `resolved_style` defaults: body font and `text` color, 32 px (24 px for code and tables), weight 400, line height 1.3, start alignment, top. Code uses the code font and colors on `code-bg` with 24 px padding. Rect and ellipse fill with `accent1`; lines and arrows stroke with `text` at 2 px.
 - `AddSlide` from a layout copies the placeholder's style attributes onto the new element, which is how layout styling reaches slides.
+- Numbers in the model are `f64`, not the spec's `f32`. With `f32`, JSON for hosts showed `line-height: 1.2999999523162842` and `x: 786.239990234375` for values written as `1.3` and `786.24`.
 
 ## M2 results
 

@@ -114,12 +114,12 @@ impl ElementSrc {
 pub struct Element {
     pub id: String,
     pub kind: Kind,
-    pub x: f32,
-    pub y: f32,
-    pub w: f32,
-    pub h: f32,
-    pub rot: f32,
-    pub opacity: f32,
+    pub x: f64,
+    pub y: f64,
+    pub w: f64,
+    pub h: f64,
+    pub rot: f64,
+    pub opacity: f64,
     pub locked: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -254,10 +254,10 @@ pub struct Master {
 pub struct Placeholder {
     pub id: String,
     pub kind: String,
-    pub x: f32,
-    pub y: f32,
-    pub w: f32,
-    pub h: f32,
+    pub x: f64,
+    pub y: f64,
+    pub w: f64,
+    pub h: f64,
     pub attrs: Vec<Attr>,
 }
 
@@ -800,16 +800,16 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
     if pre_end > pre_start {
         let c = cx.canvas;
         let (mx, my) = (
-            (c.width as f32 * 0.05).round(),
-            (c.height as f32 * 0.05).round(),
+            (c.width as f64 * 0.05).round(),
+            (c.height as f64 * 0.05).round(),
         );
         slide.elements.push(Element {
             id: String::new(),
             kind: Kind::Text,
             x: mx,
             y: my,
-            w: c.width as f32 - 2.0 * mx,
-            h: c.height as f32 - 2.0 * my,
+            w: c.width as f64 - 2.0 * mx,
+            h: c.height as f64 - 2.0 * my,
             rot: 0.0,
             opacity: 1.0,
             locked: false,
@@ -1066,8 +1066,8 @@ fn geometry(
     required: bool,
     element: Option<&str>,
     slide: Option<usize>,
-) -> [f32; 4] {
-    let mut g = [0.0f32; 4];
+) -> [f64; 4] {
+    let mut g = [0.0f64; 4];
     for (i, key) in ["x", "y", "w", "h"].into_iter().enumerate() {
         match d.get(key) {
             None => {
@@ -1085,7 +1085,7 @@ fn geometry(
             Some(a) => match a
                 .value
                 .as_deref()
-                .and_then(|v| v.parse::<f32>().ok())
+                .and_then(|v| v.parse::<f64>().ok())
                 .filter(|v| v.is_finite())
             {
                 Some(v) if (key == "w" || key == "h") && v < 0.0 => cx.push(
@@ -1181,12 +1181,12 @@ fn build_element(
         slide,
     );
 
-    let mut num = |key: &str, default: f32, range: Option<(f32, f32)>| -> f32 {
+    let mut num = |key: &str, default: f64, range: Option<(f64, f64)>| -> f64 {
         let Some(a) = d.get(key) else { return default };
         match a
             .value
             .as_deref()
-            .and_then(|v| v.parse::<f32>().ok())
+            .and_then(|v| v.parse::<f64>().ok())
             .filter(|v| v.is_finite())
         {
             Some(v) if range.is_none_or(|(lo, hi)| (lo..=hi).contains(&v)) => v,
@@ -1234,8 +1234,8 @@ fn build_element(
         && kind != Kind::Group
         && (g[0] < 0.0
             || g[1] < 0.0
-            || g[0] + g[2] > c.width as f32
-            || g[1] + g[3] > c.height as f32)
+            || g[0] + g[2] > c.width as f64
+            || g[1] + g[3] > c.height as f64)
     {
         cx.push(
             Severity::Warning,

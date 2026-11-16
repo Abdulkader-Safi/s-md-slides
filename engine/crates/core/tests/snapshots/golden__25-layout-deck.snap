@@ -1,0 +1,562 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({\n    \"deck\": p.deck, \"diagnostics\": p.diagnostics, \"resolved\":\n    p.deck.elements().map(|e|\n    (e.id.clone(),\n    p.deck.resolved_style(&e.id))).collect::<std::collections::BTreeMap<_,\n    _>>(), \"backgrounds\":\n    (0..p.deck.slides.len()).map(|i|\n    p.deck.background(i)).collect::<Vec<_>>(),\n})"
+---
+{
+  "backgrounds": [
+    {
+      "color": "#ffffff",
+      "type": "color"
+    },
+    {
+      "color": "#ffffff",
+      "type": "color"
+    },
+    {
+      "color": "#ffffff",
+      "type": "color"
+    }
+  ],
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto",
+      "title": "Layouts"
+    },
+    "layouts": [
+      {
+        "attrs": [
+          {
+            "key": "id",
+            "value": "title-only"
+          },
+          {
+            "key": "master",
+            "value": "brand"
+          }
+        ],
+        "id": "title-only",
+        "master": "brand",
+        "placeholders": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "title"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "400"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              },
+              {
+                "key": "size",
+                "value": "96"
+              }
+            ],
+            "h": 200.0,
+            "id": "title",
+            "kind": "text",
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 400.0
+          }
+        ]
+      },
+      {
+        "attrs": [
+          {
+            "key": "id",
+            "value": "two-col"
+          },
+          {
+            "key": "master",
+            "value": "brand"
+          }
+        ],
+        "id": "two-col",
+        "master": "brand",
+        "placeholders": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "left"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "200"
+              },
+              {
+                "key": "w",
+                "value": "820"
+              },
+              {
+                "key": "h",
+                "value": "760"
+              }
+            ],
+            "h": 760.0,
+            "id": "left",
+            "kind": "text",
+            "w": 820.0,
+            "x": 120.0,
+            "y": 200.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "right"
+              },
+              {
+                "key": "x",
+                "value": "980"
+              },
+              {
+                "key": "y",
+                "value": "200"
+              },
+              {
+                "key": "w",
+                "value": "820"
+              },
+              {
+                "key": "h",
+                "value": "760"
+              },
+              {
+                "key": "kind",
+                "value": "image"
+              }
+            ],
+            "h": 760.0,
+            "id": "right",
+            "kind": "image",
+            "w": 820.0,
+            "x": 980.0,
+            "y": 200.0
+          }
+        ]
+      }
+    ],
+    "line_ending": "lf",
+    "masters": [
+      {
+        "attrs": [
+          {
+            "key": "id",
+            "value": "brand"
+          }
+        ],
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "logo"
+              },
+              {
+                "key": "x",
+                "value": "1720"
+              },
+              {
+                "key": "y",
+                "value": "40"
+              },
+              {
+                "key": "w",
+                "value": "160"
+              },
+              {
+                "key": "h",
+                "value": "60"
+              }
+            ],
+            "body": "![Company logo](assets/logo.svg)\n",
+            "content": {
+              "alt": "Company logo",
+              "fit": "contain",
+              "path": "assets/logo.svg",
+              "type": "image"
+            },
+            "h": 60.0,
+            "id": "logo",
+            "kind": "image",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 160.0,
+            "x": 1720.0,
+            "y": 40.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "footer"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "1010"
+              },
+              {
+                "key": "w",
+                "value": "600"
+              },
+              {
+                "key": "h",
+                "value": "40"
+              },
+              {
+                "key": "size",
+                "value": "20"
+              },
+              {
+                "key": "color",
+                "value": "accent1"
+              }
+            ],
+            "body": "{title}: {slide} / {total}\n",
+            "h": 40.0,
+            "id": "footer",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "style": {
+              "color": "accent1",
+              "size": "20"
+            },
+            "w": 600.0,
+            "x": 120.0,
+            "y": 1010.0
+          }
+        ],
+        "id": "brand"
+      }
+    ],
+    "slides": [
+      {
+        "attrs": [
+          {
+            "key": "layout",
+            "value": "title-only"
+          }
+        ],
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "400"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              },
+              {
+                "key": "size",
+                "value": "96"
+              }
+            ],
+            "body": "# Layouts\n",
+            "h": 200.0,
+            "id": "t1",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "style": {
+              "size": "96"
+            },
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 400.0
+          }
+        ],
+        "index": 0,
+        "layout": "title-only",
+        "master": "inherit"
+      },
+      {
+        "attrs": [
+          {
+            "key": "layout",
+            "value": "two-col"
+          },
+          {
+            "key": "hide",
+            "value": "logo"
+          }
+        ],
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t2"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "200"
+              },
+              {
+                "key": "w",
+                "value": "820"
+              },
+              {
+                "key": "h",
+                "value": "760"
+              }
+            ],
+            "body": "Left column\n",
+            "h": 760.0,
+            "id": "t2",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 820.0,
+            "x": 120.0,
+            "y": 200.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "i1"
+              },
+              {
+                "key": "x",
+                "value": "980"
+              },
+              {
+                "key": "y",
+                "value": "200"
+              },
+              {
+                "key": "w",
+                "value": "820"
+              },
+              {
+                "key": "h",
+                "value": "760"
+              }
+            ],
+            "body": "![Right column photo](assets/right.jpg)\n",
+            "content": {
+              "alt": "Right column photo",
+              "fit": "contain",
+              "path": "assets/right.jpg",
+              "type": "image"
+            },
+            "h": 760.0,
+            "id": "i1",
+            "kind": "image",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 820.0,
+            "x": 980.0,
+            "y": 200.0
+          }
+        ],
+        "hide": [
+          "logo"
+        ],
+        "index": 1,
+        "layout": "two-col",
+        "master": "inherit"
+      },
+      {
+        "attrs": [
+          {
+            "key": "master",
+            "value": "none"
+          }
+        ],
+        "elements": [
+          {
+            "attrs": [],
+            "body": "# No master here\n",
+            "h": 972.0,
+            "id": "t3",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 2,
+        "master": "none"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": [],
+  "resolved": {
+    "footer": {
+      "align": "start",
+      "color": "#2563eb",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 20.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "i1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "logo": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "t1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 96.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "t2": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "t3": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    }
+  }
+}

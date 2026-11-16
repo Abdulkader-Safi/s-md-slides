@@ -1,0 +1,247 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({\n    \"deck\": p.deck, \"diagnostics\": p.diagnostics, \"resolved\":\n    p.deck.elements().map(|e|\n    (e.id.clone(),\n    p.deck.resolved_style(&e.id))).collect::<std::collections::BTreeMap<_,\n    _>>(), \"backgrounds\":\n    (0..p.deck.slides.len()).map(|i|\n    p.deck.background(i)).collect::<Vec<_>>(),\n})"
+---
+{
+  "backgrounds": [
+    {
+      "color": "#ffffff",
+      "type": "color"
+    }
+  ],
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "v1"
+              },
+              {
+                "key": "x",
+                "value": "100"
+              },
+              {
+                "key": "y",
+                "value": "100"
+              },
+              {
+                "key": "w",
+                "value": "960"
+              },
+              {
+                "key": "h",
+                "value": "540"
+              },
+              {
+                "key": "src",
+                "value": "assets/demo.mp4"
+              },
+              {
+                "key": "poster",
+                "value": "assets/demo.jpg"
+              },
+              {
+                "key": "autoplay",
+                "value": null
+              },
+              {
+                "key": "muted",
+                "value": null
+              },
+              {
+                "key": "loop",
+                "value": null
+              }
+            ],
+            "body": "",
+            "content": {
+              "autoplay": true,
+              "loop": true,
+              "muted": true,
+              "poster": "assets/demo.jpg",
+              "src": "assets/demo.mp4",
+              "type": "video"
+            },
+            "h": 540.0,
+            "id": "v1",
+            "kind": "video",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 960.0,
+            "x": 100.0,
+            "y": 100.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "e1"
+              },
+              {
+                "key": "x",
+                "value": "1100"
+              },
+              {
+                "key": "y",
+                "value": "100"
+              },
+              {
+                "key": "w",
+                "value": "700"
+              },
+              {
+                "key": "h",
+                "value": "394"
+              },
+              {
+                "key": "src",
+                "value": "https://www.youtube-nocookie.com/embed/abc123"
+              },
+              {
+                "key": "poster",
+                "value": "assets/talk.jpg"
+              }
+            ],
+            "body": "",
+            "content": {
+              "poster": "assets/talk.jpg",
+              "src": "https://www.youtube-nocookie.com/embed/abc123",
+              "type": "embed"
+            },
+            "h": 394.0,
+            "id": "e1",
+            "kind": "embed",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 700.0,
+            "x": 1100.0,
+            "y": 100.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "e2"
+              },
+              {
+                "key": "x",
+                "value": "1100"
+              },
+              {
+                "key": "y",
+                "value": "600"
+              },
+              {
+                "key": "w",
+                "value": "700"
+              },
+              {
+                "key": "h",
+                "value": "394"
+              },
+              {
+                "key": "src",
+                "value": "https://player.vimeo.com/video/42"
+              }
+            ],
+            "body": "",
+            "content": {
+              "src": "https://player.vimeo.com/video/42",
+              "type": "embed"
+            },
+            "h": 394.0,
+            "id": "e2",
+            "kind": "embed",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 700.0,
+            "x": 1100.0,
+            "y": 600.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": [],
+  "resolved": {
+    "e1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "e2": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "v1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    }
+  }
+}

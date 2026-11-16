@@ -139,7 +139,7 @@ impl Theme {
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum Background {
     Color { color: String },
-    Gradient { angle: f32, stops: Vec<String> },
+    Gradient { angle: f64, stops: Vec<String> },
     Image { path: String },
 }
 
@@ -155,29 +155,29 @@ pub(crate) fn valid_background(v: &str) -> bool {
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct ResolvedStyle {
     pub font: String,
-    pub size: f32,
+    pub size: f64,
     /// Text color as #hex.
     pub color: String,
     pub weight: u32,
     pub align: String,
     pub valign: String,
     #[serde(rename = "line-height")]
-    pub line_height: f32,
+    pub line_height: f64,
     /// Top, right, bottom, left.
-    pub padding: [f32; 4],
+    pub padding: [f64; 4],
     /// #hex or `linear(angle,#hex,#hex)`; `None` for no fill.
     pub fill: Option<String>,
     pub stroke: Option<String>,
     #[serde(rename = "stroke-width")]
-    pub stroke_width: f32,
-    pub radius: f32,
+    pub stroke_width: f64,
+    pub radius: f64,
     pub dir: Dir,
 }
 
-fn padding(v: &str) -> Option<[f32; 4]> {
-    let n: Vec<f32> = v
+fn padding(v: &str) -> Option<[f64; 4]> {
+    let n: Vec<f64> = v
         .split(',')
-        .map(|p| p.trim().parse::<f32>().ok())
+        .map(|p| p.trim().parse::<f64>().ok())
         .collect::<Option<_>>()?;
     Some(match n.as_slice() {
         [a] => [*a; 4],
@@ -316,9 +316,9 @@ impl Deck {
                 Some(c) => Some(t.color(c)),
             }
         };
-        let num = |v: &Option<String>, default: f32| {
+        let num = |v: &Option<String>, default: f64| {
             v.as_deref()
-                .and_then(|s| s.parse::<f32>().ok())
+                .and_then(|s| s.parse::<f64>().ok())
                 .unwrap_or(default)
         };
         let fill_default = match e.kind {
