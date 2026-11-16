@@ -7,3 +7,4 @@ target/
 coverage/
 corpus/fuzz_ops/*
 !corpus/fuzz_ops/*.md
+target-da
