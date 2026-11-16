@@ -5,6 +5,10 @@ import type { MasterSetting } from "./MasterSetting";
 
 export type Slide = { index: number, layout?: string, master: MasterSetting, hide: Array<string>, bg?: string, transition?: string, 
 /**
+ * Transition length in milliseconds (`dur=` on the slide directive).
+ */
+transition_dur?: number, 
+/**
  * Attributes of the `<!-- slide -->` directive as written.
  */
 attrs: Array<Attr>, 

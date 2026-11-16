@@ -133,6 +133,9 @@ pub struct Element {
     /// What the engine reads from kind-specific attributes and the body.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<crate::kinds::Content>,
+    /// Entrance and exit animation.
+    #[serde(skip_serializing_if = "crate::kinds::Anim::is_static")]
+    pub anim: crate::kinds::Anim,
     /// Raw markdown, never normalized.
     pub body: String,
     /// Markdown before a slide's first directive, read as a full-slide text element.
@@ -228,6 +231,9 @@ pub struct Slide {
     pub bg: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transition: Option<String>,
+    /// Transition length in milliseconds (`dur=` on the slide directive).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub transition_dur: Option<u32>,
     /// Attributes of the `<!-- slide -->` directive as written.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub attrs: Vec<Attr>,
@@ -722,6 +728,7 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
         hide: Vec::new(),
         bg: None,
         transition: None,
+        transition_dur: None,
         attrs: Vec::new(),
         elements: Vec::new(),
         notes: None,
@@ -771,7 +778,30 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
                             }
                             slide.bg = v
                         }
-                        "transition" => slide.transition = v,
+                        "transition" => {
+                            if !matches!(v.as_deref(), Some("none" | "fade" | "push")) {
+                                cx.push(
+                                    Severity::Error,
+                                    "E-ATTR-VALUE",
+                                    "transition must be none, fade or push.".into(),
+                                    a.span.start,
+                                    None,
+                                    Some(index),
+                                );
+                            }
+                            slide.transition = v
+                        }
+                        "dur" => match v.as_deref().and_then(|d| d.parse::<u32>().ok()) {
+                            Some(d) if d <= 60_000 => slide.transition_dur = Some(d),
+                            _ => cx.push(
+                                Severity::Error,
+                                "E-ATTR-VALUE",
+                                "dur must be milliseconds as a whole number, up to 60000.".into(),
+                                a.span.start,
+                                None,
+                                Some(index),
+                            ),
+                        },
                         _ => {}
                     }
                 }
@@ -818,6 +848,7 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
             attrs: Vec::new(),
             style: Default::default(),
             content: None,
+            anim: Default::default(),
             body: src[pre_start..pre_end].to_string(),
             implicit: true,
             src: ElementSrc {
@@ -1251,7 +1282,7 @@ fn build_element(
     }
 
     let (body, end) = body_ranges(src, next, to);
-    let (style, content) = crate::kinds::check(
+    let (style, content, anim) = crate::kinds::check(
         &kind,
         d,
         &src[body.clone()],
@@ -1273,6 +1304,7 @@ fn build_element(
         attrs: d.attrs.clone(),
         style,
         content,
+        anim,
         body: src[body.clone()].to_string(),
         implicit: false,
         src: ElementSrc {

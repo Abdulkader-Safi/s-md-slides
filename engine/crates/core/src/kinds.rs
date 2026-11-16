@@ -62,6 +62,50 @@ impl Style {
     }
 }
 
+/// Entrance and exit effects (FR-ANIM-01).
+pub const EFFECTS: &[&str] = &[
+    "appear",
+    "fade",
+    "fly-left",
+    "fly-right",
+    "fly-up",
+    "fly-down",
+    "scale",
+];
+
+/// Animation attributes: `enter`, `exit`, `order`, `delay` and `dur` (milliseconds).
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
+pub struct Anim {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enter: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub exit: Option<String>,
+    /// Build step (1 and up). `None` plays when the slide appears.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub order: Option<u32>,
+    pub delay: u32,
+    pub dur: u32,
+}
+
+impl Default for Anim {
+    fn default() -> Self {
+        Anim {
+            enter: None,
+            exit: None,
+            order: None,
+            delay: 0,
+            dur: 400,
+        }
+    }
+}
+
+impl Anim {
+    pub fn is_static(&self) -> bool {
+        self.enter.is_none() && self.exit.is_none()
+    }
+}
+
 /// What the engine reads from an element's kind-specific attributes and body.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
@@ -273,7 +317,7 @@ pub(crate) fn check(
     body: &str,
     body_at: usize,
     report: Report,
-) -> (Style, Option<Content>) {
+) -> (Style, Option<Content>, Anim) {
     let get = |k: &str| d.get(k).and_then(|a| a.value.clone());
     let at = |k: &str| {
         d.get(k).map_or(d.insert_at, |a| {
@@ -289,6 +333,35 @@ pub(crate) fn check(
                 at(k),
             );
         };
+
+    let mut anim = Anim::default();
+    for (k, slot) in [("enter", &mut anim.enter), ("exit", &mut anim.exit)] {
+        if let Some(v) = get(k) {
+            if EFFECTS.contains(&v.as_str()) {
+                *slot = Some(v);
+            } else {
+                bad(
+                    k,
+                    "appear, fade, fly-left, fly-right, fly-up, fly-down or scale",
+                    report,
+                );
+            }
+        }
+    }
+    if let Some(v) = get("order") {
+        match v.parse::<u32>() {
+            Ok(n) if n >= 1 => anim.order = Some(n),
+            _ => bad("order", "a whole number from 1", report),
+        }
+    }
+    for (k, slot) in [("delay", &mut anim.delay), ("dur", &mut anim.dur)] {
+        if let Some(v) = get(k) {
+            match v.parse::<u32>() {
+                Ok(n) if n <= 600_000 => *slot = n,
+                _ => bad(k, "milliseconds as a whole number, up to 600000", report),
+            }
+        }
+    }
 
     let style = Style {
         font: get("font"),
@@ -597,7 +670,7 @@ pub(crate) fn check(
         }
         Kind::Text | Kind::Unknown(_) => None,
     };
-    (style, content)
+    (style, content, anim)
 }
 
 #[cfg(test)]
