@@ -1,0 +1,25 @@
+name: conformance
+
+# Attach the conformance vectors (FR-PKG-03) to each GitHub release that
+# release.yml (cargo-dist) creates. Separate file because `dist generate`
+# rewrites release.yml.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  attach:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Zip and attach
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          cd engine
+          zip -qr "conformance-${TAG#v}.zip" conformance
+          gh release upload "$TAG" "conformance-${TAG#v}.zip" --clobber

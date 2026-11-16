@@ -20,6 +20,4 @@ Publish three crates, CLI binaries and `conformance-<version>.zip`. FR-PKG-01.
 
 ## Result
 
-Workflow written 2026-11-16: a `v0.1.0` tag runs the tests, checks the tag matches the crate version, builds the binary for macOS (Apple silicon and Intel), Linux and Windows with notices, publishes core, render and CLI in that order, and attaches the binaries, `conformance-0.1.0.zip` and the notices to a GitHub release. All three crates package and build from their packages locally, and all three names are free on crates.io.
-
-> [!warning] Publishing cannot be undone. It needs a `CARGO_REGISTRY_TOKEN` secret and the go-ahead before the tag is pushed.
+Changed 2026-11-16 to the user's release flow: `cargo publish` by hand from the Mac (core, render, CLI), then the `v0.1.0` tag runs cargo-dist. That builds five targets, shell and PowerShell installers and checksums, and creates the GitHub release; `conformance.yml` attaches the conformance zip. A local `dist build` for Apple silicon gives a working 19 MB binary with the license, notices and font license beside it.

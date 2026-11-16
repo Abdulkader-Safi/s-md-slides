@@ -23,9 +23,19 @@ Positions live in one-line HTML comments, and the content under each comment is 
 
 ## Install the command
 
+macOS and Linux:
+
 ```sh
-cargo install s-md-slides-cli
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Abdulkader-Safi/s-md-slides/releases/latest/download/s-md-slides-cli-installer.sh | sh
 ```
+
+Windows (PowerShell):
+
+```powershell
+powershell -ExecutionPolicy Bypass -c "irm https://github.com/Abdulkader-Safi/s-md-slides/releases/latest/download/s-md-slides-cli-installer.ps1 | iex"
+```
+
+With Rust installed, `cargo install s-md-slides-cli` works too. Prebuilt archives for each platform are on the [releases page](https://github.com/Abdulkader-Safi/s-md-slides/releases).
 
 ```sh
 s-md-slides validate deck.md             # problems, with line and column
