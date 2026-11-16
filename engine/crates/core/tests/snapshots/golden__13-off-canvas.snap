@@ -1,8 +1,14 @@
 ---
 source: crates/core/tests/golden.rs
-expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostics, })"
+expression: "serde_json::json!({\n    \"deck\": p.deck, \"diagnostics\": p.diagnostics, \"resolved\":\n    p.deck.elements().map(|e|\n    (e.id.clone(),\n    p.deck.resolved_style(&e.id))).collect::<std::collections::BTreeMap<_,\n    _>>(), \"backgrounds\":\n    (0..p.deck.slides.len()).map(|i|\n    p.deck.background(i)).collect::<Vec<_>>(),\n})"
 ---
 {
+  "backgrounds": [
+    {
+      "color": "#ffffff",
+      "type": "color"
+    }
+  ],
   "deck": {
     "front": {
       "canvas": {
@@ -49,12 +55,19 @@ expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostic
               }
             ],
             "body": "",
+            "content": {
+              "shape": "rect",
+              "type": "shape"
+            },
             "h": 400.0,
             "id": "s1",
             "kind": "shape",
             "locked": false,
             "opacity": 1.0,
             "rot": 0.0,
+            "style": {
+              "fill": "accent1"
+            },
             "w": 400.0,
             "x": -200.0,
             "y": 100.0
@@ -87,12 +100,19 @@ expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostic
               }
             ],
             "body": "",
+            "content": {
+              "shape": "arrow",
+              "type": "shape"
+            },
             "h": 0.0,
             "id": "s2",
             "kind": "shape",
             "locked": false,
             "opacity": 1.0,
             "rot": 0.0,
+            "style": {
+              "stroke": "#e11"
+            },
             "w": 600.0,
             "x": 100.0,
             "y": 1200.0
@@ -114,5 +134,47 @@ expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostic
       "severity": "warning",
       "slide": 0
     }
-  ]
+  ],
+  "resolved": {
+    "s1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": "#2563eb",
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "s2": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": "#e11",
+      "stroke-width": 2.0,
+      "valign": "top",
+      "weight": 400
+    }
+  }
 }

@@ -95,7 +95,7 @@ impl Deck {
 
     /// Elements under a point on a slide, top first. Rotation is taken into account.
     /// Groups are skipped (they have no box of their own).
-    pub fn elements_at(&self, slide: usize, x: f32, y: f32) -> Vec<String> {
+    pub fn elements_at(&self, slide: usize, x: f64, y: f64) -> Vec<String> {
         let Some(s) = self.slides.get(slide) else {
             return Vec::new();
         };
@@ -187,7 +187,7 @@ impl Deck {
 }
 
 /// Point-in-box test in the element's own rotated frame (rotation about its center).
-fn contains(e: &Element, x: f32, y: f32) -> bool {
+fn contains(e: &Element, x: f64, y: f64) -> bool {
     let (cx, cy) = (e.x + e.w / 2.0, e.y + e.h / 2.0);
     let (s, c) = (-e.rot).to_radians().sin_cos();
     let (dx, dy) = (x - cx, y - cy);

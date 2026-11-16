@@ -1,0 +1,22 @@
+{
+  "name": "default",
+  "description": "Light theme with Noto fonts. The engine's built-in default.",
+  "colors": {
+    "background": "#ffffff",
+    "text": "#1f2328",
+    "accent1": "#2563eb",
+    "accent2": "#db2777",
+    "accent3": "#16a34a",
+    "accent4": "#ea580c",
+    "accent5": "#7c3aed",
+    "accent6": "#0891b2",
+    "code": "#1f2328",
+    "code-bg": "#f3f4f6"
+  },
+  "fonts": {
+    "heading": "Noto Sans",
+    "body": "Noto Sans",
+    "code": "Noto Sans Mono"
+  },
+  "background": "background"
+}

@@ -1,0 +1,203 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({\n    \"deck\": p.deck, \"diagnostics\": p.diagnostics, \"resolved\":\n    p.deck.elements().map(|e|\n    (e.id.clone(),\n    p.deck.resolved_style(&e.id))).collect::<std::collections::BTreeMap<_,\n    _>>(), \"backgrounds\":\n    (0..p.deck.slides.len()).map(|i|\n    p.deck.background(i)).collect::<Vec<_>>(),\n})"
+---
+{
+  "backgrounds": [
+    {
+      "color": "#ffffff",
+      "type": "color"
+    }
+  ],
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "80"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              },
+              {
+                "key": "font",
+                "value": "heading"
+              },
+              {
+                "key": "size",
+                "value": "72"
+              },
+              {
+                "key": "weight",
+                "value": "bold"
+              },
+              {
+                "key": "color",
+                "value": "accent1"
+              },
+              {
+                "key": "align",
+                "value": "center"
+              },
+              {
+                "key": "valign",
+                "value": "middle"
+              }
+            ],
+            "body": "# Styled heading\n",
+            "h": 200.0,
+            "id": "t1",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "style": {
+              "align": "center",
+              "color": "accent1",
+              "font": "heading",
+              "size": "72",
+              "valign": "middle",
+              "weight": "bold"
+            },
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 80.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t2"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "320"
+              },
+              {
+                "key": "w",
+                "value": "800"
+              },
+              {
+                "key": "h",
+                "value": "600"
+              },
+              {
+                "key": "font",
+                "value": "Inter"
+              },
+              {
+                "key": "size",
+                "value": "28"
+              },
+              {
+                "key": "line-height",
+                "value": "1.5"
+              },
+              {
+                "key": "padding",
+                "value": "24,48"
+              },
+              {
+                "key": "color",
+                "value": "#333333"
+              }
+            ],
+            "body": "Body copy with **bold**, *italic*, `code` and a [link](https://example.com).\n\n- one\n- two\n",
+            "h": 600.0,
+            "id": "t2",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "style": {
+              "color": "#333333",
+              "font": "Inter",
+              "line-height": "1.5",
+              "padding": "24,48",
+              "size": "28"
+            },
+            "w": 800.0,
+            "x": 120.0,
+            "y": 320.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": [],
+  "resolved": {
+    "t1": {
+      "align": "center",
+      "color": "#2563eb",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 72.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "middle",
+      "weight": 700
+    },
+    "t2": {
+      "align": "start",
+      "color": "#333333",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Inter",
+      "line-height": 1.5,
+      "padding": [
+        24.0,
+        48.0,
+        24.0,
+        48.0
+      ],
+      "radius": 0.0,
+      "size": 28.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    }
+  }
+}

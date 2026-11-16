@@ -1,0 +1,228 @@
+---
+source: crates/core/tests/golden.rs
+expression: "serde_json::json!({\n    \"deck\": p.deck, \"diagnostics\": p.diagnostics, \"resolved\":\n    p.deck.elements().map(|e|\n    (e.id.clone(),\n    p.deck.resolved_style(&e.id))).collect::<std::collections::BTreeMap<_,\n    _>>(), \"backgrounds\":\n    (0..p.deck.slides.len()).map(|i|\n    p.deck.background(i)).collect::<Vec<_>>(),\n})"
+---
+{
+  "backgrounds": [
+    {
+      "color": "#0b1020",
+      "type": "color"
+    },
+    {
+      "angle": 135.0,
+      "stops": [
+        "#2563eb",
+        "#7c3aed"
+      ],
+      "type": "gradient"
+    },
+    {
+      "path": "assets/hero.jpg",
+      "type": "image"
+    },
+    {
+      "color": "#ffffff",
+      "type": "color"
+    }
+  ],
+  "deck": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto",
+      "theme": "themes/default.json"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "attrs": [
+          {
+            "key": "bg",
+            "value": "#0b1020"
+          }
+        ],
+        "bg": "#0b1020",
+        "elements": [
+          {
+            "attrs": [],
+            "body": "# Solid\n",
+            "h": 972.0,
+            "id": "t1",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      },
+      {
+        "attrs": [
+          {
+            "key": "bg",
+            "value": "linear(135,accent1,accent5)"
+          }
+        ],
+        "bg": "linear(135,accent1,accent5)",
+        "elements": [
+          {
+            "attrs": [],
+            "body": "# Gradient\n",
+            "h": 972.0,
+            "id": "t2",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 1,
+        "master": "inherit"
+      },
+      {
+        "attrs": [
+          {
+            "key": "bg",
+            "value": "assets/hero.jpg"
+          }
+        ],
+        "bg": "assets/hero.jpg",
+        "elements": [
+          {
+            "attrs": [],
+            "body": "# Image\n",
+            "h": 972.0,
+            "id": "t3",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 2,
+        "master": "inherit"
+      },
+      {
+        "elements": [
+          {
+            "attrs": [],
+            "body": "# Theme background\n",
+            "h": 972.0,
+            "id": "t4",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 3,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "diagnostics": [],
+  "resolved": {
+    "t1": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "t2": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "t3": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    },
+    "t4": {
+      "align": "start",
+      "color": "#1f2328",
+      "dir": "ltr",
+      "fill": null,
+      "font": "Noto Sans",
+      "line-height": 1.3,
+      "padding": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "size": 32.0,
+      "stroke": null,
+      "stroke-width": 0.0,
+      "valign": "top",
+      "weight": 400
+    }
+  }
+}

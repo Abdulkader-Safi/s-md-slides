@@ -20,8 +20,10 @@ pub mod attrs;
 mod deck;
 pub mod diag;
 mod frontmatter;
+pub mod kinds;
 mod ops;
 mod query;
+mod theme;
 
 pub use attrs::Attr;
 pub use deck::{
@@ -30,5 +32,7 @@ pub use deck::{
 };
 pub use diag::{Diagnostic, EngineError, Severity};
 pub use frontmatter::{Canvas, Dir, FORMAT_VERSION, FrontMatter};
+pub use kinds::{Content, Style};
 pub use ops::{Op, ZStep, ZTo};
 pub use query::{AssetKind, AssetRef, Hit, HitField};
+pub use theme::{Asset, AssetResolver, Background, Fonts, ResolvedStyle, Theme};

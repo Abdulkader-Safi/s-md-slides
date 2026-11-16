@@ -114,12 +114,12 @@ impl ElementSrc {
 pub struct Element {
     pub id: String,
     pub kind: Kind,
-    pub x: f32,
-    pub y: f32,
-    pub w: f32,
-    pub h: f32,
-    pub rot: f32,
-    pub opacity: f32,
+    pub x: f64,
+    pub y: f64,
+    pub w: f64,
+    pub h: f64,
+    pub rot: f64,
+    pub opacity: f64,
     pub locked: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -127,6 +127,12 @@ pub struct Element {
     pub dir: Option<Dir>,
     /// Every attribute as written, in order (known ones included).
     pub attrs: Vec<Attr>,
+    /// Style attributes as written (literal values or theme roles).
+    #[serde(skip_serializing_if = "crate::kinds::Style::is_empty")]
+    pub style: crate::kinds::Style,
+    /// What the engine reads from kind-specific attributes and the body.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<crate::kinds::Content>,
     /// Raw markdown, never normalized.
     pub body: String,
     /// Markdown before a slide's first directive, read as a full-slide text element.
@@ -248,10 +254,10 @@ pub struct Master {
 pub struct Placeholder {
     pub id: String,
     pub kind: String,
-    pub x: f32,
-    pub y: f32,
-    pub w: f32,
-    pub h: f32,
+    pub x: f64,
+    pub y: f64,
+    pub w: f64,
+    pub h: f64,
     pub attrs: Vec<Attr>,
 }
 
@@ -290,6 +296,11 @@ pub struct Deck {
     /// 3 when the file starts with a BOM, else 0.
     #[serde(skip)]
     pub(crate) bom: usize,
+    #[serde(skip)]
+    pub(crate) theme: crate::theme::Theme,
+    /// Path of the theme file loaded through `load_theme`, if any.
+    #[serde(skip)]
+    pub(crate) theme_path: Option<String>,
 }
 
 /// Result of [`Deck::parse`]: always a deck, plus whatever went wrong.
@@ -496,6 +507,8 @@ impl Deck {
             front_span: None,
             sections: Vec::new(),
             bom: 0,
+            theme: Default::default(),
+            theme_path: None,
         };
         if src.len() > MAX_FILE_BYTES {
             cx.push(
@@ -541,6 +554,12 @@ impl Deck {
                     let parsed = frontmatter::parse(text);
                     deck.front = parsed.front;
                     deck.version = parsed.version;
+                    let (theme, problems) = crate::theme::inline_theme(deck.front.theme.as_ref());
+                    deck.theme = theme;
+                    for p in problems {
+                        let at = text.find("theme").map_or(base, |o| base + o);
+                        cx.push(Severity::Warning, "W-THEME", p, at, None, None);
+                    }
                     for i in parsed.issues {
                         cx.push(
                             Severity::Error,
@@ -670,6 +689,7 @@ impl Deck {
             }
         }
         assign_ids(&mut cx, &mut deck, carry);
+        check_refs(&mut cx, &deck);
         deck.diagnostics = cx.diags;
         deck
     }
@@ -736,7 +756,21 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
                                 .filter(|s| !s.is_empty())
                                 .collect()
                         }
-                        "bg" => slide.bg = v,
+                        "bg" => {
+                            if let Some(b) = &v
+                                && !crate::theme::valid_background(b)
+                            {
+                                cx.push(
+                                        Severity::Error,
+                                        "E-ATTR-VALUE",
+                                        "bg must be a color, a theme role, linear(angle,color,color) or an image path.".into(),
+                                        a.value_span.as_ref().map_or(a.span.start, |r| r.start),
+                                        None,
+                                        Some(index),
+                                    );
+                            }
+                            slide.bg = v
+                        }
                         "transition" => slide.transition = v,
                         _ => {}
                     }
@@ -766,22 +800,24 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
     if pre_end > pre_start {
         let c = cx.canvas;
         let (mx, my) = (
-            (c.width as f32 * 0.05).round(),
-            (c.height as f32 * 0.05).round(),
+            (c.width as f64 * 0.05).round(),
+            (c.height as f64 * 0.05).round(),
         );
         slide.elements.push(Element {
             id: String::new(),
             kind: Kind::Text,
             x: mx,
             y: my,
-            w: c.width as f32 - 2.0 * mx,
-            h: c.height as f32 - 2.0 * my,
+            w: c.width as f64 - 2.0 * mx,
+            h: c.height as f64 - 2.0 * my,
             rot: 0.0,
             opacity: 1.0,
             locked: false,
             name: None,
             dir: None,
             attrs: Vec::new(),
+            style: Default::default(),
+            content: None,
             body: src[pre_start..pre_end].to_string(),
             implicit: true,
             src: ElementSrc {
@@ -1030,8 +1066,8 @@ fn geometry(
     required: bool,
     element: Option<&str>,
     slide: Option<usize>,
-) -> [f32; 4] {
-    let mut g = [0.0f32; 4];
+) -> [f64; 4] {
+    let mut g = [0.0f64; 4];
     for (i, key) in ["x", "y", "w", "h"].into_iter().enumerate() {
         match d.get(key) {
             None => {
@@ -1049,7 +1085,7 @@ fn geometry(
             Some(a) => match a
                 .value
                 .as_deref()
-                .and_then(|v| v.parse::<f32>().ok())
+                .and_then(|v| v.parse::<f64>().ok())
                 .filter(|v| v.is_finite())
             {
                 Some(v) if (key == "w" || key == "h") && v < 0.0 => cx.push(
@@ -1145,12 +1181,12 @@ fn build_element(
         slide,
     );
 
-    let mut num = |key: &str, default: f32, range: Option<(f32, f32)>| -> f32 {
+    let mut num = |key: &str, default: f64, range: Option<(f64, f64)>| -> f64 {
         let Some(a) = d.get(key) else { return default };
         match a
             .value
             .as_deref()
-            .and_then(|v| v.parse::<f32>().ok())
+            .and_then(|v| v.parse::<f64>().ok())
             .filter(|v| v.is_finite())
         {
             Some(v) if range.is_none_or(|(lo, hi)| (lo..=hi).contains(&v)) => v,
@@ -1198,8 +1234,8 @@ fn build_element(
         && kind != Kind::Group
         && (g[0] < 0.0
             || g[1] < 0.0
-            || g[0] + g[2] > c.width as f32
-            || g[1] + g[3] > c.height as f32)
+            || g[0] + g[2] > c.width as f64
+            || g[1] + g[3] > c.height as f64)
     {
         cx.push(
             Severity::Warning,
@@ -1215,6 +1251,13 @@ fn build_element(
     }
 
     let (body, end) = body_ranges(src, next, to);
+    let (style, content) = crate::kinds::check(
+        &kind,
+        d,
+        &src[body.clone()],
+        body.start,
+        &mut |sev, code, msg, at| cx.push(sev, code, msg, at, label, slide),
+    );
     Element {
         id: written_id.clone().unwrap_or_default(),
         kind,
@@ -1228,6 +1271,8 @@ fn build_element(
         name: d.get("name").and_then(|a| a.value.clone()),
         dir,
         attrs: d.attrs.clone(),
+        style,
+        content,
         body: src[body.clone()].to_string(),
         implicit: false,
         src: ElementSrc {
@@ -1297,6 +1342,94 @@ fn assign_ids(cx: &mut Ctx, deck: &mut Deck, carry: &Carry) {
             if used.insert(id.clone()) {
                 e.id = id;
                 break;
+            }
+        }
+    }
+}
+
+/// References between parts: layouts, masters, hidden master elements, group members.
+fn check_refs(cx: &mut Ctx, deck: &Deck) {
+    let master_ids: HashSet<&str> = deck.masters.iter().map(|m| m.id.as_str()).collect();
+    for l in &deck.layouts {
+        if let Some(m) = &l.master
+            && !master_ids.contains(m.as_str())
+        {
+            cx.push(
+                Severity::Error,
+                "E-UNKNOWN-MASTER",
+                format!("Layout {} uses master {m}, which doesn't exist.", l.id),
+                l.src.block.start,
+                None,
+                None,
+            );
+        }
+    }
+    for s in &deck.slides {
+        let at = s
+            .src
+            .directive
+            .as_ref()
+            .map_or(s.src.span.start, |r| r.start);
+        if let Some(l) = &s.layout
+            && !deck.layouts.iter().any(|x| &x.id == l)
+        {
+            cx.push(
+                Severity::Error,
+                "E-UNKNOWN-LAYOUT",
+                format!("There is no layout {l}."),
+                at,
+                None,
+                Some(s.index),
+            );
+        }
+        if let MasterSetting::Id(m) = &s.master
+            && !master_ids.contains(m.as_str())
+        {
+            cx.push(
+                Severity::Error,
+                "E-UNKNOWN-MASTER",
+                format!("There is no master {m}."),
+                at,
+                None,
+                Some(s.index),
+            );
+        }
+        let master = deck.slide_master(s.index);
+        for h in s.hide.iter().filter(|_| master.is_some()) {
+            if !master.is_some_and(|m| m.elements.iter().any(|e| &e.id == h)) {
+                cx.push(
+                    Severity::Warning,
+                    "W-HIDE-UNKNOWN",
+                    format!("hide names {h}, which is not an element of this slide's master."),
+                    at,
+                    None,
+                    Some(s.index),
+                );
+            }
+        }
+        for g in s.elements.iter().filter(|e| e.kind == Kind::Group) {
+            if let Some(crate::kinds::Content::Group { items }) = &g.content {
+                for i in items {
+                    match s.elements.iter().find(|e| &e.id == i) {
+                        None => cx.push(
+                            Severity::Error,
+                            "E-GROUP",
+                            format!("Group {} lists {i}, which is not on this slide.", g.id),
+                            g.src.start(),
+                            Some(&g.id),
+                            Some(s.index),
+                        ),
+                        Some(e) if e.kind == Kind::Group => cx.push(
+                            Severity::Error,
+                            "E-GROUP",
+                            "Groups can't be nested.".into(),
+                            g.src.start(),
+                            Some(&g.id),
+                            Some(s.index),
+                        ),
+                        Some(_) => {}
+                    }
+                }
             }
         }
     }

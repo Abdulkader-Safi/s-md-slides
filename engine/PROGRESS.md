@@ -9,7 +9,7 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 | M0 de-risk                    | done (PR #1)        |
 | M1 format core                | done (PR #2)        |
 | M2 operations                 | done (PR #3)        |
-| M3 elements and style         | not started         |
+| M3 elements and style         | done (PR #4)        |
 | M4 animation and HTML export  | not started         |
 | M5 native render              | not started         |
 | M6 CLI                        | not started         |
@@ -22,6 +22,24 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 - 2026-11-15: one branch and one PR per milestone. Commits after each task.
 - 2026-11-16: keep serde-saphyr (about 400 KB of WASM) and nested inline themes. Spec 04 set a 150 KB limit for it; the build spec only replaces it above 1.5 MB total, and the core is 677 KB. The flat front matter reader stays the fallback if a later milestone trips the size gate. Decided by the user.
 - 2026-11-15: approved after review. Native PDF export draws text by passing parley glyph runs straight to krilla (`draw_glyphs` with parley's cluster ranges, ligature continuations merged, glyph y offsets negated). krilla-svg draws everything that is not text. PNG export keeps the flattened SVG through resvg.
+
+## M3 results
+
+Acceptance boxes ticked: FR-EL-02 and FR-STYLE-02. The other M3 requirements (FR-EL-01, 03 to 09, FR-STYLE-01, 03 to 05) have their model half done and tested in `crates/core/tests/style.rs`, but each check also names an export ("the HTML export renders them", "exports to SVG", "3 / 12 on slide 3"), so they get ticked in M4 and M5. Exit criteria: 25 golden decks round-trip, `resolved_style` is snapshotted for every element and reviewed, and `fuzz_parse` passed another 1,000,000 runs with the new body parsing.
+
+Code: `crates/core/src/kinds.rs` (attributes and bodies per kind), `crates/core/src/theme.rs` (themes, `resolved_style`, backgrounds, masters), `themes/default.json`.
+
+Decisions:
+
+- Element bodies are read with pulldown-cmark, which the spec already picks for export. The core's WASM build went from 677 KB to 852 KB. M4 adds the export code and the presentation runtime, so the 1 MB target is getting close; if it trips, the first fallback is the flat front matter reader (about 400 KB).
+- Every element gets `style` (style attributes as written) and `content` (typed kind data: image path, alt text and fit; code language and source plus highlighted lines; table header flag; Mermaid or math source; video and embed fields; group items).
+- Colors are `#rgb`, `#rrggbb`, `#rrggbbaa` or a theme role, as the spec lists. Named CSS colors such as `red` give `E-ATTR-VALUE`. `fill` and `bg` also take `linear(angle,color,color[,color])`.
+- A theme file named in front matter is read only when the host calls `load_theme(&resolver)`, since the engine never touches files. Until then the default theme applies. A loaded theme survives later edits as long as the front matter still names the same file.
+- `AssetResolver` and `Asset` live in the core now (M3 needs them for themes) rather than waiting for M4's export module.
+- Which master a slide gets: its own `master=`, else its layout's master, else the first master in the deck. `master=none` gives none.
+- `resolved_style` defaults: body font and `text` color, 32 px (24 px for code and tables), weight 400, line height 1.3, start alignment, top. Code uses the code font and colors on `code-bg` with 24 px padding. Rect and ellipse fill with `accent1`; lines and arrows stroke with `text` at 2 px.
+- `AddSlide` from a layout copies the placeholder's style attributes onto the new element, which is how layout styling reaches slides.
+- Numbers in the model are `f64`, not the spec's `f32`. With `f32`, JSON for hosts showed `line-height: 1.2999999523162842` and `x: 786.239990234375` for values written as `1.3` and `786.24`.
 
 ## M2 results
 

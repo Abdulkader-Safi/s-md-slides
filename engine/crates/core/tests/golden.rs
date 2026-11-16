@@ -23,8 +23,8 @@ fn decks() -> Vec<(String, String)> {
 fn golden_decks_round_trip_and_match_snapshots() {
     let all = decks();
     assert!(
-        all.len() >= 15,
-        "expected at least 15 golden decks, found {}",
+        all.len() >= 25,
+        "expected at least 25 golden decks, found {}",
         all.len()
     );
     for (name, src) in all {
@@ -35,6 +35,8 @@ fn golden_decks_round_trip_and_match_snapshots() {
             serde_json::json!({
                 "deck": p.deck,
                 "diagnostics": p.diagnostics,
+                "resolved": p.deck.elements().map(|e| (e.id.clone(), p.deck.resolved_style(&e.id))).collect::<std::collections::BTreeMap<_, _>>(),
+                "backgrounds": (0..p.deck.slides.len()).map(|i| p.deck.background(i)).collect::<Vec<_>>(),
             })
         );
     }

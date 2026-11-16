@@ -224,12 +224,12 @@ Throwaway spikes in a `spikes/` folder, deleted or folded in after.
 - [x] **FR-PKG-02** The core crate builds for `wasm32-unknown-unknown` with no file system, network or threads, so the npm repo can wrap it. Engine CI builds it on every push and reports its size. Check: the CI job builds the core to WASM and fails above 1.5 MB.
 
 ### MVP (shippable v1)
-- [ ] **FR-EL-02** Image element: one markdown image (path and alt text), with `fit=contain|cover|fill` and an optional crop. Check: the image path, alt text and fit parse. A missing alt text gives a warning.
+- [x] **FR-EL-02** Image element: one markdown image (path and alt text), with `fit=contain|cover|fill` and an optional crop. Check: the image path, alt text and fit parse. A missing alt text gives a warning.
 - [ ] **FR-EL-03** Shape element: `kind=rect|ellipse|line|arrow`, with fill, stroke, stroke width and corner radius, and optional text inside rect and ellipse. Check: each kind parses and exports to SVG with the right geometry.
 - [ ] **FR-EL-04** Code element: a fenced code block with a language tag, shown in the theme's code font and code colors, with an optional line-highlight list. The language tag is kept so hosts can color it. Check: a `rust` block exports in the code font on the code background, with highlighted lines marked, and its language tag round-trips.
 - [ ] **FR-EL-05** Table element: a markdown table, with header and cell styles from the theme. Check: a 3 x 4 GFM table exports as a table with the right cells and alignment.
 - [ ] **FR-STYLE-01** A theme sets colors (named roles: background, text, accent 1 to 6, code), fonts (heading, body, code) and the default slide background. It sits inline in front matter or in a JSON file referenced by path. Check: a text element with `color=accent1` resolves to the theme's accent 1. Changing the theme file changes the export.
-- [ ] **FR-STYLE-02** Element style values can be literal (`#e11`, `Inter`) or theme roles (`accent1`, `heading`). Check: both forms parse and round-trip exactly as written.
+- [x] **FR-STYLE-02** Element style values can be literal (`#e11`, `Inter`) or theme roles (`accent1`, `heading`). Check: both forms parse and round-trip exactly as written.
 - [ ] **FR-STYLE-05** Slide background: color, gradient or image, per slide, overriding the theme. Check: `bg=#0b1020` and `bg=assets/hero.jpg` both export correctly.
 - [ ] **FR-ANIM-01** Per-element entrance and exit effects: `appear`, `fade`, `fly-left|right|up|down`, `scale`. Each has an order, a delay and a duration (milliseconds). Check: `enter=fly-left delay=300 dur=500` parses, round-trips and plays in the HTML presentation.
 - [ ] **FR-ANIM-02** Build steps: elements with the same order appear together on one click. Elements without an order are visible from the start. Check: a slide with orders 1, 1, 2 takes two clicks to finish in the HTML presentation.
