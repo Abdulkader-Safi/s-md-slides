@@ -41,3 +41,8 @@ fn check(path: &str, min: usize) {
 fn format_doc_examples_parse_cleanly() {
     check("docs/format.md", 15);
 }
+
+#[test]
+fn skill_examples_parse_cleanly() {
+    check("skills/s-md-slides/SKILL.md", 4);
+}

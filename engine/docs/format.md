@@ -90,7 +90,7 @@ One markdown image. `fit` is `contain` (default), `cover` or `fill`. `crop=x,y,w
 
 ### Shape
 
-`kind` is `rect` (default), `ellipse`, `line` or `arrow`. Lines and arrows may leave out `h`. Rectangles and ellipses can hold text.
+`kind` is `rect` (default), `ellipse`, `line` or `arrow`. Lines and arrows run from `(x, y)` to `(x + w, y + h)` and may leave out `h` (a horizontal line). Arrows have a head at the end; `arrow-start=triangle` adds one at the start and `arrow-end=none` removes the end one. Rectangles and ellipses can hold text.
 
 ```markdown
 <!-- shape id=s1 kind=rect x=100 y=100 w=400 h=200 fill=accent1 radius=16 -->
