@@ -6,7 +6,7 @@ mod presentation;
 pub(crate) mod sanitize;
 mod svg;
 
-pub use html::slide_html;
+pub use html::{shape_svg, slide_html};
 pub use presentation::presentation_html;
 pub use svg::slide_svg;
 
@@ -105,7 +105,7 @@ impl<'a> Assets<'a> {
 }
 
 /// A best guess from the file extension, for resolvers that don't say.
-pub(crate) fn mime_for(path: &str) -> &'static str {
+pub fn mime_for(path: &str) -> &'static str {
     let ext = path.rsplit('.').next().unwrap_or("").to_ascii_lowercase();
     match ext.as_str() {
         "png" => "image/png",
@@ -124,7 +124,7 @@ pub(crate) fn mime_for(path: &str) -> &'static str {
 }
 
 /// Standard base64 with padding.
-pub(crate) fn base64(bytes: &[u8]) -> String {
+pub fn base64(bytes: &[u8]) -> String {
     const T: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut out = String::with_capacity(bytes.len().div_ceil(3) * 4);
     for c in bytes.chunks(3) {

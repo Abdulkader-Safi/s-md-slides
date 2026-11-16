@@ -25,6 +25,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: engine
+      - name: fontconfig for system fonts in the render crate
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --exclude spike-layout --all-targets -- -D warnings
       - name: TypeScript bindings are current
@@ -48,7 +51,10 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: engine
-      # The layout spike (krilla, resvg, parley) waits for M5 and is slow to build.
+      - name: fontconfig for system fonts in the render crate
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev
+      # The M0 layout spike is kept for reference only.
       - run: cargo test --workspace --exclude spike-layout --release
 
   wasm-size:

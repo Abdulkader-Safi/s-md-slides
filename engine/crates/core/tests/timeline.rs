@@ -80,3 +80,22 @@ fn fr_anim_04_state_at() {
             .is_empty()
     );
 }
+
+#[test]
+fn state_at_step_keeps_zero_length_steps_apart() {
+    let d = Deck::parse("<!-- text id=a x=0 y=0 w=1 h=1 enter=appear order=1 -->\n<!-- text id=b x=0 y=0 w=1 h=1 enter=appear order=2 -->\n").deck;
+    let t = d.timeline(0).unwrap();
+    assert_eq!(t.duration, 0, "appear steps take no time");
+    assert_eq!(
+        t.state_at(0.0)["b"].opacity,
+        1.0,
+        "so state_at(0) already shows b"
+    );
+    let s1 = t.state_at_step(1, 0.0);
+    assert_eq!(
+        (s1["a"].opacity, s1["b"].opacity),
+        (1.0, 0.0),
+        "step 1 shows a, not yet b"
+    );
+    assert_eq!(t.state_at_step(2, 0.0)["b"].opacity, 1.0);
+}

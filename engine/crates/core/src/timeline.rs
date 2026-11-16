@@ -140,6 +140,32 @@ impl Timeline {
         out
     }
 
+    /// States while step `k` plays, `t` milliseconds into it: earlier steps finished,
+    /// later ones not started. Unlike `state_at`, this keeps zero-length steps (such as
+    /// `appear`) apart, which a GIF or any click-free playback needs.
+    pub fn state_at_step(&self, k: usize, t: f64) -> BTreeMap<String, State> {
+        let mut out = self.initial.clone();
+        for (i, step) in self.steps.iter().enumerate().take(k + 1) {
+            for e in &step.entries {
+                if i < k {
+                    out.insert(e.id.clone(), e.to);
+                    continue;
+                }
+                let begin = e.delay as f64;
+                if t < begin {
+                    continue;
+                }
+                let p = if e.dur == 0 {
+                    1.0
+                } else {
+                    (t - begin) / e.dur as f64
+                };
+                out.insert(e.id.clone(), State::lerp(e.from, e.to, ease(p)));
+            }
+        }
+        out
+    }
+
     /// Milliseconds at which step `k` has finished playing.
     pub fn end_of_step(&self, k: usize) -> u32 {
         self.steps
