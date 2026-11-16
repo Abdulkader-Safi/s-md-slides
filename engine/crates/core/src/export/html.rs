@@ -418,14 +418,21 @@ pub(crate) fn element_inner(
             };
             ("smd-video".into(), inner)
         }
-        (Kind::Embed, Some(Content::Embed { src, .. })) => (
-            "smd-embed".into(),
-            format!(
-                "<iframe src=\"{}\" title=\"{}\" allow=\"fullscreen; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\"></iframe>",
-                esc_attr(&embed_src(src)),
-                esc_attr(e.name.as_deref().unwrap_or("Embedded content"))
-            ),
-        ),
+        (Kind::Embed, Some(Content::Embed { src, .. })) => {
+            // Only https embeds become iframes; anything else shows the gray box.
+            let url = embed_src(src);
+            if !url.starts_with("https://") || !super::sanitize::safe_url(&url) {
+                return Some(("smd-embed".into(), missing(src)));
+            }
+            (
+                "smd-embed".into(),
+                format!(
+                    "<iframe src=\"{}\" title=\"{}\" allow=\"fullscreen; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\"></iframe>",
+                    esc_attr(&url),
+                    esc_attr(e.name.as_deref().unwrap_or("Embedded content"))
+                ),
+            )
+        }
         _ => return None,
     })
 }

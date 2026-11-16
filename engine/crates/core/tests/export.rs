@@ -313,3 +313,28 @@ fn presentation_has_csp_runtime_and_data() {
         d.slides.len()
     );
 }
+
+#[test]
+fn unsafe_urls_never_reach_the_output() {
+    let src = "---\ntitle: 'x\" onmouseover=\"alert(1)'\n---\n<!-- slide bg=javascript:alert(1).png -->\n<!-- embed id=e x=0 y=0 w=10 h=10 src=javascript:alert(2) -->\n<!-- video id=v x=0 y=0 w=10 h=10 src=javascript:alert(3) poster=javascript:alert(4) -->\n";
+    let d = Deck::parse(src).deck;
+    for out in [
+        presentation_html(&d, &Options::default()).text,
+        slide_svg(&d, 0, Frame::End, &Options::default())
+            .unwrap()
+            .text,
+    ] {
+        // Placeholders may show the bad source as escaped text; no attribute or CSS
+        // URL may carry it.
+        assert!(
+            !out.contains("=\"javascript:") && !out.contains("url(&quot;javascript"),
+            "{out}"
+        );
+        assert!(
+            !out.contains("=\"x\" onmouseover"),
+            "title escaped in attributes"
+        );
+    }
+    let page = presentation_html(&d, &Options::default()).text;
+    assert!(page.contains("aria-label=\"x&quot; onmouseover=&quot;alert(1)\""));
+}

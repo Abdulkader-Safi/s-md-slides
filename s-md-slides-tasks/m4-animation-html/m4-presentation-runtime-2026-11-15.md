@@ -1,11 +1,11 @@
 ---
 id: "m4-presentation-runtime-2026-11-15"
-status: "todo"
+status: "in-progress"
 priority: "medium"
 assignee: "claude"
 dueDate: null
 created: "2026-11-15T12:00:00.000Z"
-modified: "2026-11-15T12:00:00.000Z"
+modified: "2026-11-16T06:48:05.000Z"
 labels: ["engine", "m4"]
 order: 4
 ---

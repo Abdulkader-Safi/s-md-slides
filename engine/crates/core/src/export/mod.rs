@@ -63,6 +63,9 @@ impl<'a> Assets<'a> {
     /// The URL to use for `path`: a data URI when embedding, the path itself otherwise.
     /// `None` when the resolver can't find it (reported once as `W-MISSING-ASSET`).
     pub(crate) fn url(&mut self, path: &str) -> Option<String> {
+        if !sanitize::safe_url(path) {
+            return None;
+        }
         let local = !path.contains("://") && !path.starts_with("data:") && !path.starts_with('#');
         if !local {
             return Some(path.to_string());
