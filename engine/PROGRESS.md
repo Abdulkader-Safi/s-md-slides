@@ -8,7 +8,7 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 | ----------------------------- | ------------------- |
 | M0 de-risk                    | done (PR #1)        |
 | M1 format core                | done (PR #2)        |
-| M2 operations                 | in progress         |
+| M2 operations                 | done (PR #3)        |
 | M3 elements and style         | not started         |
 | M4 animation and HTML export  | not started         |
 | M5 native render              | not started         |
@@ -20,9 +20,12 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 - 2026-11-15: the Cargo workspace lives in `engine/`, not at the git root. The git repo also holds the task board, and the spec puts the GPUI app, npm package and Obsidian plugin in their own repos later.
 - 2026-11-15: MSRV is 1.95 (latest stable 1.97.1 minus two).
 - 2026-11-15: one branch and one PR per milestone. Commits after each task.
+- 2026-11-16: keep serde-saphyr (about 400 KB of WASM) and nested inline themes. Spec 04 set a 150 KB limit for it; the build spec only replaces it above 1.5 MB total, and the core is 677 KB. The flat front matter reader stays the fallback if a later milestone trips the size gate. Decided by the user.
 - 2026-11-15: approved after review. Native PDF export draws text by passing parley glyph runs straight to krilla (`draw_glyphs` with parley's cluster ranges, ligature continuations merged, glyph y offsets negated). krilla-svg draws everything that is not text. PNG export keeps the flattened SVG through resvg.
 
 ## M2 results
+
+Acceptance boxes ticked: FR-OPS-01 to FR-OPS-05 and FR-EL-10. FR-OPS-01's "same result in the npm build" half is proven by the conformance vectors in M7; the npm package lives in its own repo. Exit criteria: the proptest runs 10,000 decks with random sequences of every op type (about 35,000 successful ops), each op stays inside its target's bytes, and undo restores the exact file. `fuzz_ops` passed 1,000,000 runs in 21 minutes with no panic and every inverse exact.
 
 Code: `crates/core/src/ops.rs` (every op from the spec), `crates/core/src/query.rs`, TypeScript types in `bindings/`.
 
