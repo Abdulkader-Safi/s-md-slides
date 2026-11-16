@@ -1767,8 +1767,11 @@ impl Deck {
             sh(x, ds);
         }
         sh(&mut deck.marks.built, ds);
-        for x in deck.marks.build.iter_mut().skip(k) {
-            sh(x, ds + db);
+        // The whole build phase comes after every section's syntax problems, so all
+        // build marks move by the syntax change; this section's and later ones also
+        // move by the build change.
+        for (j, x) in deck.marks.build.iter_mut().enumerate() {
+            sh(x, if j < k { ds } else { ds + db });
         }
         cx.diags = diags;
         assign_ids(&mut cx, &mut deck, carry);

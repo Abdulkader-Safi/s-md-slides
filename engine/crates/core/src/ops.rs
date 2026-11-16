@@ -479,12 +479,19 @@ impl Deck {
                 #[cfg(debug_assertions)]
                 {
                     let full = Deck::build(&next, &carry);
-                    assert_eq!(
-                        format!("{fast:?}"),
-                        format!("{full:?}"),
-                        "one-line rebuild differs from a full parse"
-                    );
-                    assert_eq!(fast.diagnostics, full.diagnostics);
+                    let (f, g) = (format!("{fast:?}"), format!("{full:?}"));
+                    if f != g {
+                        let at = f.bytes().zip(g.bytes()).take_while(|(a, b)| a == b).count();
+                        let cut = |t: &str| {
+                            let from = t.floor_char_boundary(at.saturating_sub(200));
+                            t[from..t.floor_char_boundary((at + 200).min(t.len()))].to_string()
+                        };
+                        panic!(
+                            "one-line rebuild differs from a full parse at byte {at}\nfast: {}\nfull: {}",
+                            cut(&f),
+                            cut(&g)
+                        );
+                    }
                 }
                 fast
             }
@@ -1828,6 +1835,34 @@ mod fast_path {
                 }
             }
         }
+        // Fuzz find: an edit that fixes (or adds) a syntax problem in one slide moves
+        // every later diagnostic mark, including the build marks of earlier slides.
+        let text = "<!-- text id=a x=1 y=1 w=1 h=1 -->\nA\n---\n<!-- text id=b x=1 =y w=1 h=1 -->\nB\n---\n<!-- text id=c x=5000 y=1 w=1 h=1 -->\nC\n";
+        let mut deck = Deck::build(text, &Carry::new());
+        let at = text.find("=y").unwrap();
+        for (old, new) in [("=y", "y=2"), ("y=2", "=y"), ("=y", "y=3")] {
+            let at = deck.text()[at..].find(old).unwrap() + at;
+            deck.apply(Op::Replace {
+                at,
+                old: old.into(),
+                new: new.into(),
+            })
+            .unwrap();
+            for id in ["a", "b", "c"] {
+                let undo = deck
+                    .apply(Op::SetGeometry {
+                        id: id.into(),
+                        x: Some(9.0),
+                        y: None,
+                        w: None,
+                        h: None,
+                        rot: None,
+                    })
+                    .unwrap();
+                deck.apply(undo).unwrap();
+            }
+        }
+
         assert!(total > 100, "{total}");
         assert!(
             fast * 2 > total,
