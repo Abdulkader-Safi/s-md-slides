@@ -210,9 +210,10 @@ pub(crate) fn scene_with(
     let mut diags = Vec::new();
     let background = match deck.background(index) {
         Background::Color { color } => format!(
-            "<rect width=\"{}\" height=\"{}\" fill=\"{color}\" />",
+            "<rect width=\"{}\" height=\"{}\" fill=\"{}\" />",
             num(w),
-            num(h)
+            num(h),
+            esc(&color)
         ),
         Background::Gradient { angle, stops } => {
             let (s, co) = angle.to_radians().sin_cos();
@@ -222,8 +223,9 @@ pub(crate) fn scene_with(
                 .enumerate()
                 .map(|(i, col)| {
                     format!(
-                        "<stop offset=\"{}\" stop-color=\"{col}\" />",
-                        num(i as f64 / n as f64)
+                        "<stop offset=\"{}\" stop-color=\"{}\" />",
+                        num(i as f64 / n as f64),
+                        esc(col)
                     )
                 })
                 .collect();
@@ -402,7 +404,7 @@ fn element(
                     cr.size = cr.size.min(24.0);
                     cr.color = t.color("code");
                     cr.padding = [16.0; 4];
-                    svg.push_str(&format!("<rect width=\"{}\" height=\"{}\" rx=\"8\" fill=\"{}\" />", num(w), num(h), t.color("code-bg")));
+                    svg.push_str(&format!("<rect width=\"{}\" height=\"{}\" rx=\"8\" fill=\"{}\" />", num(w), num(h), esc(&t.color("code-bg"))));
                     let co = TextOpts { style: &cr, ..o };
                     runs = code_box(f, &source, &[], &co, w).runs;
                 }

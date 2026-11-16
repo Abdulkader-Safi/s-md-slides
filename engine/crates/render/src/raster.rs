@@ -4,13 +4,24 @@ use crate::fonts::Fonts;
 use resvg::tiny_skia::{Pixmap, Transform};
 use resvg::usvg;
 
+/// usvg options for our SVG: our fonts, and images only from `data:` URIs. usvg's
+/// default would read local files for any other `href`, and Mermaid and math SVG
+/// come from deck text, so file and path references are refused.
+pub(crate) fn svg_options(fonts: &Fonts) -> usvg::Options<'static> {
+    usvg::Options {
+        fontdb: fonts.inner.borrow().db.clone(),
+        image_href_resolver: usvg::ImageHrefResolver {
+            resolve_data: usvg::ImageHrefResolver::default_data_resolver(),
+            resolve_string: Box::new(|_, _| None),
+        },
+        ..Default::default()
+    }
+}
+
 /// Draw an SVG at `scale`. Fonts are only needed for text inside Mermaid and math
 /// images; slide text is already outlines.
 pub(crate) fn pixmap(svg: &str, scale: f32, fonts: &Fonts) -> Result<Pixmap, String> {
-    let opt = usvg::Options {
-        fontdb: fonts.inner.borrow().db.clone(),
-        ..Default::default()
-    };
+    let opt = svg_options(fonts);
     let tree = usvg::Tree::from_str(svg, &opt).map_err(|e| e.to_string())?;
     let size = tree.size();
     let (w, h) = (

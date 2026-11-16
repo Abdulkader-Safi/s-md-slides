@@ -8,6 +8,24 @@ use s_md_slides_render::{Control, Fonts, Frame, gif, jpeg, pdf, png};
 use std::io::{IsTerminal, Write};
 use std::path::PathBuf;
 use std::process::ExitCode;
+use std::sync::atomic::{AtomicBool, Ordering};
+
+/// Set by the first Ctrl-C. Exports stop at the next page or frame and exit 4.
+static CANCEL: AtomicBool = AtomicBool::new(false);
+
+fn cancelled() -> bool {
+    CANCEL.load(Ordering::Relaxed)
+}
+
+/// First Ctrl-C asks the export to stop cleanly; a second one quits at once.
+fn watch_ctrl_c() {
+    let _ = ctrlc::set_handler(|| {
+        if CANCEL.swap(true, Ordering::Relaxed) {
+            std::process::exit(130);
+        }
+        eprintln!("\nStopping after the current page or frame (Ctrl-C again to quit now)");
+    });
+}
 
 pub struct Args {
     pub deck: PathBuf,
@@ -48,7 +66,11 @@ fn bar(what: &str) -> impl FnMut(u32, u32) -> Control {
             }
             let _ = std::io::stderr().flush();
         }
-        Control::Continue
+        if cancelled() {
+            Control::Cancel
+        } else {
+            Control::Continue
+        }
     }
 }
 
@@ -75,6 +97,7 @@ pub fn run(a: &Args) -> ExitCode {
         eprintln!("s-md-slides: --scale must be above 0 and at most 8");
         return ExitCode::from(2);
     }
+    watch_ctrl_c();
     let fonts = Fonts::with_system();
     let default_out = |suffix: &str| {
         a.deck
@@ -115,6 +138,9 @@ pub fn run(a: &Args) -> ExitCode {
                 };
                 let many = slides.len() > 1;
                 for i in slides {
+                    if cancelled() {
+                        return Err(ExitCode::from(CANCELLED));
+                    }
                     let r = match a.to {
                         Format::Png => png(&deck, i, Frame::End, a.scale, &folder, &fonts),
                         Format::Jpeg => {
