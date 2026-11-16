@@ -32,7 +32,7 @@ Acceptance boxes ticked: FR-CLI-01 to FR-CLI-04. Exit criteria: a Vim-style save
 Decisions:
 
 - `serve` keeps live-reload connections open and writes `event: reload` to each when the deck, one of its assets or its theme file changes (100 ms debounce, recursive watch on the deck's folder, other files ignored). The reload script is part of the runtime build with its own SHA-256 in the CSP, added through the new export option `live_reload`.
-- The watcher reacts only to creates, writes, renames and removes. Linux also reports reads, and every rebuild reads the deck, so the first version reloaded the browser forever on Linux (caught by CI). The serve test now fails if one save causes more than one reload.
+- The watcher reacts only to real changes (files created, written, renamed or removed). Linux also reports reads, and every rebuild reads the deck, so the first version reloaded the browser forever on Linux (caught by CI). The serve test now fails if one save causes more than one reload.
 - Errors in the deck show as an overlay above the slides; the presentation still renders what parses.
 - File serving: GET only, files under the deck's folder after resolving symlinks, no `..` segments, no directory listing. A host other than 127.0.0.1, localhost or ::1 prints a network warning.
 - `export` writes next to the deck by default (`deck.pdf`, `deck-3.png`); `-o` names a file, or a folder when several images are written. `--to png|jpeg|gif` without `--slide` exports every slide. It exits 1 if the deck has errors, after writing.
