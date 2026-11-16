@@ -9,7 +9,7 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 | M0 de-risk                    | done (PR #1)        |
 | M1 format core                | done (PR #2)        |
 | M2 operations                 | done (PR #3)        |
-| M3 elements and style         | in progress         |
+| M3 elements and style         | done (PR #4)        |
 | M4 animation and HTML export  | not started         |
 | M5 native render              | not started         |
 | M6 CLI                        | not started         |
@@ -24,6 +24,8 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 - 2026-11-15: approved after review. Native PDF export draws text by passing parley glyph runs straight to krilla (`draw_glyphs` with parley's cluster ranges, ligature continuations merged, glyph y offsets negated). krilla-svg draws everything that is not text. PNG export keeps the flattened SVG through resvg.
 
 ## M3 results
+
+Acceptance boxes ticked: FR-EL-02 and FR-STYLE-02. The other M3 requirements (FR-EL-01, 03 to 09, FR-STYLE-01, 03 to 05) have their model half done and tested in `crates/core/tests/style.rs`, but each check also names an export ("the HTML export renders them", "exports to SVG", "3 / 12 on slide 3"), so they get ticked in M4 and M5. Exit criteria: 25 golden decks round-trip, `resolved_style` is snapshotted for every element and reviewed, and `fuzz_parse` passed another 1,000,000 runs with the new body parsing.
 
 Code: `crates/core/src/kinds.rs` (attributes and bodies per kind), `crates/core/src/theme.rs` (themes, `resolved_style`, backgrounds, masters), `themes/default.json`.
 
