@@ -1,11 +1,11 @@
 ---
 id: "m7-release-workflow-2026-11-15"
-status: "review"
+status: "done"
 priority: "low"
 assignee: "claude"
 dueDate: null
 created: "2026-11-15T12:00:00.000Z"
-modified: "2026-11-16T09:54:29.000Z"
+modified: "2026-11-16T11:53:58.000Z"
 labels: ["engine", "m7"]
 order: 7
 ---
