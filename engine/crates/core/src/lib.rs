@@ -19,6 +19,7 @@
 pub mod attrs;
 mod deck;
 pub mod diag;
+pub mod export;
 mod frontmatter;
 pub mod kinds;
 mod ops;
