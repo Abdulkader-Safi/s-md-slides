@@ -1863,6 +1863,18 @@ mod fast_path {
             }
         }
 
+        // Fuzz find: an edit at the start of the file that makes a byte order mark.
+        let mut deck = Deck::build(
+            "p =\n---\n<!-- text id=a x=1 y=1 w=1 h=1 -->\n",
+            &Carry::new(),
+        );
+        deck.apply(Op::Replace {
+            at: 0,
+            old: String::new(),
+            new: "\u{feff}".into(),
+        })
+        .unwrap();
+
         assert!(total > 100, "{total}");
         assert!(
             fast * 2 > total,

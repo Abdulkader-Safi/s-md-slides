@@ -1666,7 +1666,14 @@ impl Deck {
     ) -> Option<Deck> {
         let old = &self.source[range.clone()];
         let newline = |t: &str| t.contains(['\n', '\r']);
-        if self.read_only || newline(old) || newline(text) || self.sections.len() < 2 {
+        // The first three bytes can make or break a byte order mark, which moves where
+        // the first section starts.
+        if self.read_only
+            || range.start < 3
+            || newline(old)
+            || newline(text)
+            || self.sections.len() < 2
+        {
             return None;
         }
         if self.marks.syntax.len() != self.sections.len()
