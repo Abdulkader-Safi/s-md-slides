@@ -473,7 +473,23 @@ impl Deck {
                 }
             })
             .collect();
-        let mut candidate = Deck::build(&next, &carry);
+        let mut candidate = match self.rebuild_line(&p.range, &p.text, &next, &carry) {
+            Some(fast) => {
+                // The fast path must give exactly what a full parse gives.
+                #[cfg(debug_assertions)]
+                {
+                    let full = Deck::build(&next, &carry);
+                    assert_eq!(
+                        format!("{fast:?}"),
+                        format!("{full:?}"),
+                        "one-line rebuild differs from a full parse"
+                    );
+                    assert_eq!(fast.diagnostics, full.diagnostics);
+                }
+                fast
+            }
+            None => Deck::build(&next, &carry),
+        };
         // A theme file loaded by the host stays loaded while front matter still names it.
         if let Some(path) = &self.theme_path
             && candidate.front.theme.as_ref().and_then(Value::as_str) == Some(path.as_str())
@@ -1715,5 +1731,107 @@ impl Kind {
             "group" => Kind::Group,
             _ => return None,
         })
+    }
+}
+
+#[cfg(test)]
+mod fast_path {
+    use super::*;
+    use crate::deck::{Carry, Kind};
+
+    /// Every golden deck and conformance input, edited one line at a time: each edit
+    /// goes through `splice`, which in debug builds asserts the fast result equals a
+    /// full parse. The fast path must also actually fire for most of these edits.
+    #[test]
+    fn one_line_edits_match_a_full_parse() {
+        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
+        let mut texts = Vec::new();
+        for dir in ["tests/decks", "conformance", "examples"] {
+            for f in std::fs::read_dir(format!("{root}/{dir}"))
+                .unwrap()
+                .flatten()
+            {
+                if !f.path().is_file() {
+                    continue;
+                }
+                let t = std::fs::read_to_string(f.path()).unwrap();
+                match f.path().extension().and_then(|e| e.to_str()) {
+                    Some("md") => texts.push(t),
+                    Some("json") => {
+                        let v: serde_json::Value = serde_json::from_str(&t).unwrap();
+                        texts.push(v["input"].as_str().unwrap().to_string());
+                    }
+                    _ => {}
+                }
+            }
+        }
+        let (mut fast, mut total) = (0, 0);
+        for text in texts {
+            let mut deck = Deck::build(&text, &Carry::new());
+            if deck.read_only {
+                continue;
+            }
+            let ids: Vec<String> = deck
+                .elements()
+                .filter(|e| e.kind != Kind::Group)
+                .map(|e| e.id.clone())
+                .collect();
+            for id in ids {
+                for op in [
+                    Op::SetGeometry {
+                        id: id.clone(),
+                        x: Some(7.0),
+                        y: Some(9.5),
+                        w: None,
+                        h: None,
+                        rot: Some(3.0),
+                    },
+                    Op::SetAttrs {
+                        id: id.clone(),
+                        set: [
+                            ("color".to_string(), serde_json::json!("#123456")),
+                            ("zz".to_string(), serde_json::json!("x")),
+                        ]
+                        .into_iter()
+                        .collect(),
+                        remove: vec!["opacity".into()],
+                    },
+                ] {
+                    total += 1;
+                    let before = deck.clone();
+                    if let Ok(Step::Edit(p)) = deck.plan(&op) {
+                        let mut next = deck.source.clone();
+                        next.replace_range(p.range.clone(), &p.text);
+                        if deck
+                            .rebuild_line(&p.range, &p.text, &next, &deck.carry())
+                            .is_some()
+                        {
+                            fast += 1;
+                        }
+                    }
+                    if let Ok(undo) = deck.apply(op) {
+                        deck.apply(undo).unwrap();
+                        assert_eq!(deck.text(), before.text());
+                    }
+                }
+            }
+            for i in 0..deck.slides.len() {
+                let op = Op::SetSlideAttrs {
+                    slide: i,
+                    set: [("bg".to_string(), serde_json::json!("#000"))]
+                        .into_iter()
+                        .collect(),
+                    remove: vec![],
+                };
+                if let Ok(undo) = deck.apply(op) {
+                    deck.apply(undo).unwrap();
+                }
+            }
+        }
+        assert!(total > 100, "{total}");
+        assert!(
+            fast * 2 > total,
+            "fast path fired for only {fast} of {total} edits"
+        );
     }
 }

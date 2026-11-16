@@ -267,7 +267,7 @@ Throwaway spikes in a `spikes/` folder, deleted or folded in after.
 - [x] **FR-CLI-04** `s-md-slides apply <deck> <ops.json>` applies a batch of operations and writes the deck (for scripts and agents). Check: a JSON batch of moves changes only those lines.
 
 ### Non-functional
-- [ ] **NFR-01** Performance: parse plus serialize of a 200-slide, 2,000-element deck under 50 ms native on an M1. One op plus serialize under 5 ms. One 1920 x 1080 PNG under 300 ms. `serve` reload under 500 ms. Measured by criterion and the M6 test.
+- [x] **NFR-01** Performance: parse plus serialize of a 200-slide, 2,000-element deck under 50 ms native on an M1. One op plus serialize under 5 ms. One 1920 x 1080 PNG under 300 ms. `serve` reload under 500 ms. Measured by criterion and the M6 test.
 - [x] **NFR-02** Size: the core's WASM build under 1 MB uncompressed, never above 1.5 MB, enforced by `scripts/wasm-size.sh` in CI.
 - [x] **NFR-03** Round-trip: every golden deck and conformance case saves byte-identical, and every op touches only its targets' spans.
 - [x] **NFR-04** Privacy and security: no network in core or render. `serve` binds 127.0.0.1 by default, serves only the deck folder, never writes. Exports are sanitized and carry the CSP.

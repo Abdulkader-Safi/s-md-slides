@@ -376,6 +376,25 @@ pub struct Deck {
     /// Path of the theme file loaded through `load_theme`, if any.
     #[serde(skip)]
     pub(crate) theme_path: Option<String>,
+    /// Where each phase's diagnostics end, so a one-line edit can replace just its
+    /// section's diagnostics in the same order a full parse gives.
+    #[serde(skip)]
+    pub(crate) marks: DiagMarks,
+}
+
+/// Diagnostic counts after each parse phase. A full parse emits, in order: front
+/// matter, then the syntax problems of every section, then an unclosed fence, then
+/// each section's build problems, then id and reference problems (the tail).
+#[derive(Debug, Clone, Default, PartialEq)]
+pub(crate) struct DiagMarks {
+    /// After front matter.
+    head: usize,
+    /// After each section's syntax problems.
+    syntax: Vec<usize>,
+    /// Where section building starts (after the unclosed-fence problem, if any).
+    built: usize,
+    /// After each section's build problems.
+    build: Vec<usize>,
 }
 
 /// Result of [`Deck::parse`]: always a deck, plus whatever went wrong.
@@ -430,6 +449,70 @@ fn fence_marker(text: &str) -> Option<(u8, usize)> {
     }
     let n = t.bytes().take_while(|&x| x == c).count();
     (n >= 3).then_some((c, n))
+}
+
+/// Split `lines` (which cover `span`) into sections at `---` lines outside code
+/// fences, parsing every directive line. Returns the sections, the start of a fence
+/// that never closes, and the diagnostic count after each section's syntax problems.
+fn scan(
+    cx: &mut Ctx,
+    lines: &[Line],
+    span: Range<usize>,
+) -> (Vec<Section>, Option<usize>, Vec<usize>) {
+    let src = cx.src;
+    let end = span.end;
+    let mut sections = Vec::new();
+    let mut syntax = Vec::new();
+    let mut cur = Section {
+        span,
+        directives: Vec::new(),
+    };
+    let mut fence: Option<(u8, usize, usize)> = None;
+    for l in lines {
+        let text = &src[l.start..l.end];
+        if let Some((c, n, _)) = fence {
+            if let Some((c2, n2)) = fence_marker(text)
+                && c2 == c
+                && n2 >= n
+                && text.trim().bytes().all(|x| x == c)
+            {
+                fence = None;
+            }
+            continue;
+        }
+        if let Some((c, n)) = fence_marker(text) {
+            fence = Some((c, n, l.start));
+            continue;
+        }
+        if is_separator(text) {
+            cur.span.end = l.start;
+            sections.push(std::mem::replace(
+                &mut cur,
+                Section {
+                    span: l.next..end,
+                    directives: Vec::new(),
+                },
+            ));
+            syntax.push(cx.diags.len());
+            continue;
+        }
+        if let Some(d) = parse_directive(text, l.start) {
+            if let Some(at) = d.error_at {
+                cx.push(
+                    Severity::Error,
+                    "E-ATTR-SYNTAX",
+                    "This attribute can't be read. Use key=value, key=\"quoted value\" or a bare key.".into(),
+                    at,
+                    None,
+                    None,
+                );
+            }
+            cur.directives.push((l.start..l.end, l.next, d));
+        }
+    }
+    sections.push(cur);
+    syntax.push(cx.diags.len());
+    (sections, fence.map(|(_, _, at)| at), syntax)
 }
 
 fn is_separator(text: &str) -> bool {
@@ -589,6 +672,7 @@ impl Deck {
             bom: 0,
             theme: Default::default(),
             theme_path: None,
+            marks: DiagMarks::default(),
         };
         if src.len() > MAX_FILE_BYTES {
             cx.push(
@@ -668,55 +752,12 @@ impl Deck {
         }
 
         // Split into sections at `---` lines outside code fences.
-        let mut sections = Vec::new();
-        let mut cur = Section {
-            span: lines.get(first).map_or(src.len(), |l| l.start)..src.len(),
-            directives: Vec::new(),
-        };
-        let mut fence: Option<(u8, usize, usize)> = None;
-        for l in lines.iter().skip(first) {
-            let text = &src[l.start..l.end];
-            if let Some((c, n, _)) = fence {
-                if let Some((c2, n2)) = fence_marker(text)
-                    && c2 == c
-                    && n2 >= n
-                    && text.trim().bytes().all(|x| x == c)
-                {
-                    fence = None;
-                }
-                continue;
-            }
-            if let Some((c, n)) = fence_marker(text) {
-                fence = Some((c, n, l.start));
-                continue;
-            }
-            if is_separator(text) {
-                cur.span.end = l.start;
-                sections.push(std::mem::replace(
-                    &mut cur,
-                    Section {
-                        span: l.next..src.len(),
-                        directives: Vec::new(),
-                    },
-                ));
-                continue;
-            }
-            if let Some(d) = parse_directive(text, l.start) {
-                if let Some(at) = d.error_at {
-                    cx.push(
-                        Severity::Error,
-                        "E-ATTR-SYNTAX",
-                        "This attribute can't be read. Use key=value, key=\"quoted value\" or a bare key.".into(),
-                        at,
-                        None,
-                        None,
-                    );
-                }
-                cur.directives.push((l.start..l.end, l.next, d));
-            }
-        }
-        sections.push(cur);
-        if let Some((_, _, at)) = fence {
+        deck.marks.head = cx.diags.len();
+        let start = lines.get(first).map_or(src.len(), |l| l.start);
+        let (mut sections, fence, syntax) =
+            scan(&mut cx, &lines[first.min(lines.len())..], start..src.len());
+        deck.marks.syntax = syntax;
+        if let Some(at) = fence {
             cx.push(
                 Severity::Error,
                 "E-UNCLOSED-FENCE",
@@ -733,7 +774,9 @@ impl Deck {
             && src[sections[0].span.clone()].trim().is_empty()
         {
             sections.clear();
+            deck.marks.syntax.clear();
         }
+        deck.marks.built = cx.diags.len();
         let mut slide_sections = 0;
         for sec in sections {
             let defs = sec
@@ -746,6 +789,7 @@ impl Deck {
                     slide: None,
                 });
                 build_definitions(&mut cx, &mut deck, sec);
+                deck.marks.build.push(cx.diags.len());
             } else {
                 if slide_sections == MAX_SLIDES {
                     cx.push(
@@ -764,8 +808,10 @@ impl Deck {
                     span: sec.span.clone(),
                     slide: Some(deck.slides.len()),
                 });
-                let slide = build_slide(&mut cx, &mut deck, sec);
+                let index = deck.slides.len();
+                let slide = build_slide(&mut cx, &mut deck, sec, index);
                 deck.slides.push(slide);
+                deck.marks.build.push(cx.diags.len());
             }
         }
         assign_ids(&mut cx, &mut deck, carry);
@@ -792,9 +838,8 @@ fn body_ranges(src: &str, from: usize, to: usize) -> (Range<usize>, usize) {
     (from..trim_blank_tail(src, from..to), to)
 }
 
-fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
+fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section, index: usize) -> Slide {
     let src = cx.src;
-    let index = deck.slides.len();
     let mut slide = Slide {
         index,
         layout: None,
@@ -1558,4 +1603,177 @@ pub fn first_strong(text: &str) -> Dir {
         }
     }
     Dir::Ltr
+}
+
+/// Move a byte offset by `d` (an edit earlier in the file changed its length).
+fn sh(x: &mut usize, d: isize) {
+    *x = x.wrapping_add_signed(d);
+}
+
+fn sh_range(r: &mut Range<usize>, d: isize) {
+    sh(&mut r.start, d);
+    sh(&mut r.end, d);
+}
+
+fn sh_attrs(attrs: &mut [Attr], d: isize) {
+    for a in attrs {
+        sh_range(&mut a.span, d);
+        if let Some(v) = &mut a.value_span {
+            sh_range(v, d);
+        }
+    }
+}
+
+fn sh_elements(elements: &mut [Element], d: isize) {
+    for e in elements {
+        sh_attrs(&mut e.attrs, d);
+        if let Some(l) = &mut e.src.line {
+            sh_range(l, d);
+        }
+        sh(&mut e.src.insert_at, d);
+        sh_range(&mut e.src.body, d);
+        sh(&mut e.src.end, d);
+    }
+}
+
+fn sh_slide(s: &mut Slide, d: isize) {
+    sh_attrs(&mut s.attrs, d);
+    sh_elements(&mut s.elements, d);
+    sh_range(&mut s.src.span, d);
+    if let Some(r) = &mut s.src.directive {
+        sh_range(r, d);
+    }
+    sh(&mut s.src.content_start, d);
+    if let Some(n) = &mut s.src.notes {
+        sh(&mut n.start, d);
+        sh_range(&mut n.body, d);
+        sh(&mut n.end, d);
+    }
+}
+
+impl Deck {
+    /// The deck after replacing `range` with `text` (giving the source `next`), built
+    /// by re-parsing only the edited slide when the edit stays inside one line of a
+    /// slide and cannot change where sections or code fences are. Everything else is
+    /// kept and shifted. Returns `None` when a full parse is needed. The result equals
+    /// `Deck::build(next, carry)`; debug builds check that on every edit.
+    pub(crate) fn rebuild_line(
+        &self,
+        range: &Range<usize>,
+        text: &str,
+        next: &str,
+        carry: &Carry,
+    ) -> Option<Deck> {
+        let old = &self.source[range.clone()];
+        let newline = |t: &str| t.contains(['\n', '\r']);
+        if self.read_only || newline(old) || newline(text) || self.sections.len() < 2 {
+            return None;
+        }
+        if self.marks.syntax.len() != self.sections.len()
+            || self.marks.build.len() != self.sections.len()
+        {
+            return None;
+        }
+        let k = self
+            .sections
+            .iter()
+            .position(|s| s.span.start <= range.start && range.end <= s.span.end)?;
+        let slide = self.sections[k].slide?;
+        // The edited line, before and after, must not be a separator or a fence line.
+        let line_of = |src: &str, at: usize, end: usize| {
+            let start = src[..at].rfind('\n').map_or(0, |i| i + 1);
+            let stop = src[end..].find('\n').map_or(src.len(), |i| end + i);
+            src[start..stop].trim_end_matches('\r').to_string()
+        };
+        let delta = text.len() as isize - old.len() as isize;
+        let after = range.end.wrapping_add_signed(delta);
+        for line in [
+            line_of(&self.source, range.start, range.end),
+            line_of(next, range.start, after),
+        ] {
+            if is_separator(&line) || fence_marker(&line).is_some() {
+                return None;
+            }
+        }
+
+        let span =
+            self.sections[k].span.start..self.sections[k].span.end.wrapping_add_signed(delta);
+        let mut cx = Ctx {
+            src: next,
+            index: LineIndex::new(next),
+            diags: Vec::new(),
+            canvas: self.front.canvas,
+        };
+        let lines = split_lines(&next[..span.end], span.start);
+        let (mut secs, fence, _) = scan(&mut cx, &lines, span.clone());
+        if secs.len() != 1 || fence.is_some() {
+            return None;
+        }
+        let sec = secs.pop()?;
+        if sec
+            .directives
+            .first()
+            .is_some_and(|(_, _, d)| d.kind == "master" || d.kind == "layout")
+        {
+            return None;
+        }
+        let syntax = std::mem::take(&mut cx.diags);
+
+        let mut deck = self.clone();
+        deck.source = next.to_string();
+        let built = build_slide(&mut cx, &mut deck, sec, slide);
+        if deck.read_only {
+            return None;
+        }
+        let build = std::mem::take(&mut cx.diags);
+        deck.slides[slide] = built;
+        deck.sections[k].span = span;
+        for j in k + 1..deck.sections.len() {
+            sh_range(&mut deck.sections[j].span, delta);
+            match deck.sections[j].slide {
+                Some(s) => sh_slide(&mut deck.slides[s], delta),
+                None => {
+                    for m in deck.masters.iter_mut().filter(|m| m.src.section == j) {
+                        sh_attrs(&mut m.attrs, delta);
+                        sh_elements(&mut m.elements, delta);
+                        sh_range(&mut m.src.block, delta);
+                    }
+                    for l in deck.layouts.iter_mut().filter(|l| l.src.section == j) {
+                        sh_attrs(&mut l.attrs, delta);
+                        for p in &mut l.placeholders {
+                            sh_attrs(&mut p.attrs, delta);
+                        }
+                        sh_range(&mut l.src.block, delta);
+                    }
+                }
+            }
+        }
+
+        // Diagnostics: keep everything outside this section, in full-parse order.
+        let m = &self.marks;
+        let old_diags = &self.diagnostics;
+        let s0 = if k == 0 { m.head } else { m.syntax[k - 1] };
+        let b0 = if k == 0 { m.built } else { m.build[k - 1] };
+        let tail = *m.build.last()?;
+        let mut diags = Vec::with_capacity(old_diags.len());
+        diags.extend_from_slice(&old_diags[..s0]);
+        diags.extend(syntax.iter().cloned());
+        diags.extend_from_slice(&old_diags[m.syntax[k]..b0]);
+        diags.extend(build.iter().cloned());
+        diags.extend_from_slice(&old_diags[m.build[k]..tail]);
+        let ds = syntax.len() as isize - (m.syntax[k] - s0) as isize;
+        let db = build.len() as isize - (m.build[k] - b0) as isize;
+        for x in deck.marks.syntax.iter_mut().skip(k) {
+            sh(x, ds);
+        }
+        sh(&mut deck.marks.built, ds);
+        for x in deck.marks.build.iter_mut().skip(k) {
+            sh(x, ds + db);
+        }
+        cx.diags = diags;
+        assign_ids(&mut cx, &mut deck, carry);
+        check_refs(&mut cx, &deck);
+        deck.diagnostics = cx.diags;
+        Some(deck)
+    }
 }

@@ -240,11 +240,13 @@ Open questions for M1:
 
 | Check | Budget | Measured |
 | --- | --- | --- |
-| Parse plus save, 200 slides and 2,000 elements (155 KB) | 50 ms | 4.5 ms |
-| One op plus save on that deck | 5 ms | 5.0 ms |
+| Parse plus save, 200 slides and 2,000 elements (155 KB) | 50 ms | 4.5 to 4.8 ms |
+| One op plus save on that deck | 5 ms | 1.9 ms |
 | One 1920 x 1080 PNG | 300 ms | 45 ms |
 | `serve` reload | 500 ms | checked by the M6 test |
 
 The op number started at 7.0 ms. Every op re-parses the whole deck to check its structure, so an op costs one parse. Profiling showed the parser cloning each element's attributes and hashing every attribute key to find duplicates; moving instead of cloning and scanning instead of hashing took parse from 6.4 to 4.5 ms. What is left is mostly allocation (37% of parse time goes to malloc, free and copies: about 25 small strings per element).
 
-Open: on an M1, which is slower than this machine, one op on a 2,000-element deck will land around 6 ms, over the 5 ms budget. Getting under it needs a design change, so it waits for the user.
+That still left one op at 5.0 ms, which would miss 5 ms on an M1. The user chose a fast path (2026-11-16): when an edit stays inside one line of a slide and cannot move a `---` line or a code fence (a move, resize, restyle or slide setting), the engine clones the deck, re-parses only that slide's section, shifts the byte offsets of the sections after it, and re-runs the deck-wide id and reference passes. Diagnostics keep full-parse order because the parse records where each section's problems start and end. Anything else (new lines, definitions sections, one-section decks) takes the full parse as before. One op plus save dropped to 1.9 ms; most of what is left is the clone and dropping the old deck.
+
+Safety: debug builds compare every fast result with a full parse (the whole model, spans and diagnostics) and panic on any difference. That runs in the 10,000-case op proptest, every test, and the fuzzers (cargo-fuzz keeps debug assertions on). A unit test edits every golden deck, conformance input and example and checks the fast path fires for most edits.
