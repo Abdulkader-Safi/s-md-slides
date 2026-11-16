@@ -43,7 +43,7 @@ Decisions:
 
 Code: `crates/render` (crate `s-md-slides-render`): `fonts.rs`, `layout.rs` (markdown to parley glyph runs), `flatten.rs` (scene and SVG), `raster.rs`, `pdf.rs`, `gif.rs`, `graphics.rs` (Mermaid and math). Example: `cargo run -p s-md-slides-render --release --example render -- deck.md out-dir`. Reference PNGs: `engine/tests/reference/`. The M0 spikes are gone.
 
-Acceptance boxes ticked: FR-EXP-03 to FR-EXP-06, FR-EL-06 to FR-EL-09. FR-EL-11 (syntax highlighting, a Could) is not built and its card is in the backlog. Exit criteria: every example deck exports to every format (PNG, JPEG, SVG, PDF, GIF); the 11 reference PNGs match within 0.5% on macOS, Windows and Linux in CI; PDF text is selectable (12 pages, ToUnicode maps; `pdftotext` reads Latin and Arabic); a three-step slide's GIF shows each step in order; cancel returns `E-CANCELLED` within 200 ms.
+Acceptance boxes ticked: FR-EXP-03 to FR-EXP-06, FR-EL-06 to FR-EL-09. FR-EL-11 (syntax highlighting, a Could) is not built and its card is in the backlog. Exit criteria: every example deck exports to every format (PNG, JPEG, SVG, PDF, GIF); the 11 reference PNGs match within 0.5% on all three CI operating systems; PDF text is selectable (12 pages, ToUnicode maps; `pdftotext` reads Latin and Arabic); a three-step slide's GIF shows each step in order; cancel returns `E-CANCELLED` within 200 ms.
 
 Decisions:
 
@@ -249,4 +249,4 @@ The op number started at 7.0 ms. Every op re-parses the whole deck to check its 
 
 That still left one op at 5.0 ms, which would miss 5 ms on an M1. The user chose a fast path (2026-11-16): when an edit stays inside one line of a slide and cannot move a `---` line or a code fence (a move, resize, restyle or slide setting), the engine clones the deck, re-parses only that slide's section, shifts the byte offsets of the sections after it, and re-runs the deck-wide id and reference passes. Diagnostics keep full-parse order because the parse records where each section's problems start and end. Anything else (new lines, definitions sections, one-section decks) takes the full parse as before. One op plus save dropped to 1.9 ms; most of what is left is the clone and dropping the old deck.
 
-Safety: debug builds compare every fast result with a full parse (the whole model, spans and diagnostics) and panic on any difference. That runs in the 10,000-case op proptest, every test, and the fuzzers (cargo-fuzz keeps debug assertions on). A unit test edits every golden deck, conformance input and example and checks the fast path fires for most edits.
+Safety: debug builds compare every fast result with a full parse (the whole model including byte spans, plus the diagnostics) and panic on any difference. That runs in the 10,000-case op proptest, every test, and the fuzzers (cargo-fuzz keeps debug assertions on). A unit test edits every golden deck, conformance input and example and checks the fast path fires for most edits.
