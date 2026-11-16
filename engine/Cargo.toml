@@ -1,7 +1,7 @@
 [workspace]
 resolver = "3"
 exclude = ["fuzz"]
-members = ["crates/core", "crates/render", "crates/wasm-probe", "spikes/layout"]
+members = ["crates/core", "crates/render", "crates/wasm-probe"]
 
 [workspace.package]
 edition = "2024"

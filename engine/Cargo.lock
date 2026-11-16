@@ -1694,19 +1694,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "149309498a5f7334b12ddae0cad8aba81ce785fe91755068867e017cf98fee46"
 
 [[package]]
-name = "spike-layout"
-version = "0.0.0"
-dependencies = [
- "krilla",
- "krilla-svg",
- "parley",
- "resvg",
- "serde",
- "serde_json",
- "usvg",
-]
-
-[[package]]
 name = "stable_deref_trait"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

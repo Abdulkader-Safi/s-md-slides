@@ -43,9 +43,9 @@ Run from `engine/`:
 cargo build --workspace
 cargo test --workspace
 cargo test -p s-md-slides <test_name>      # one test
-cargo +1.95.0 clippy --workspace --exclude spike-layout --all-targets -- -D warnings   # match CI (MSRV)
+cargo +1.95.0 clippy --workspace --all-targets -- -D warnings   # match CI (MSRV)
 cargo fmt --all
 scripts/wasm-size.sh                       # core WASM size gate
 ```
 
-Spikes from M0 live in `engine/spikes/` until they are folded into the crates or deleted.
+Browser checks: `node runtime/test/check.mjs` (Chrome, or `BROWSER=firefox FIREFOX_PATH=...`) and `node runtime/test/safari.mjs`. Native renders: `cargo run -p s-md-slides-render --release --example render -- deck.md out-dir`. Reference PNGs: `UPDATE_REFERENCE=1 cargo test -p s-md-slides-render --release`, then review them.
