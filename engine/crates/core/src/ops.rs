@@ -974,7 +974,8 @@ impl Deck {
                     });
                 if known && kind != "group" {
                     for g in ["x", "y", "w", "h"] {
-                        if !rest.iter().any(|(k, _)| k == g) && !(g == "h" && shape_line) {
+                        let optional = g == "h" && shape_line;
+                        if !optional && !rest.iter().any(|(k, _)| k == g) {
                             return Err(err(
                                 "E-ATTR-MISSING",
                                 format!("A {kind} element needs {g}."),

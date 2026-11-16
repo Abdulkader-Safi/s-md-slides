@@ -43,7 +43,7 @@ Run from `engine/`:
 cargo build --workspace
 cargo test --workspace
 cargo test -p s-md-slides <test_name>      # one test
-cargo clippy --workspace --all-targets -- -D warnings
+cargo +1.95.0 clippy --workspace --exclude spike-layout --all-targets -- -D warnings   # match CI (MSRV)
 cargo fmt --all
 scripts/wasm-size.sh                       # core WASM size gate
 ```
