@@ -413,7 +413,14 @@ impl Deck {
                 }
             })
             .collect();
-        let candidate = Deck::build(&next, &carry);
+        let mut candidate = Deck::build(&next, &carry);
+        // A theme file loaded by the host stays loaded while front matter still names it.
+        if let Some(path) = &self.theme_path
+            && candidate.front.theme.as_ref().and_then(Value::as_str) == Some(path.as_str())
+        {
+            candidate.theme = self.theme.clone();
+            candidate.theme_path = Some(path.clone());
+        }
         if candidate.read_only && !self.read_only {
             return Err(err(
                 "E-LIMIT",
@@ -1171,8 +1178,20 @@ impl Deck {
                         "text"
                     };
                     let id = self.fresh_id(kind, &mut taken);
+                    // Style set on the placeholder carries over to the new element.
+                    let extra: String = p
+                        .attrs
+                        .iter()
+                        .filter(|a| {
+                            !matches!(a.key.as_str(), "id" | "x" | "y" | "w" | "h" | "kind")
+                        })
+                        .map(|a| match &a.value {
+                            Some(v) => format!(" {}={}", a.key, quote(v)),
+                            None => format!(" {}", a.key),
+                        })
+                        .collect();
                     t.push_str(&format!(
-                        "{eol}<!-- {kind} id={id} x={} y={} w={} h={} -->{eol}",
+                        "{eol}<!-- {kind} id={id} x={} y={} w={} h={}{extra} -->{eol}",
                         fmt_num(p.x as f64),
                         fmt_num(p.y as f64),
                         fmt_num(p.w as f64),

@@ -64,6 +64,9 @@ expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostic
             "name": "Title box",
             "opacity": 1.0,
             "rot": 0.0,
+            "style": {
+              "font": "Noto Sans"
+            },
             "w": 1680.0,
             "x": 120.0,
             "y": 80.0

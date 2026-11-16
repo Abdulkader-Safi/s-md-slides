@@ -49,12 +49,19 @@ expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostic
               }
             ],
             "body": "",
+            "content": {
+              "shape": "rect",
+              "type": "shape"
+            },
             "h": 400.0,
             "id": "s1",
             "kind": "shape",
             "locked": false,
             "opacity": 1.0,
             "rot": 0.0,
+            "style": {
+              "fill": "accent1"
+            },
             "w": 400.0,
             "x": -200.0,
             "y": 100.0
@@ -87,12 +94,19 @@ expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostic
               }
             ],
             "body": "",
+            "content": {
+              "shape": "arrow",
+              "type": "shape"
+            },
             "h": 0.0,
             "id": "s2",
             "kind": "shape",
             "locked": false,
             "opacity": 1.0,
             "rot": 0.0,
+            "style": {
+              "stroke": "#e11"
+            },
             "w": 600.0,
             "x": 100.0,
             "y": 1200.0

@@ -45,6 +45,17 @@ expression: "serde_json::json!({ \"deck\": p.deck, \"diagnostics\": p.diagnostic
               }
             ],
             "body": "```markdown\n---\n<!-- text id=not-a-directive x=1 y=1 w=1 h=1 -->\nStill inside the fence.\n```\n",
+            "content": {
+              "code": "---\n<!-- text id=not-a-directive x=1 y=1 w=1 h=1 -->\nStill inside the fence.\n",
+              "lang": "markdown",
+              "lines": [
+                [
+                  2,
+                  2
+                ]
+              ],
+              "type": "code"
+            },
             "h": 800.0,
             "id": "c1",
             "kind": "code",

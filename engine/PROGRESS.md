@@ -9,7 +9,7 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 | M0 de-risk                    | done (PR #1)        |
 | M1 format core                | done (PR #2)        |
 | M2 operations                 | done (PR #3)        |
-| M3 elements and style         | not started         |
+| M3 elements and style         | in progress         |
 | M4 animation and HTML export  | not started         |
 | M5 native render              | not started         |
 | M6 CLI                        | not started         |
@@ -22,6 +22,21 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 - 2026-11-15: one branch and one PR per milestone. Commits after each task.
 - 2026-11-16: keep serde-saphyr (about 400 KB of WASM) and nested inline themes. Spec 04 set a 150 KB limit for it; the build spec only replaces it above 1.5 MB total, and the core is 677 KB. The flat front matter reader stays the fallback if a later milestone trips the size gate. Decided by the user.
 - 2026-11-15: approved after review. Native PDF export draws text by passing parley glyph runs straight to krilla (`draw_glyphs` with parley's cluster ranges, ligature continuations merged, glyph y offsets negated). krilla-svg draws everything that is not text. PNG export keeps the flattened SVG through resvg.
+
+## M3 results
+
+Code: `crates/core/src/kinds.rs` (attributes and bodies per kind), `crates/core/src/theme.rs` (themes, `resolved_style`, backgrounds, masters), `themes/default.json`.
+
+Decisions:
+
+- Element bodies are read with pulldown-cmark, which the spec already picks for export. The core's WASM build went from 677 KB to 852 KB. M4 adds the export code and the presentation runtime, so the 1 MB target is getting close; if it trips, the first fallback is the flat front matter reader (about 400 KB).
+- Every element gets `style` (style attributes as written) and `content` (typed kind data: image path, alt text and fit; code language, source and highlighted lines; table header flag; Mermaid or math source; video and embed fields; group items).
+- Colors are `#rgb`, `#rrggbb`, `#rrggbbaa` or a theme role, as the spec lists. Named CSS colors such as `red` give `E-ATTR-VALUE`. `fill` and `bg` also take `linear(angle,color,color[,color])`.
+- A theme file named in front matter is read only when the host calls `load_theme(&resolver)`, since the engine never touches files. Until then the default theme applies. A loaded theme survives later edits as long as the front matter still names the same file.
+- `AssetResolver` and `Asset` live in the core now (M3 needs them for themes) rather than waiting for M4's export module.
+- Which master a slide gets: its own `master=`, else its layout's master, else the first master in the deck. `master=none` gives none.
+- `resolved_style` defaults: body font and `text` color, 32 px (24 px for code and tables), weight 400, line height 1.3, start alignment, top. Code uses the code font and colors on `code-bg` with 24 px padding. Rect and ellipse fill with `accent1`; lines and arrows stroke with `text` at 2 px.
+- `AddSlide` from a layout copies the placeholder's style attributes onto the new element, which is how layout styling reaches slides.
 
 ## M2 results
 
