@@ -4,8 +4,16 @@ import type { HitField } from "./HitField";
 /**
  * Where a search match was found.
  */
-export type Hit = { slide: number, 
+export type Hit = { 
+/**
+ * 0-based index of the slide with the match.
+ */
+slide: number, 
 /**
  * The element, or `None` for a match in the notes.
  */
-element?: string, field: HitField, };
+element?: string, 
+/**
+ * Whether the match is in an element body or the notes.
+ */
+field: HitField, };

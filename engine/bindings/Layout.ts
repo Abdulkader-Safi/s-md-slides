@@ -2,4 +2,23 @@
 import type { Attr } from "./Attr";
 import type { Placeholder } from "./Placeholder";
 
-export type Layout = { id: string, master?: string, attrs: Array<Attr>, placeholders: Array<Placeholder>, };
+/**
+ * A layout: placeholder positions on a master.
+ */
+export type Layout = { 
+/**
+ * Layout id from `id=`.
+ */
+id: string, 
+/**
+ * Master id from `master=`. `None` uses the deck's first master.
+ */
+master?: string, 
+/**
+ * Attributes of the `<!-- layout -->` directive as written.
+ */
+attrs: Array<Attr>, 
+/**
+ * Placeholders in file order.
+ */
+placeholders: Array<Placeholder>, };

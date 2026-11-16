@@ -3,4 +3,16 @@
 /**
  * Fonts by role.
  */
-export type Fonts = { heading: string, body: string, code: string, };
+export type Fonts = { 
+/**
+ * Font family for headings.
+ */
+heading: string, 
+/**
+ * Font family for body text.
+ */
+body: string, 
+/**
+ * Font family for code.
+ */
+code: string, };

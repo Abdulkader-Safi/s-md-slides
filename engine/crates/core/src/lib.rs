@@ -16,6 +16,8 @@
 //! assert_eq!(deck.text(), src);
 //! ```
 
+#![deny(missing_docs)]
+
 pub mod attrs;
 mod deck;
 pub mod diag;

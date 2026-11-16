@@ -9,29 +9,40 @@ use std::ops::Range;
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Hit {
+    /// 0-based index of the slide with the match.
     pub slide: usize,
     /// The element, or `None` for a match in the notes.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub element: Option<String>,
+    /// Whether the match is in an element body or the notes.
     pub field: HitField,
 }
 
+/// Where in a slide a search match is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum HitField {
+    /// In an element's markdown body.
     Body,
+    /// In the slide's speaker notes.
     Notes,
 }
 
+/// How the deck uses an asset.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum AssetKind {
+    /// A markdown image in an element body.
     Image,
+    /// The `src=` of a video element.
     Video,
+    /// A `poster=` of a video or embed.
     Poster,
+    /// A theme file named in front matter.
     Theme,
+    /// A slide background image from `bg=`.
     Background,
 }
 
@@ -39,7 +50,9 @@ pub enum AssetKind {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct AssetRef {
+    /// Path as written, relative to the deck.
     pub path: String,
+    /// How the asset is used.
     pub kind: AssetKind,
     /// Element ids, `slide:N` (0-based) for backgrounds, or `front` for the theme.
     pub used_by: Vec<String>,

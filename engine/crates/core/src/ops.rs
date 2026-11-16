@@ -18,147 +18,207 @@ use std::ops::Range;
 #[serde(untagged)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum ZTo {
+    /// Stacking index in the slide. 0 is the back.
     Index(usize),
+    /// A relative move.
     Step(ZStep),
 }
 
+/// A relative stacking move for `SetZ`.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum ZStep {
+    /// To the top of the slide.
     Front,
+    /// To the bottom of the slide.
     Back,
+    /// One place up.
     Forward,
+    /// One place down.
     Backward,
 }
 
+/// One edit to a deck. Apply it with `Deck::apply`, which returns the inverse.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum Op {
     /// Insert a slide before `index` (or at the end). Empty, from a layout, or raw text.
     AddSlide {
+        /// 0-based slide index to insert before. Past the last slide appends.
         index: usize,
+        /// Layout id. The new slide gets one element per placeholder.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         layout: Option<String>,
+        /// Slide source text to insert as is, without the `---` separator.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         raw: Option<String>,
     },
+    /// Remove a slide and everything on it.
     RemoveSlide {
+        /// 0-based index of the slide to remove.
         index: usize,
     },
     /// Copy a slide right after itself, with fresh element ids.
     DuplicateSlide {
+        /// 0-based index of the slide to copy.
         index: usize,
     },
+    /// Move a slide to a new position.
     MoveSlide {
+        /// 0-based index of the slide to move.
         from: usize,
+        /// 0-based index the slide ends up at.
         to: usize,
     },
     /// Add an element at `index` in the slide's stacking order (default: the top).
     /// Either `kind` plus `attrs` and `body`, or `raw` source text for one element.
     AddElement {
+        /// 0-based index of the slide to add to.
         slide: usize,
+        /// Stacking index (0 is the back). `None` puts it on top.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         index: Option<usize>,
+        /// Element kind, such as `text`. Use with `attrs` and `body`, not with `raw`.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         kind: Option<String>,
+        /// Attributes to write, as in `SetAttrs`. `x`, `y`, `w` and `h` are required for built-in kinds.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         attrs: Option<Map<String, Value>>,
+        /// Markdown body.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         body: Option<String>,
+        /// Source text for one element: its directive line and body.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         raw: Option<String>,
     },
+    /// Remove an element. Removing a group keeps its members.
     RemoveElement {
+        /// Id of the element to remove.
         id: String,
     },
     /// Copy an element right above itself with a fresh id, offset by `dx`, `dy`.
     DuplicateElement {
+        /// Id of the element to copy.
         id: String,
+        /// Horizontal offset in canvas units. `None` keeps `x`.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         dx: Option<f64>,
+        /// Vertical offset in canvas units. `None` keeps `y`.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         dy: Option<f64>,
     },
     /// Move, resize or rotate. On a group it moves and scales the members.
     SetGeometry {
+        /// Id of the element to change.
         id: String,
+        /// New left edge in canvas units. `None` keeps it.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         x: Option<f64>,
+        /// New top edge in canvas units. `None` keeps it.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         y: Option<f64>,
+        /// New width in canvas units. `None` keeps it.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         w: Option<f64>,
+        /// New height in canvas units. `None` keeps it.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         h: Option<f64>,
+        /// New rotation in degrees. `None` keeps it.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         rot: Option<f64>,
     },
     /// Set and remove attributes. Values: string, number, `true` for a bare flag, a
     /// list for comma-separated values; `false` or `null` removes the key.
     SetAttrs {
+        /// Id of the element to change.
         id: String,
+        /// Attributes to set, by key.
         #[serde(default, skip_serializing_if = "Map::is_empty")]
         set: Map<String, Value>,
+        /// Keys to remove.
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         remove: Vec<String>,
     },
+    /// Replace an element's markdown body.
     SetBody {
+        /// Id of the element to change.
         id: String,
+        /// New markdown body.
         text: String,
     },
+    /// Change an element's place in its slide's stacking order.
     SetZ {
+        /// Id of the element to move.
         id: String,
+        /// New stacking index or a relative step.
         to: ZTo,
     },
     /// Set the slide's speaker notes, or remove them with `null`.
     SetNotes {
+        /// 0-based slide index.
         slide: usize,
+        /// Notes markdown. `None` removes the notes.
         #[serde(default)]
         text: Option<String>,
     },
     /// Edit the `<!-- slide -->` directive (bg, layout, master, hide, transition).
     SetSlideAttrs {
+        /// 0-based slide index.
         slide: usize,
+        /// Attributes to set, by key. Values work as in `SetAttrs`.
         #[serde(default, skip_serializing_if = "Map::is_empty")]
         set: Map<String, Value>,
+        /// Keys to remove.
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         remove: Vec<String>,
     },
     /// Set a top-level front matter key, or remove it with `null`.
     SetFrontMatter {
+        /// Front matter key, such as `title` or `canvas`.
         key: String,
+        /// New value. `None` removes the key.
         #[serde(default)]
         value: Option<Value>,
     },
     /// Add a master or layout block given as source text.
     AddDefinition {
+        /// Source text of the block, starting with its `<!-- master -->` or `<!-- layout -->` line.
         raw: String,
     },
     /// Remove a master or layout. Refused while a slide or layout uses it.
     RemoveDefinition {
+        /// Id of the master or layout to remove.
         id: String,
     },
     /// Group elements on one slide under a new `group` element.
     Group {
+        /// Ids of the elements to group, all on one slide.
         ids: Vec<String>,
+        /// Id for the new group. `None` generates one.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         id: Option<String>,
     },
+    /// Remove a group element and keep its members.
     Ungroup {
+        /// Id of the group to remove.
         id: String,
     },
     /// Low-level: replace the bytes `old` found at byte offset `at` with `new`. Fails if
     /// the bytes there are not `old`. Every inverse is one of these, so undo restores the
     /// exact bytes. Offsets are UTF-8 byte offsets into `deck.text()`.
     Replace {
+        /// Byte offset into `deck.text()` where `old` starts.
         at: usize,
+        /// Bytes expected at `at`.
         old: String,
+        /// Bytes to put in their place.
         new: String,
     },
     /// All or nothing. The inverse is one `Batch`.
     Batch {
+        /// Ops to apply in order.
         ops: Vec<Op>,
     },
 }

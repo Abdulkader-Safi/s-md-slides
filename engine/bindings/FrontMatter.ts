@@ -3,11 +3,38 @@ import type { Canvas } from "./Canvas";
 import type { Dir } from "./Dir";
 import type { JsonValue } from "./serde_json/JsonValue";
 
-export type FrontMatter = { title?: string, author?: string, canvas: Canvas, dir: Dir, lang?: string, 
+/**
+ * The deck's front matter as read. Edits splice key lines; the model is never printed.
+ */
+export type FrontMatter = { 
+/**
+ * `title` key. Masters show it through `{title}`.
+ */
+title?: string, 
+/**
+ * `author` key.
+ */
+author?: string, 
+/**
+ * Slide size. 1920 x 1080 when not written.
+ */
+canvas: Canvas, 
+/**
+ * Deck text direction. `auto` when not written.
+ */
+dir: Dir, 
+/**
+ * `lang` key, a language tag such as `en` or `ar`.
+ */
+lang?: string, 
 /**
  * Inline mapping or a relative path to a JSON theme. Resolved in M3.
  */
-theme?: JsonValue, transition?: string, 
+theme?: JsonValue, 
+/**
+ * Default slide transition: `none`, `fade` or `push`. `None` means `fade`.
+ */
+transition?: string, 
 /**
  * Keys the engine does not know, kept for hosts. They round-trip in the text.
  */

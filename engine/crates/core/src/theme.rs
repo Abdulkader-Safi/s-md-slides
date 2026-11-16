@@ -11,12 +11,15 @@ use std::collections::BTreeMap;
 /// A file the host hands to the engine. The engine never reads files itself.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Asset {
+    /// File contents.
     pub bytes: Vec<u8>,
+    /// Media type, such as `image/png`.
     pub mime: String,
 }
 
 /// The only way the engine sees files: the host resolves paths relative to the deck.
 pub trait AssetResolver {
+    /// Bytes for `path` (relative to the deck), or `None` if it does not exist.
     fn resolve(&self, path: &str) -> Option<Asset>;
 }
 
@@ -34,8 +37,11 @@ pub fn safe_font(f: &str) -> Option<&str> {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub struct Fonts {
+    /// Font family for headings.
     pub heading: String,
+    /// Font family for body text.
     pub body: String,
+    /// Font family for code.
     pub code: String,
 }
 
@@ -43,7 +49,9 @@ pub struct Fonts {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub struct Theme {
+    /// Hex color by role name (`background`, `text`, `accent1` and so on).
     pub colors: BTreeMap<String, String>,
+    /// Font family by role.
     pub fonts: Fonts,
     /// Color, role, `linear(...)` gradient or image path.
     pub background: String,
@@ -150,9 +158,23 @@ impl Theme {
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum Background {
-    Color { color: String },
-    Gradient { angle: f64, stops: Vec<String> },
-    Image { path: String },
+    /// A solid color.
+    Color {
+        /// The color as #hex.
+        color: String,
+    },
+    /// A linear gradient.
+    Gradient {
+        /// Direction in degrees, as in CSS `linear-gradient`.
+        angle: f64,
+        /// Two or three colors as #hex.
+        stops: Vec<String>,
+    },
+    /// An image that covers the slide.
+    Image {
+        /// Image path as written, relative to the deck.
+        path: String,
+    },
 }
 
 /// True when a `bg` value is valid: a color, a role, a gradient or a relative path.
@@ -166,23 +188,33 @@ pub(crate) fn valid_background(v: &str) -> bool {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct ResolvedStyle {
+    /// Font family, with roles resolved.
     pub font: String,
+    /// Font size in canvas units.
     pub size: f64,
     /// Text color as #hex.
     pub color: String,
+    /// Font weight from 100 to 900.
     pub weight: u32,
+    /// `left`, `center`, `right`, `justify`, `start` or `end`. `start` by default.
     pub align: String,
+    /// `top`, `middle` or `bottom`. `top` by default.
     pub valign: String,
+    /// Line height as a multiple of the font size.
     #[serde(rename = "line-height")]
     pub line_height: f64,
     /// Top, right, bottom, left.
     pub padding: [f64; 4],
     /// #hex or `linear(angle,#hex,#hex)`; `None` for no fill.
     pub fill: Option<String>,
+    /// Outline color as #hex; `None` for no outline.
     pub stroke: Option<String>,
+    /// Outline width in canvas units.
     #[serde(rename = "stroke-width")]
     pub stroke_width: f64,
+    /// Corner radius in canvas units.
     pub radius: f64,
+    /// Text direction with `auto` resolved.
     pub dir: Dir,
 }
 

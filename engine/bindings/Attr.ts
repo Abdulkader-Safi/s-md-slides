@@ -3,7 +3,11 @@
 /**
  * One attribute token, in file order.
  */
-export type Attr = { key: string, 
+export type Attr = { 
+/**
+ * Attribute name as written, such as `x` or `stroke-width`.
+ */
+key: string, 
 /**
  * Unescaped value. `None` for a bare key such as `locked`.
  */

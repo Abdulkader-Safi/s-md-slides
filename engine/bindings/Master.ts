@@ -2,4 +2,19 @@
 import type { Attr } from "./Attr";
 import type { Element } from "./Element";
 
-export type Master = { id: string, attrs: Array<Attr>, elements: Array<Element>, };
+/**
+ * A master: elements drawn behind every slide that uses it.
+ */
+export type Master = { 
+/**
+ * Master id from `id=`.
+ */
+id: string, 
+/**
+ * Attributes of the `<!-- master -->` directive as written.
+ */
+attrs: Array<Attr>, 
+/**
+ * Master elements in stacking order. Their text can use `{slide}`, `{total}` and `{title}`.
+ */
+elements: Array<Element>, };

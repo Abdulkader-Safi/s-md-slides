@@ -3,4 +3,20 @@
 /**
  * How an element looks at one moment, relative to its place on the slide.
  */
-export type State = { opacity: number, dx: number, dy: number, scale: number, };
+export type State = { 
+/**
+ * Opacity from 0 to 1.
+ */
+opacity: number, 
+/**
+ * Horizontal offset from the element's place, in canvas units.
+ */
+dx: number, 
+/**
+ * Vertical offset from the element's place, in canvas units.
+ */
+dy: number, 
+/**
+ * Size multiple around the element's center. 1 is its normal size.
+ */
+scale: number, };

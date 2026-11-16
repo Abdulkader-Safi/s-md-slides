@@ -8,10 +8,13 @@ use std::collections::BTreeMap;
 /// Newest format version this engine edits. Newer decks open read-only.
 pub const FORMAT_VERSION: u32 = 1;
 
+/// Slide size in canvas units, from the `canvas` front matter key.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Canvas {
+    /// Width in canvas units. 1920 by default.
     pub width: u32,
+    /// Height in canvas units. 1080 by default.
     pub height: u32,
 }
 
@@ -47,17 +50,22 @@ impl Canvas {
     }
 }
 
+/// Text direction, from `dir` in front matter or on an element.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum Dir {
+    /// The first strong letter decides.
     #[default]
     Auto,
+    /// Left to right.
     Ltr,
+    /// Right to left. Changes text direction and presenter keys, never positions.
     Rtl,
 }
 
 impl Dir {
+    /// Reads `auto`, `ltr` or `rtl`. Anything else gives `None`.
     pub fn parse(s: &str) -> Option<Dir> {
         match s {
             "auto" => Some(Dir::Auto),
@@ -68,20 +76,27 @@ impl Dir {
     }
 }
 
+/// The deck's front matter as read. Edits splice key lines; the model is never printed.
 #[derive(Debug, Clone, Default, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct FrontMatter {
+    /// `title` key. Masters show it through `{title}`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
+    /// `author` key.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub author: Option<String>,
+    /// Slide size. 1920 x 1080 when not written.
     pub canvas: Canvas,
+    /// Deck text direction. `auto` when not written.
     pub dir: Dir,
+    /// `lang` key, a language tag such as `en` or `ar`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     /// Inline mapping or a relative path to a JSON theme. Resolved in M3.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub theme: Option<Value>,
+    /// Default slide transition: `none`, `fade` or `push`. `None` means `fade`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transition: Option<String>,
     /// Keys the engine does not know, kept for hosts. They round-trip in the text.

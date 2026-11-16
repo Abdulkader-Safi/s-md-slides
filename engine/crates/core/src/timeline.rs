@@ -12,13 +12,18 @@ use std::collections::BTreeMap;
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub struct State {
+    /// Opacity from 0 to 1.
     pub opacity: f64,
+    /// Horizontal offset from the element's place, in canvas units.
     pub dx: f64,
+    /// Vertical offset from the element's place, in canvas units.
     pub dy: f64,
+    /// Size multiple around the element's center. 1 is its normal size.
     pub scale: f64,
 }
 
 impl State {
+    /// Fully shown in place.
     pub const VISIBLE: State = State {
         opacity: 1.0,
         dx: 0.0,
@@ -43,11 +48,14 @@ pub fn ease(p: f64) -> f64 {
     1.0 - (1.0 - p).powi(3)
 }
 
+/// Whether an entry brings an element in or takes it out.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 #[serde(rename_all = "lowercase")]
 pub enum Phase {
+    /// Entrance effect.
     Enter,
+    /// Exit effect.
     Exit,
 }
 
@@ -55,14 +63,19 @@ pub enum Phase {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub struct Entry {
+    /// Id of the animated element.
     pub id: String,
+    /// Entrance or exit.
     pub phase: Phase,
+    /// Effect name, such as `fade` or `fly-left`.
     pub effect: String,
     /// Milliseconds after the step starts.
     pub delay: u32,
     /// Milliseconds; 0 for `appear`.
     pub dur: u32,
+    /// State when the effect starts.
     pub from: State,
+    /// State when the effect ends.
     pub to: State,
 }
 
@@ -72,7 +85,9 @@ pub struct Entry {
 pub struct Step {
     /// Milliseconds from the start of the timeline.
     pub start: u32,
+    /// Milliseconds the step lasts: its longest delay plus duration.
     pub duration: u32,
+    /// Animations in this step.
     pub entries: Vec<Entry>,
 }
 
@@ -82,6 +97,7 @@ pub struct Step {
 pub struct Timeline {
     /// State of animated elements before anything plays. Other elements are visible.
     pub initial: BTreeMap<String, State>,
+    /// Steps in order: step 0, then one per click.
     pub steps: Vec<Step>,
     /// Total milliseconds.
     pub duration: u32,

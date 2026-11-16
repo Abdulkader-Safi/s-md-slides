@@ -30,33 +30,46 @@ pub const FONT_ROLES: &[&str] = &["heading", "body", "code"];
 #[derive(Debug, Clone, Default, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Style {
+    /// `font=`: a family name or a font role (`heading`, `body`, `code`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub font: Option<String>,
+    /// `size=`: font size in canvas units.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub size: Option<String>,
+    /// `color=`: text color, a hex color or a theme role.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
+    /// `weight=`: `normal`, `bold` or 100 to 900.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub weight: Option<String>,
+    /// `align=`: `left`, `center`, `right`, `justify`, `start` or `end`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub align: Option<String>,
+    /// `valign=`: `top`, `middle` or `bottom`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub valign: Option<String>,
+    /// `line-height=`: a multiple of the font size.
     #[serde(rename = "line-height", skip_serializing_if = "Option::is_none")]
     pub line_height: Option<String>,
+    /// `padding=`: one to four numbers in canvas units, comma-separated.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub padding: Option<String>,
+    /// `fill=`: a color, a role or a `linear(...)` gradient.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fill: Option<String>,
+    /// `stroke=`: outline color, a hex color or a role.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stroke: Option<String>,
+    /// `stroke-width=`: outline width in canvas units.
     #[serde(rename = "stroke-width", skip_serializing_if = "Option::is_none")]
     pub stroke_width: Option<String>,
+    /// `radius=`: corner radius in canvas units.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub radius: Option<String>,
 }
 
 impl Style {
+    /// True when no style attribute is written.
     pub fn is_empty(&self) -> bool {
         *self == Style::default()
     }
@@ -77,14 +90,18 @@ pub const EFFECTS: &[&str] = &[
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Anim {
+    /// Entrance effect from `enter=`, such as `fade` or `fly-left`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enter: Option<String>,
+    /// Exit effect from `exit=`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub exit: Option<String>,
     /// Build step (1 and up). `None` plays when the slide appears.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub order: Option<u32>,
+    /// Milliseconds to wait after the step starts. 0 by default.
     pub delay: u32,
+    /// Effect length in milliseconds. 400 by default.
     pub dur: u32,
 }
 
@@ -101,6 +118,7 @@ impl Default for Anim {
 }
 
 impl Anim {
+    /// True when the element has no entrance or exit effect.
     pub fn is_static(&self) -> bool {
         self.enter.is_none() && self.exit.is_none()
     }
@@ -111,50 +129,79 @@ impl Anim {
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum Content {
+    /// An image element.
     Image {
+        /// Image path as written in the markdown image.
         path: String,
+        /// Alt text. Empty gives a `W-NO-ALT` warning.
         alt: String,
+        /// `fit=`: `contain`, `cover` or `fill`.
         fit: String,
+        /// `crop=x,y,w,h` in image pixels.
         #[serde(skip_serializing_if = "Option::is_none")]
         crop: Option<[f64; 4]>,
     },
+    /// A shape element.
     Shape {
+        /// `kind=`: `rect`, `ellipse`, `line` or `arrow`. `rect` when not written.
         shape: String,
+        /// `arrow-start=` as written, such as `triangle`. `None` draws no head at the start.
         #[serde(skip_serializing_if = "Option::is_none")]
         arrow_start: Option<String>,
+        /// `arrow-end=` as written. `None` leaves the default: a head on arrows, none on lines.
         #[serde(skip_serializing_if = "Option::is_none")]
         arrow_end: Option<String>,
     },
+    /// A code element.
     Code {
+        /// Language tag of the fence, such as `rust`. Empty when missing.
         lang: String,
+        /// Code inside the fence.
         code: String,
         /// Highlighted lines as inclusive 1-based ranges.
         lines: Vec<[u32; 2]>,
     },
+    /// A table element.
     Table {
+        /// False when `header=false`: the first row is styled like the others.
         header: bool,
     },
+    /// A Mermaid diagram element.
     Diagram {
+        /// Mermaid source inside the fence.
         source: String,
     },
+    /// A math element.
     Math {
+        /// LaTeX source, trimmed.
         source: String,
     },
+    /// A video element.
     Video {
+        /// Video path from `src=`.
         src: String,
+        /// `poster=`: still image shown in PDF and image exports.
         #[serde(skip_serializing_if = "Option::is_none")]
         poster: Option<String>,
+        /// `autoplay` flag.
         autoplay: bool,
+        /// `loop` flag.
         #[serde(rename = "loop")]
         looped: bool,
+        /// `muted` flag.
         muted: bool,
     },
+    /// An embed element.
     Embed {
+        /// Page address from `src=`. Must start with `https://`.
         src: String,
+        /// `poster=`: still image shown in exports other than HTML.
         #[serde(skip_serializing_if = "Option::is_none")]
         poster: Option<String>,
     },
+    /// A group element.
     Group {
+        /// Member ids from `items=`, in order.
         items: Vec<String>,
     },
 }

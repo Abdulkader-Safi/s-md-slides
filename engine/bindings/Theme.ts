@@ -4,7 +4,15 @@ import type { Fonts } from "./Fonts";
 /**
  * Colors by role, fonts by role and the default slide background.
  */
-export type Theme = { colors: { [key in string]: string }, fonts: Fonts, 
+export type Theme = { 
+/**
+ * Hex color by role name (`background`, `text`, `accent1` and so on).
+ */
+colors: { [key in string]: string }, 
+/**
+ * Font family by role.
+ */
+fonts: Fonts, 
 /**
  * Color, role, `linear(...)` gradient or image path.
  */

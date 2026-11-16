@@ -10,20 +10,28 @@ use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use std::ops::Range;
 
+/// Files larger than this many bytes open read-only.
 pub const MAX_FILE_BYTES: usize = 20 * 1024 * 1024;
+/// Decks with more slides than this open read-only.
 pub const MAX_SLIDES: usize = 5_000;
+/// Slides with more elements than this open read-only.
 pub const MAX_ELEMENTS_PER_SLIDE: usize = 2_000;
+/// Attribute values longer than this many bytes are an `E-LIMIT` error.
 pub const MAX_ATTR_VALUE_BYTES: usize = 4 * 1024;
 
+/// Line ending style. New lines use the file's most common one.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum LineEnding {
+    /// `\n`.
     Lf,
+    /// `\r\n`.
     Crlf,
 }
 
 impl LineEnding {
+    /// The line ending as text.
     pub fn as_str(self) -> &'static str {
         match self {
             LineEnding::Lf => "\n",
@@ -32,20 +40,32 @@ impl LineEnding {
     }
 }
 
+/// Element kind, from the directive's first word.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(into = "String")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, type = "string"))]
 pub enum Kind {
+    /// Markdown text box.
     Text,
+    /// One markdown image.
     Image,
+    /// Rectangle, ellipse, line or arrow.
     Shape,
+    /// One fenced code block.
     Code,
+    /// One markdown table.
     Table,
+    /// One Mermaid diagram.
     Diagram,
+    /// One LaTeX block.
     Math,
+    /// Video file, with an optional poster.
     Video,
+    /// An https page in an iframe.
     Embed,
+    /// A set of elements on the same slide that move together.
     Group,
+    /// A kind the engine does not know, kept because the directive has an `id=`.
     Unknown(String),
 }
 
@@ -65,6 +85,7 @@ impl Kind {
             other => Kind::Unknown(other.to_string()),
         }
     }
+    /// The kind as written in a directive, such as `text`.
     pub fn name(&self) -> &str {
         match self {
             Kind::Text => "text",
@@ -109,20 +130,32 @@ impl ElementSrc {
     }
 }
 
+/// One box on a slide or master: its directive plus its markdown body.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Element {
+    /// Element id, unique in the deck. Written in the file or assigned in memory until the element is first edited.
     pub id: String,
+    /// What the element is.
     pub kind: Kind,
+    /// Left edge in canvas units.
     pub x: f64,
+    /// Top edge in canvas units.
     pub y: f64,
+    /// Width in canvas units.
     pub w: f64,
+    /// Height in canvas units. 0 for a horizontal line or arrow written without `h`.
     pub h: f64,
+    /// Rotation in degrees. 0 when not written.
     pub rot: f64,
+    /// Opacity from 0 to 1. 1 when not written.
     pub opacity: f64,
+    /// True when `locked` is set, so editors should not move the element.
     pub locked: bool,
+    /// Display name from `name=`, for editors' layer lists.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
+    /// Text direction from `dir=`. `None` follows the deck; see [`Deck::resolved_dir`].
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dir: Option<Dir>,
     /// Every attribute as written, in order (known ones included).
@@ -160,12 +193,16 @@ impl Element {
     }
 }
 
+/// Which master a slide uses, from `master=` on its slide directive.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(into = "String")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, type = "string"))]
 pub enum MasterSetting {
+    /// No `master=` (or `master=inherit`): the layout's master, else the deck's first master.
     Inherit,
+    /// `master=none`: no master is drawn.
     None,
+    /// A master id.
     Id(String),
 }
 
@@ -218,17 +255,24 @@ pub(crate) struct DefSrc {
     pub section: usize,
 }
 
+/// One slide: its directive settings, elements and notes.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Slide {
+    /// 0-based position in the deck.
     pub index: usize,
+    /// Layout id from `layout=`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub layout: Option<String>,
+    /// Which master the slide draws behind its elements.
     pub master: MasterSetting,
+    /// Ids of master elements this slide hides, from `hide=`.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub hide: Vec<String>,
+    /// Background as written in `bg=`: a color, a role, a `linear(...)` gradient or an image path.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bg: Option<String>,
+    /// Transition from `transition=`: `none`, `fade` or `push`. `None` uses the deck default.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transition: Option<String>,
     /// Transition length in milliseconds (`dur=` on the slide directive).
@@ -239,56 +283,81 @@ pub struct Slide {
     pub attrs: Vec<Attr>,
     /// File order is stacking order.
     pub elements: Vec<Element>,
+    /// Speaker notes as raw markdown. `None` when the slide has no `<!-- notes -->`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub notes: Option<String>,
     #[serde(skip)]
     pub(crate) src: SlideSrc,
 }
 
+/// A master: elements drawn behind every slide that uses it.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Master {
+    /// Master id from `id=`.
     pub id: String,
+    /// Attributes of the `<!-- master -->` directive as written.
     pub attrs: Vec<Attr>,
+    /// Master elements in stacking order. Their text can use `{slide}`, `{total}` and `{title}`.
     pub elements: Vec<Element>,
     #[serde(skip)]
     pub(crate) src: DefSrc,
 }
 
+/// A named position in a layout. A slide added from the layout gets one element per placeholder.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Placeholder {
+    /// Placeholder id, unique within its layout.
     pub id: String,
+    /// Kind of element the placeholder makes, from `kind=`. `text` when not written.
     pub kind: String,
+    /// Left edge in canvas units.
     pub x: f64,
+    /// Top edge in canvas units.
     pub y: f64,
+    /// Width in canvas units.
     pub w: f64,
+    /// Height in canvas units.
     pub h: f64,
+    /// Attributes of the `<!-- placeholder -->` directive as written, style included.
     pub attrs: Vec<Attr>,
 }
 
+/// A layout: placeholder positions on a master.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Layout {
+    /// Layout id from `id=`.
     pub id: String,
+    /// Master id from `master=`. `None` uses the deck's first master.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub master: Option<String>,
+    /// Attributes of the `<!-- layout -->` directive as written.
     pub attrs: Vec<Attr>,
+    /// Placeholders in file order.
     pub placeholders: Vec<Placeholder>,
     #[serde(skip)]
     pub(crate) src: DefSrc,
 }
 
+/// A parsed deck. It keeps the source text, and every edit splices that text.
 #[derive(Debug, Clone, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Deck {
     #[serde(skip)]
     pub(crate) source: String,
+    /// Format version from the `s-md-slides` front matter key. Above [`frontmatter::FORMAT_VERSION`] the deck is read-only.
     pub version: u32,
+    /// Front matter as read.
     pub front: FrontMatter,
+    /// Masters in file order.
     pub masters: Vec<Master>,
+    /// Layouts in file order.
     pub layouts: Vec<Layout>,
+    /// Slides in file order.
     pub slides: Vec<Slide>,
+    /// The file's most common line ending, used for new lines.
     pub line_ending: LineEnding,
     #[serde(skip)]
     pub(crate) diagnostics: Vec<Diagnostic>,
@@ -312,7 +381,9 @@ pub struct Deck {
 /// Result of [`Deck::parse`]: always a deck, plus whatever went wrong.
 #[derive(Debug, Clone)]
 pub struct Parsed {
+    /// The deck, read as far as it could be.
     pub deck: Deck,
+    /// Problems found, with line and column.
     pub diagnostics: Vec<Diagnostic>,
 }
 
@@ -463,10 +534,12 @@ impl Deck {
         self.read_only
     }
 
+    /// Canvas size from front matter.
     pub fn canvas(&self) -> Canvas {
         self.front.canvas
     }
 
+    /// Slide at a 0-based index.
     pub fn slide(&self, index: usize) -> Option<&Slide> {
         self.slides.get(index)
     }
@@ -479,6 +552,7 @@ impl Deck {
             .chain(self.slides.iter().flat_map(|s| &s.elements))
     }
 
+    /// The element with this id, on a slide or a master.
     pub fn element(&self, id: &str) -> Option<&Element> {
         self.elements().find(|e| e.id == id)
     }

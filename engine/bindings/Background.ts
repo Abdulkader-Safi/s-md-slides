@@ -3,4 +3,20 @@
 /**
  * A slide background with roles resolved.
  */
-export type Background = { "type": "color", color: string, } | { "type": "gradient", angle: number, stops: Array<string>, } | { "type": "image", path: string, };
+export type Background = { "type": "color", 
+/**
+ * The color as #hex.
+ */
+color: string, } | { "type": "gradient", 
+/**
+ * Direction in degrees, as in CSS `linear-gradient`.
+ */
+angle: number, 
+/**
+ * Two or three colors as #hex.
+ */
+stops: Array<string>, } | { "type": "image", 
+/**
+ * Image path as written, relative to the deck.
+ */
+path: string, };

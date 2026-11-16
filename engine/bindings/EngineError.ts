@@ -3,4 +3,20 @@
 /**
  * Error returned by operations. The deck is unchanged when one comes back.
  */
-export type EngineError = { code: string, message: string, element?: string, slide?: number, };
+export type EngineError = { 
+/**
+ * Stable code such as `E-NOT-FOUND`.
+ */
+code: string, 
+/**
+ * One English sentence that says what to do.
+ */
+message: string, 
+/**
+ * Id of the element the op failed on, if any.
+ */
+element?: string, 
+/**
+ * 0-based index of the slide the op failed on, if any.
+ */
+slide?: number, };
