@@ -4,8 +4,7 @@
 .smd-text,.smd-flow{display:flex;flex-direction:column;overflow:hidden;overflow-wrap:break-word}
 .smd-text>:first-child,.smd-flow>:first-child{margin-top:0}
 .smd-text>:last-child,.smd-flow>:last-child{margin-bottom:0}
-.smd-slide h1,.smd-slide h2,.smd-slide h3,.smd-slide h4,.smd-slide h5,.smd-slide h6{font-family:var(--smd-heading);line-height:1.15;margin:0 0 .4em}
-.smd-slide h1{font-size:2em}.smd-slide h2{font-size:1.6em}.smd-slide h3{font-size:1.3em}
+.smd-slide h1,.smd-slide h2,.smd-slide h3,.smd-slide h4,.smd-slide h5,.smd-slide h6{font-family:var(--smd-heading);font-size:1em;line-height:1.15;margin:0 0 .4em}
 .smd-slide p,.smd-slide ul,.smd-slide ol,.smd-slide blockquote,.smd-slide table,.smd-slide pre{margin:0 0 .6em}
 .smd-slide a{color:var(--smd-accent1)}
 .smd-slide code{font-family:var(--smd-code);font-size:.9em}
