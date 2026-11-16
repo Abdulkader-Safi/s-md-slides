@@ -151,7 +151,7 @@ fn fr_el_03_04_05_shapes_code_tables() {
     );
     assert!(
         h.contains("data-lang=\"rust\"")
-            && h.contains("font-family:'Noto Sans Mono'")
+            && h.contains("font-family:&#39;Noto Sans Mono&#39;")
             && h.contains("background:#f3f4f6"),
         "{h}"
     );
@@ -337,4 +337,49 @@ fn unsafe_urls_never_reach_the_output() {
     }
     let page = presentation_html(&d, &Options::default()).text;
     assert!(page.contains("aria-label=\"x&quot; onmouseover=&quot;alert(1)\""));
+}
+
+#[test]
+fn security_review_regressions() {
+    // 1. A fake tag with an unquoted `<` inside must not smuggle a live tag through.
+    for body in [
+        "<1<script>alert(1)</script>",
+        "<a<img src=x onerror=alert(1)>",
+        "x <<script>alert(1)//<</script>",
+    ] {
+        let h = html(&format!("<!-- text id=t x=0 y=0 w=10 h=10 -->\n{body}\n"));
+        let inner = h.split_once('>').unwrap().1;
+        assert!(
+            !inner.contains("<script") && !inner.contains("onerror"),
+            "{body} gave {h}"
+        );
+    }
+    // 2. Invalid style values (reported as errors) never reach a style attribute.
+    let src = "---\ntheme:\n  fonts:\n    code: \"x'};body{background:red\"\n---\n<!-- code id=c x=0 y=0 w=10 h=10 color=\"x\\\" onmouseover=\\\"alert(1)\" align=\"center\\\" onclick=\\\"y\" font=\"a'b\" -->\n```js\n1\n```\n<!-- shape id=s kind=rect x=0 y=0 w=10 h=10 color=\"z\\\" onfocus=\\\"q\" -->\nlabel\n";
+    let d = Deck::parse(src).deck;
+    for out in [
+        slide_html(&d, 0, Frame::End, &Options::default())
+            .unwrap()
+            .text,
+        slide_svg(&d, 0, Frame::End, &Options::default())
+            .unwrap()
+            .text,
+        presentation_html(&d, &Options::default()).text,
+    ] {
+        assert!(
+            !out.contains("\" onmouseover")
+                && !out.contains("\" onclick")
+                && !out.contains("\" onfocus"),
+            "{out}"
+        );
+        assert!(
+            !out.contains("background:red"),
+            "3. unsafe code font is refused"
+        );
+    }
+    let r = d.resolved_style("c").unwrap();
+    assert_eq!(
+        (r.color.as_str(), r.align.as_str(), r.font.as_str()),
+        ("#1f2328", "start", "Noto Sans Mono")
+    );
 }

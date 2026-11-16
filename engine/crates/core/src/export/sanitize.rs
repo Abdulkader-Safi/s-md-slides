@@ -302,7 +302,8 @@ fn tag_end(s: &str) -> Option<usize> {
             (None, '"' | '\'') => quote = Some(c),
             (Some(q), c) if c == q => quote = None,
             (None, '>') => return Some(i),
-            (None, '<') if i == 1 => return None,
+            // An unquoted `<` means this was never a tag: emit the first `<` as text.
+            (None, '<') => return None,
             _ => {}
         }
     }
@@ -372,7 +373,7 @@ fn entities(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     let mut rest = s;
     while let Some(i) = rest.find('&') {
-        out.push_str(&rest[..i].replace('>', "&gt;"));
+        out.push_str(&rest[..i].replace('<', "&lt;").replace('>', "&gt;"));
         rest = &rest[i..];
         let semi = rest[1..].find(';').map(|p| p + 1).filter(|p| *p <= 10);
         let name = semi.map(|p| &rest[1..p]);
@@ -401,7 +402,7 @@ fn entities(s: &str) -> String {
             }
         }
     }
-    out.push_str(&rest.replace('>', "&gt;"));
+    out.push_str(&rest.replace('<', "&lt;").replace('>', "&gt;"));
     out
 }
 

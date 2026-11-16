@@ -58,7 +58,10 @@ pub(crate) fn px(v: f64) -> String {
 }
 
 fn font_family(f: &str) -> String {
-    format!("'{}',sans-serif", f.replace(['\'', '"', ';', '<', '>'], ""))
+    format!(
+        "'{}',sans-serif",
+        crate::theme::safe_font(f).unwrap_or("sans-serif")
+    )
 }
 
 /// CSS custom properties for the theme, set on each slide.
@@ -69,7 +72,7 @@ pub(crate) fn theme_vars(deck: &Deck) -> String {
         "--smd-heading:{};--smd-body:{};--smd-code:'{}',monospace;--smd-text:{};--smd-accent1:{};--smd-code-bg:{};--smd-code-fg:{}",
         font_family(&t.fonts.heading),
         font_family(&t.fonts.body),
-        t.fonts.code.replace(['\'', '"', ';'], ""),
+        crate::theme::safe_font(&t.fonts.code).unwrap_or("monospace"),
         c("text"),
         c("accent1"),
         c("code-bg"),
@@ -291,7 +294,7 @@ pub(crate) fn code_html(lang: &str, code: &str, lines: &[[u32; 2]], r: &Resolved
     format!(
         "<pre class=\"smd-code\" data-lang=\"{}\" style=\"{};background:{fill};width:100%;height:100%\"><code>{body}</code></pre>",
         esc_attr(lang),
-        text_style(r)
+        esc_attr(&text_style(r))
     )
 }
 
@@ -359,7 +362,7 @@ pub(crate) fn element_inner(
                 let html = cx.md(e, &body, Some(slide));
                 inner.push_str(&format!(
                     "<div class=\"smd-shape-text\" style=\"{}\">{html}</div>",
-                    text_style(&r)
+                    esc_attr(&text_style(&r))
                 ));
             }
             ("smd-shape".into(), inner)

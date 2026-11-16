@@ -36,6 +36,7 @@ Decisions:
 - Headings inside a text box use the box's `size`, set in the heading font, instead of the browser's 2em for h1. A box with `size=72` shows its `# Title` at 72 px, as the spec's examples expect.
 - Mermaid and math show their source in a labeled box in HTML and browser SVG. Drawing them needs the native renderer (M5) or the host (Obsidian renders them itself, per spec).
 - Asset URLs and embed `src` are scheme-checked at export: `javascript:` and other unsafe schemes become the gray placeholder, and embeds must be https. YouTube links are rewritten to youtube-nocookie.
+- Security review fixes (2026-11-16): the sanitizer escapes `<` in every text it echoes and treats an unquoted `<` inside a would-be tag as text; every style attribute is attribute-escaped; `resolved_style` replaces values that failed validation with defaults; font names are limited to letters, digits, spaces and `-_.`. `fuzz_parse` now renders every fuzzed deck to HTML and SVG and fails on any `<script` in slide markup: 1,000,000 runs, none found.
 - The CSP pins the runtime by its SHA-256 (`crates/core/src/runtime/runtime.sha256`, written by the build). CI rebuilds the runtime and fails if the committed copy differs.
 - Presentation controls stay fully opaque. They faded to 35% when idle at first, which failed axe's color contrast check on dark slides.
 - WASM: the size probe now calls every export, so the linker keeps them. The core measures 953 KB with the runtime, under the 1 MB target.

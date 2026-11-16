@@ -20,6 +20,16 @@ pub trait AssetResolver {
     fn resolve(&self, path: &str) -> Option<Asset>;
 }
 
+/// A font family name made only of letters, digits, spaces and `-_.`, so it can go
+/// into CSS and attributes as is. Anything else is refused.
+pub fn safe_font(f: &str) -> Option<&str> {
+    let ok = !f.trim().is_empty()
+        && f.len() <= 100
+        && f.chars()
+            .all(|c| c.is_alphanumeric() || matches!(c, ' ' | '-' | '_' | '.'));
+    ok.then_some(f)
+}
+
 /// Fonts by role.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
@@ -101,11 +111,13 @@ impl Theme {
                 }
                 ("fonts", Value::Object(f)) => {
                     for (role, font) in f {
-                        match (role.as_str(), font.as_str()) {
+                        match (role.as_str(), font.as_str().filter(|f| safe_font(f).is_some())) {
                             ("heading", Some(s)) => t.fonts.heading = s.into(),
                             ("body", Some(s)) => t.fonts.body = s.into(),
                             ("code", Some(s)) => t.fonts.code = s.into(),
-                            _ => problems.push(format!("Theme font {role} must be heading, body or code, with a family name.")),
+                            _ => problems.push(format!(
+                                "Theme font {role} must be heading, body or code, with a family name of letters, digits, spaces and -_."
+                            )),
                         }
                     }
                 }
@@ -306,8 +318,17 @@ impl Deck {
         let st = &e.style;
         let code = e.kind == Kind::Code;
         let line_shape = matches!(&e.content, Some(Content::Shape { shape, .. }) if shape == "line" || shape == "arrow");
+        // Values that fail validation (already reported as diagnostics) fall back to the
+        // defaults, so nothing unchecked reaches CSS or SVG.
+        let valid_paint =
+            |v: &&String| v.as_str() == "none" || is_color(v) || parse_gradient(v).is_some();
         let paint = |v: &Option<String>, default: Option<&str>| -> Option<String> {
-            match v.as_deref().or(default) {
+            match v
+                .as_ref()
+                .filter(valid_paint)
+                .map(String::as_str)
+                .or(default)
+            {
                 None | Some("none") => None,
                 Some(g) if g.starts_with("linear(") => parse_gradient(g).map(|(a, stops)| {
                     let stops: Vec<String> = stops.iter().map(|c| t.color(c)).collect();
@@ -319,7 +340,14 @@ impl Deck {
         let num = |v: &Option<String>, default: f64| {
             v.as_deref()
                 .and_then(|s| s.parse::<f64>().ok())
+                .filter(|n| n.is_finite() && *n >= 0.0)
                 .unwrap_or(default)
+        };
+        let pick = |v: &Option<String>, allowed: &[&str], default: &str| {
+            v.as_deref()
+                .filter(|x| allowed.contains(x))
+                .unwrap_or(default)
+                .to_string()
         };
         let fill_default = match e.kind {
             Kind::Shape if !line_shape => Some("accent1"),
@@ -331,6 +359,7 @@ impl Deck {
             font: t.font(
                 st.font
                     .as_deref()
+                    .filter(|f| safe_font(f).is_some())
                     .unwrap_or(if code { "code" } else { "body" }),
             ),
             size: num(
@@ -344,15 +373,24 @@ impl Deck {
             color: t.color(
                 st.color
                     .as_deref()
+                    .filter(|c| is_color(c))
                     .unwrap_or(if code { "code" } else { "text" }),
             ),
             weight: match st.weight.as_deref() {
                 Some("bold") => 700,
-                Some(w) => w.parse().unwrap_or(400),
+                Some(w) => w
+                    .parse()
+                    .ok()
+                    .filter(|w| (100..=900).contains(w))
+                    .unwrap_or(400),
                 None => 400,
             },
-            align: st.align.clone().unwrap_or_else(|| "start".into()),
-            valign: st.valign.clone().unwrap_or_else(|| "top".into()),
+            align: pick(
+                &st.align,
+                &["left", "center", "right", "justify", "start", "end"],
+                "start",
+            ),
+            valign: pick(&st.valign, &["top", "middle", "bottom"], "top"),
             line_height: num(&st.line_height, 1.3),
             padding: st
                 .padding
