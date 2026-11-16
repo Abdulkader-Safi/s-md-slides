@@ -24,6 +24,7 @@ pub const KNOWN_KINDS: &[&str] = &[
 
 /// One attribute token, in file order.
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Attr {
     pub key: String,
     /// Unescaped value. `None` for a bare key such as `locked`.

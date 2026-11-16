@@ -27,6 +27,12 @@ jobs:
           workspaces: engine
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --exclude spike-layout --all-targets -- -D warnings
+      - name: TypeScript bindings are current
+        run: |
+          rm -rf bindings
+          cargo test -p s-md-slides --features ts --lib
+          git diff --exit-code -- bindings
+          test -z "$(git status --porcelain -- bindings)"
 
   test:
     strategy:

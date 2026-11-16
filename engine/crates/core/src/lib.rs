@@ -21,6 +21,7 @@ mod deck;
 pub mod diag;
 mod frontmatter;
 mod ops;
+mod query;
 
 pub use attrs::Attr;
 pub use deck::{
@@ -29,4 +30,5 @@ pub use deck::{
 };
 pub use diag::{Diagnostic, EngineError, Severity};
 pub use frontmatter::{Canvas, Dir, FORMAT_VERSION, FrontMatter};
-pub use ops::Op;
+pub use ops::{Op, ZStep, ZTo};
+pub use query::{AssetKind, AssetRef, Hit, HitField};
