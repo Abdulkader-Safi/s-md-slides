@@ -1,0 +1,41 @@
+name: fuzz
+
+# NFR-05: both fuzz targets pass 10 million runs with no panic. Nightly, and by hand
+# before a release.
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: engine/fuzz
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  fuzz:
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [fuzz_parse, fuzz_ops]
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: engine/fuzz
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-fuzz@0.13.2
+      - name: 10 million runs
+        run: cargo fuzz run ${{ matrix.target }} --release -- -runs=10000000 -print_final_stats=1
+      - name: Keep the crash input
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}-crash
+          path: engine/fuzz/artifacts/${{ matrix.target }}

@@ -1,8 +1,8 @@
 [package]
 name = "s-md-slides"
-version = "0.0.0"
+version.workspace = true
 description = "Free-canvas slide decks stored in one readable markdown file"
-readme = "../../README.md"
+readme = "../../../README.md"
 keywords = ["slides", "markdown", "presentation"]
 categories = ["parser-implementations", "text-processing"]
 edition.workspace = true

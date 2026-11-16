@@ -5,6 +5,7 @@ publish = false
 description = "Size gate only: the core crate behind wasm-bindgen exports, measured by scripts/wasm-size.sh"
 edition.workspace = true
 rust-version.workspace = true
+license.workspace = true
 
 [lib]
 crate-type = ["cdylib"]

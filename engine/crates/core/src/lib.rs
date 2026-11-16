@@ -40,3 +40,8 @@ pub use ops::{Op, ZStep, ZTo};
 pub use query::{AssetKind, AssetRef, Hit, HitField};
 pub use theme::{Asset, AssetResolver, Background, Fonts, ResolvedStyle, Theme};
 pub use timeline::{Entry, Phase, State, Step, Timeline, ease};
+
+/// The README's library example runs as a doctest.
+#[cfg(doctest)]
+#[doc = include_str!("../../../../README.md")]
+struct ReadmeExample;

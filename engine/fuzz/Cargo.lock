@@ -220,7 +220,7 @@ checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
 
 [[package]]
 name = "s-md-slides"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "pulldown-cmark",
  "serde",

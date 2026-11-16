@@ -1,0 +1,16 @@
+# Third-party notices (NFR-09): cargo about generate about.hbs -o THIRD_PARTY_NOTICES.html
+accepted = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "BSL-1.0",
+    "CC0-1.0",
+    "IJG",
+]
+ignore-dev-dependencies = true
+ignore-build-dependencies = false
