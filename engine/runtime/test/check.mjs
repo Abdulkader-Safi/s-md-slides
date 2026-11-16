@@ -1,5 +1,6 @@
 // Browser check for exported presentations (M4 exit criteria), in headless Chrome.
-// Run from engine/: node runtime/test/check.mjs  (CHROME_PATH overrides the browser)
+// Run from engine/: node runtime/test/check.mjs
+// CHROME_PATH overrides Chrome. BROWSER=firefox with FIREFOX_PATH runs it in Firefox.
 // It exports the example decks with embedded assets into a temp folder that has no
 // assets next to it, so a pass also proves the files work offline (FR-ASSET-02).
 
@@ -36,17 +37,31 @@ function check(ok, what) {
 }
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const browser = await puppeteer.launch({ executablePath: chrome, headless: true, args: ["--allow-file-access-from-files"] });
+const firefox = process.env.BROWSER === "firefox";
+const browser = firefox
+  ? await puppeteer.launch({ browser: "firefox", executablePath: process.env.FIREFOX_PATH, headless: true })
+  : await puppeteer.launch({ executablePath: chrome, headless: true, args: ["--allow-file-access-from-files"] });
+console.log(`browser: ${await browser.version()}`);
+
+// Firefox's driver can't emulate media features, so reduced motion gets its own
+// Firefox started with the matching preference.
+const reducedBrowser = firefox
+  ? await puppeteer.launch({
+      browser: "firefox",
+      executablePath: process.env.FIREFOX_PATH,
+      headless: true,
+      extraPrefsFirefox: { "ui.prefersReducedMotion": 1 },
+    })
+  : browser;
 
 async function open(url, opts = {}) {
-  const page = await browser.newPage();
+  const page = await (opts.reduced ? reducedBrowser : browser).newPage();
   await page.setViewport({ width: 1280, height: 720 });
   const problems = [];
   page.on("console", (m) => m.type() === "error" && problems.push(m.text()));
   page.on("pageerror", (e) => problems.push(String(e)));
   page.on("requestfailed", (r) => problems.push(`request failed: ${r.url().slice(0, 80)}`));
-  if (opts.reduced) await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
-  if (opts.bypassCSP) await page.setBypassCSP(true);
+  if (opts.reduced && !firefox) await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
   await page.goto(url, { waitUntil: "load" });
   await page.waitForFunction(() => !document.body.classList.contains("smd-loading"));
   return { page, problems };
@@ -72,7 +87,7 @@ const style = (page, id, prop) =>
   check((await style(page, "b1", "transform")) === "", "fly-left ends at the element's place");
   check((await style(page, "b2", "transform")) === "", "b2 plays in the same click as b1");
   check((await style(page, "s1", "opacity")) === "0", "s1 waits for the second click");
-  await page.keyboard.press("Space");
+  await page.keyboard.press(" ");
   await wait(600);
   check((await style(page, "s1", "opacity")) === "1", "second click shows s1");
   check((await state(page)).step === 2, "two clicks played");
@@ -144,8 +159,9 @@ const style = (page, id, prop) =>
 
 // Accessibility: axe-core, WCAG 2.2 AA, on the presentation controls.
 for (const url of [pitch, carousel]) {
-  const { page } = await open(url, { bypassCSP: true });
-  await page.addScriptTag({ content: axeSource });
+  const { page } = await open(url);
+  // Evaluated by the test driver, so the page's CSP doesn't block it.
+  await page.evaluate(axeSource);
   const result = await page.evaluate(() =>
     window.axe.run(
       { include: [[".smd-controls"], ["#smd-progress"]] },
@@ -158,6 +174,7 @@ for (const url of [pitch, carousel]) {
 }
 
 await browser.close();
+if (reducedBrowser !== browser) await reducedBrowser.close();
 writeFileSync(join(out, "README.txt"), "Exports from runtime/test/check.mjs\n");
 console.log(failures ? `${failures} check(s) failed` : "all checks passed");
 process.exit(failures ? 1 : 0);

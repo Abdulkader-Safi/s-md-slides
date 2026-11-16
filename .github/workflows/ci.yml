@@ -90,3 +90,5 @@ jobs:
           git diff --exit-code -- ../crates/core/src/runtime
       - name: Browser check (headless Chrome, axe-core)
         run: CHROME_PATH=$(which google-chrome) node runtime/test/check.mjs
+      - name: Browser check (headless Firefox)
+        run: BROWSER=firefox FIREFOX_PATH=$(which firefox) node runtime/test/check.mjs
