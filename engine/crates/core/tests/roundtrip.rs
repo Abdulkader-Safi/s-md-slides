@@ -171,17 +171,267 @@ enum Pick {
     Body(usize, Vec<String>),
     Remove(usize),
     Missing,
+    Attrs(usize, &'static str, Option<&'static str>),
+    Duplicate(usize, i16),
+    Z(usize, u8),
+    AddElement(usize, Option<usize>, Vec<String>),
+    Notes(usize, Option<Vec<String>>),
+    SlideAttrs(usize, &'static str, Option<&'static str>),
+    Front(&'static str, Option<&'static str>),
+    AddSlide(usize, bool),
+    RemoveSlide(usize),
+    DuplicateSlide(usize),
+    MoveSlide(usize, usize),
+    Group(usize, usize),
+    Definition(bool),
 }
 
 fn pick() -> impl Strategy<Value = Pick> {
+    let i = || any::<usize>();
+    let key = || {
+        prop::sample::select(vec![
+            "color", "size", "x", "w", "locked", "name", "foo", "dir",
+        ])
+    };
+    let val = || {
+        prop::option::of(prop::sample::select(vec![
+            "12", "#fff", "a b", "rtl", "-5", "1.5",
+        ]))
+    };
     prop_oneof![
-        4 => (any::<usize>(), prop::option::of(-500i32..3000), prop::option::of(-500i32..3000),
+        4 => (i(), prop::option::of(-500i32..3000), prop::option::of(-500i32..3000),
               prop::option::of(0u16..2000), prop::option::of(0u16..2000))
             .prop_map(|(i, x, y, w, h)| Pick::Geometry(i, x, y, w, h)),
-        3 => (any::<usize>(), prop::collection::vec(body_line(), 0..3)).prop_map(|(i, b)| Pick::Body(i, b)),
-        2 => any::<usize>().prop_map(Pick::Remove),
+        3 => (i(), prop::collection::vec(body_line(), 0..3)).prop_map(|(i, b)| Pick::Body(i, b)),
+        2 => i().prop_map(Pick::Remove),
         1 => Just(Pick::Missing),
+        2 => (i(), key(), val()).prop_map(|(i, k, v)| Pick::Attrs(i, k, v)),
+        2 => (i(), -50i16..50).prop_map(|(i, d)| Pick::Duplicate(i, d)),
+        2 => (i(), 0u8..6).prop_map(|(i, z)| Pick::Z(i, z)),
+        2 => (i(), prop::option::of(0usize..4), prop::collection::vec(body_line(), 0..2))
+            .prop_map(|(s, at, b)| Pick::AddElement(s, at, b)),
+        2 => (i(), prop::option::of(prop::collection::vec(body_line(), 0..3))).prop_map(|(s, t)| Pick::Notes(s, t)),
+        2 => (i(), prop::sample::select(vec!["bg", "transition", "layout", "foo"]), val())
+            .prop_map(|(s, k, v)| Pick::SlideAttrs(s, k, v)),
+        2 => (prop::sample::select(vec!["title", "canvas", "dir", "foo", "lang"]),
+              prop::option::of(prop::sample::select(vec!["Q3: review", "4:5", "rtl", "bar", "en"])))
+            .prop_map(|(k, v)| Pick::Front(k, v)),
+        2 => (0usize..8, any::<bool>()).prop_map(|(i, l)| Pick::AddSlide(i, l)),
+        1 => i().prop_map(Pick::RemoveSlide),
+        1 => i().prop_map(Pick::DuplicateSlide),
+        2 => (i(), i()).prop_map(|(a, b)| Pick::MoveSlide(a, b)),
+        1 => (i(), i()).prop_map(|(a, b)| Pick::Group(a, b)),
+        1 => any::<bool>().prop_map(Pick::Definition),
     ]
+}
+
+/// What a successful op may change: the bytes of one element, one slide, or anything.
+enum Scope {
+    Element(std::ops::Range<usize>),
+    Slide(std::ops::Range<usize>),
+    Any,
+}
+
+fn kv(k: &str, v: Option<&str>) -> serde_json::Map<String, serde_json::Value> {
+    let mut m = serde_json::Map::new();
+    m.insert(k.into(), v.map_or(serde_json::Value::Null, |v| v.into()));
+    m
+}
+
+/// Turn a pick into an op on the current deck, plus the bytes it may touch.
+fn to_op(d: &Deck, p: Pick) -> Option<(Op, Scope)> {
+    let all = ids(d);
+    let id_at = |i: usize| (!all.is_empty()).then(|| all[i % all.len()].clone());
+    let n = d.slides.len();
+    let slide_at = |i: usize| (n > 0).then(|| i % n);
+    let el = |id: String, op: Op| {
+        let group = d
+            .element(&id)
+            .is_some_and(|e| e.kind == s_md_slides::Kind::Group);
+        let scope = if group {
+            Scope::Any
+        } else {
+            Scope::Element(d.element_range(&id).unwrap())
+        };
+        Some((op, scope))
+    };
+    let slide_scope = |s: usize| Scope::Slide(d.slide_range(s).unwrap());
+    match p {
+        Pick::Geometry(i, x, y, w, h) => {
+            let id = id_at(i)?;
+            el(
+                id.clone(),
+                Op::SetGeometry {
+                    id,
+                    x: x.map(|v| v as f64 / 2.0),
+                    y: y.map(f64::from),
+                    w: w.map(f64::from),
+                    h: h.map(f64::from),
+                    rot: None,
+                },
+            )
+        }
+        Pick::Body(i, b) => {
+            let id = id_at(i)?;
+            el(
+                id.clone(),
+                Op::SetBody {
+                    id,
+                    text: b.join("\n"),
+                },
+            )
+        }
+        Pick::Remove(i) => {
+            let id = id_at(i)?;
+            el(id.clone(), Op::RemoveElement { id })
+        }
+        Pick::Missing => Some((Op::RemoveElement { id: "nope".into() }, Scope::Any)),
+        Pick::Attrs(i, k, v) => {
+            let id = id_at(i)?;
+            el(
+                id.clone(),
+                Op::SetAttrs {
+                    id,
+                    set: kv(k, v),
+                    remove: Vec::new(),
+                },
+            )
+        }
+        Pick::Duplicate(i, dx) => {
+            let id = id_at(i)?;
+            el(
+                id.clone(),
+                Op::DuplicateElement {
+                    id,
+                    dx: Some(dx as f64),
+                    dy: None,
+                },
+            )
+        }
+        Pick::Z(i, z) => {
+            let id = id_at(i)?;
+            let to = match z {
+                0 => s_md_slides::ZTo::Step(s_md_slides::ZStep::Front),
+                1 => s_md_slides::ZTo::Step(s_md_slides::ZStep::Back),
+                2 => s_md_slides::ZTo::Step(s_md_slides::ZStep::Forward),
+                3 => s_md_slides::ZTo::Step(s_md_slides::ZStep::Backward),
+                k => s_md_slides::ZTo::Index(k as usize - 4),
+            };
+            let scope = d
+                .slides
+                .iter()
+                .position(|s| s.elements.iter().any(|e| e.id == id))
+                .map_or(Scope::Any, slide_scope);
+            Some((Op::SetZ { id, to }, scope))
+        }
+        Pick::AddElement(s, at, b) => {
+            let s = slide_at(s)?;
+            let mut attrs = serde_json::Map::new();
+            for (k, v) in [("x", 10), ("y", 20), ("w", 300), ("h", 40)] {
+                attrs.insert(k.into(), v.into());
+            }
+            let op = Op::AddElement {
+                slide: s,
+                index: at,
+                kind: Some("text".into()),
+                attrs: Some(attrs),
+                body: Some(b.join("\n")),
+                raw: None,
+            };
+            Some((op, slide_scope(s)))
+        }
+        Pick::Notes(s, t) => {
+            let s = slide_at(s)?;
+            Some((
+                Op::SetNotes {
+                    slide: s,
+                    text: t.map(|t| t.join("\n")),
+                },
+                slide_scope(s),
+            ))
+        }
+        Pick::SlideAttrs(s, k, v) => {
+            let s = slide_at(s)?;
+            Some((
+                Op::SetSlideAttrs {
+                    slide: s,
+                    set: kv(k, v),
+                    remove: Vec::new(),
+                },
+                slide_scope(s),
+            ))
+        }
+        Pick::Front(k, v) => Some((
+            Op::SetFrontMatter {
+                key: k.into(),
+                value: v.map(Into::into),
+            },
+            Scope::Any,
+        )),
+        Pick::AddSlide(i, layout) => {
+            let layout = (layout && !d.layouts.is_empty()).then(|| d.layouts[0].id.clone());
+            Some((
+                Op::AddSlide {
+                    index: i,
+                    layout,
+                    raw: None,
+                },
+                Scope::Any,
+            ))
+        }
+        Pick::RemoveSlide(s) => Some((
+            Op::RemoveSlide {
+                index: slide_at(s)?,
+            },
+            Scope::Any,
+        )),
+        Pick::DuplicateSlide(s) => Some((
+            Op::DuplicateSlide {
+                index: slide_at(s)?,
+            },
+            Scope::Any,
+        )),
+        Pick::MoveSlide(a, b) => Some((
+            Op::MoveSlide {
+                from: slide_at(a)?,
+                to: slide_at(b)?,
+            },
+            Scope::Any,
+        )),
+        Pick::Group(a, b) => {
+            let s = d.slides.get(slide_at(a)?)?;
+            if s.elements.len() < 2 {
+                return None;
+            }
+            let x = &s.elements[b % s.elements.len()];
+            let y = &s.elements[(b + 1) % s.elements.len()];
+            Some((
+                Op::Group {
+                    ids: vec![x.id.clone(), y.id.clone()],
+                    id: None,
+                },
+                Scope::Any,
+            ))
+        }
+        Pick::Definition(add) => {
+            let op = if add {
+                Op::AddDefinition {
+                    raw: "<!-- layout id=extra -->\n<!-- placeholder id=p x=1 y=1 w=1 h=1 -->"
+                        .into(),
+                }
+            } else {
+                Op::RemoveDefinition { id: "extra".into() }
+            };
+            Some((op, Scope::Any))
+        }
+    }
+}
+
+/// True if the edit stayed inside `r`: everything before and after `r` in `before`
+/// is still there, unchanged, at the start and end of `after`.
+fn changed_within(before: &str, after: &str, r: &std::ops::Range<usize>) -> bool {
+    let (head, tail) = (&before[..r.start], &before[r.end..]);
+    head.len() + tail.len() <= after.len() && after.starts_with(head) && after.ends_with(tail)
 }
 
 fn ids(d: &Deck) -> Vec<String> {
@@ -194,7 +444,7 @@ fn diff_lines(a: &str, b: &str) -> Option<usize> {
 }
 
 proptest! {
-    #![proptest_config(ProptestConfig::with_cases(1000))]
+    #![proptest_config(ProptestConfig::with_cases(10_000))]
 
     #[test]
     fn apply_then_undo_is_byte_identical(src in deck(), picks in prop::collection::vec(pick(), 1..8)) {
@@ -202,46 +452,26 @@ proptest! {
         prop_assert_eq!(d.text(), src.as_str());
         let mut undo = Vec::new();
         for p in picks {
-            let all = ids(&d);
-            let id_at = |i: usize| (!all.is_empty()).then(|| all[i % all.len()].clone());
-            let op = match p {
-                Pick::Geometry(i, x, y, w, h) => match id_at(i) {
-                    Some(id) => Op::SetGeometry {
-                        id,
-                        x: x.map(|v| v as f64 / 2.0),
-                        y: y.map(f64::from),
-                        w: w.map(f64::from),
-                        h: h.map(f64::from),
-                        rot: None,
-                    },
-                    None => continue,
-                },
-                Pick::Body(i, b) => match id_at(i) {
-                    Some(id) => Op::SetBody { id, text: b.join("\n") },
-                    None => continue,
-                },
-                Pick::Remove(i) => match id_at(i) {
-                    Some(id) => Op::RemoveElement { id },
-                    None => continue,
-                },
-                Pick::Missing => Op::RemoveElement { id: "nope".into() },
-            };
+            let Some((op, scope)) = to_op(&d, p) else { continue };
             let before = d.text().to_string();
             // Moving implicit text writes its directive line first, which adds a line.
-            let is_move = matches!(&op, Op::SetGeometry { id, .. } if !d.element(id).is_some_and(|e| e.implicit));
+            let is_move = matches!(&op, Op::SetGeometry { id, .. }
+                if d.element(id).is_some_and(|e| !e.implicit && e.kind != s_md_slides::Kind::Group));
             match d.apply(op.clone()) {
                 Ok(inv) => {
+                    OK.fetch_add(1, Relaxed);
                     if is_move {
-                        // One move changes at most one line (zero when values are unchanged).
                         prop_assert!(diff_lines(&before, d.text()).is_some_and(|n| n <= 1),
                             "move changed more than one line: {:?}", op);
                     }
-                    OK.fetch_add(1, Relaxed);
+                    match &scope {
+                        Scope::Element(r) | Scope::Slide(r) => prop_assert!(changed_within(&before, d.text(), r),
+                            "{:?} touched bytes outside its target {:?}", op, r),
+                        Scope::Any => {}
+                    }
                     undo.push(inv);
                 }
-                Err(_) => {
-                    prop_assert_eq!(d.text(), before.as_str(), "failed op changed the deck")
-                }
+                Err(_) => prop_assert_eq!(d.text(), before.as_str(), "failed op changed the deck"),
             }
         }
         for inv in undo.into_iter().rev() {

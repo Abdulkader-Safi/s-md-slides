@@ -10,6 +10,7 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "=0.4.13"
 s-md-slides = { path = "../crates/core" }
+serde_json = "=1.0.154"
 
 # Its own workspace, so nightly-only fuzzing stays out of the main build.
 [workspace]
@@ -18,6 +19,13 @@ members = ["."]
 [[bin]]
 name = "fuzz_parse"
 path = "fuzz_targets/fuzz_parse.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_ops"
+path = "fuzz_targets/fuzz_ops.rs"
 test = false
 doc = false
 bench = false

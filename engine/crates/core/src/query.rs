@@ -3,6 +3,7 @@
 use crate::deck::{Deck, Element, Kind};
 use serde::Serialize;
 use serde_json::Value;
+use std::ops::Range;
 
 /// Where a search match was found.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -79,6 +80,19 @@ fn image_paths(body: &str) -> Vec<String> {
 }
 
 impl Deck {
+    /// Byte range of an element in `text()`: its directive line, body and the blank
+    /// lines after it. Hosts can use it to jump from a box to its source.
+    pub fn element_range(&self, id: &str) -> Option<Range<usize>> {
+        self.elements()
+            .find(|e| e.id == id)
+            .map(|e| e.src.start()..e.src.end)
+    }
+
+    /// Byte range of a slide in `text()`, without its `---` lines.
+    pub fn slide_range(&self, index: usize) -> Option<Range<usize>> {
+        self.slides.get(index).map(|s| s.src.span.clone())
+    }
+
     /// Elements under a point on a slide, top first. Rotation is taken into account.
     /// Groups are skipped (they have no box of their own).
     pub fn elements_at(&self, slide: usize, x: f32, y: f32) -> Vec<String> {
@@ -160,9 +174,10 @@ impl Deck {
                 add(&p, AssetKind::Image, e.id.clone());
             }
             if e.kind == Kind::Video
-                && let Some(src) = e.attr("src") {
-                    add(src, AssetKind::Video, e.id.clone());
-                }
+                && let Some(src) = e.attr("src")
+            {
+                add(src, AssetKind::Video, e.id.clone());
+            }
             if let Some(poster) = e.attr("poster") {
                 add(poster, AssetKind::Poster, e.id.clone());
             }
