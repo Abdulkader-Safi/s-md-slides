@@ -71,6 +71,8 @@ A move rewrites one line and leaves every other byte alone. Each op returns its 
 
 ## Docs
 
+The [wiki](https://github.com/Abdulkader-Safi/s-md-slides/wiki) is the guide: [installing](https://github.com/Abdulkader-Safi/s-md-slides/wiki/Installation), [a first deck](https://github.com/Abdulkader-Safi/s-md-slides/wiki/Your-first-deck), each command ([validate](https://github.com/Abdulkader-Safi/s-md-slides/wiki/CLI-validate), [export](https://github.com/Abdulkader-Safi/s-md-slides/wiki/CLI-export), [serve](https://github.com/Abdulkader-Safi/s-md-slides/wiki/CLI-serve), [apply](https://github.com/Abdulkader-Safi/s-md-slides/wiki/CLI-apply)), the [ops reference](https://github.com/Abdulkader-Safi/s-md-slides/wiki/Ops-reference), and [using the library](https://github.com/Abdulkader-Safi/s-md-slides/wiki/Library-getting-started) from Rust.
+
 - [The format](engine/docs/format.md): every element, attribute and setting, with examples that run as tests.
 - [The agent skill](engine/skills/s-md-slides/SKILL.md): teaches Claude and other coding agents to write and edit decks.
 - [Conformance vectors](engine/conformance/): 54 JSON cases another implementation can test itself against.
