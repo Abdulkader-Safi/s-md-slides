@@ -1,0 +1,23 @@
+[package]
+name = "s-md-slides-cli"
+version = "0.0.0"
+description = "The s-md-slides command: validate, export, serve and apply for markdown slide decks"
+keywords = ["slides", "markdown", "presentation", "cli"]
+categories = ["command-line-utilities"]
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "s-md-slides"
+path = "src/main.rs"
+
+[dependencies]
+s-md-slides = { path = "../core" }
+s-md-slides-render = { path = "../render" }
+clap.workspace = true
+notify.workspace = true
+notify-debouncer-full.workspace = true
+tiny_http.workspace = true
+serde_json.workspace = true

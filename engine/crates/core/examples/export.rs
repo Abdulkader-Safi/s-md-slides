@@ -42,6 +42,7 @@ fn main() {
         &Options {
             embed: args.iter().any(|a| a == "--embed"),
             resolver: Some(&folder),
+            ..Default::default()
         },
     );
     diags.extend(d.diagnostics().iter().cloned());

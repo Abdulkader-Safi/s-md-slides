@@ -15,6 +15,8 @@ pub(crate) const RUNTIME_JS: &str = include_str!("../runtime/runtime.js");
 pub(crate) const RUNTIME_CSS: &str = include_str!("../runtime/runtime.css");
 /// Base64 SHA-256 of `RUNTIME_JS`, for the CSP `script-src`.
 pub(crate) const RUNTIME_SHA256: &str = include_str!("../runtime/runtime.sha256");
+pub(crate) const RELOAD_JS: &str = include_str!("../runtime/reload.js");
+pub(crate) const RELOAD_SHA256: &str = include_str!("../runtime/reload.sha256");
 
 #[derive(Serialize)]
 struct SlideData {
@@ -38,7 +40,7 @@ struct Data {
 pub(crate) fn csp(extra_script_hashes: &[&str]) -> String {
     let mut scripts = format!("'sha256-{}'", RUNTIME_SHA256.trim());
     for h in extra_script_hashes {
-        scripts.push_str(&format!(" 'sha256-{h}'"));
+        scripts.push_str(&format!(" 'sha256-{}'", h.trim()));
     }
     format!(
         "default-src 'self' data: blob:; img-src 'self' file: data: blob:; media-src 'self' file: data: blob:; style-src 'unsafe-inline'; script-src {scripts}; frame-src https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'none'; form-action 'none'"
@@ -119,11 +121,15 @@ pub fn presentation_html(deck: &Deck, opts: &Options) -> Rendered {
             "<button type=\"button\" id=\"smd-presenter\" aria-label=\"Presenter view (P)\">&#9998;</button>",
             "</nav><div id=\"smd-progress\" role=\"progressbar\" aria-label=\"Progress\" aria-valuemin=\"0\" aria-valuemax=\"{total}\" aria-valuenow=\"1\"><div></div></div>",
             "<script type=\"application/json\" id=\"smd-data\">{json}</script>",
-            "<script>{js}</script></body></html>\n"
+            "<script>{js}</script>{reload}</body></html>\n"
         ),
         lang = esc_attr(&lang),
         dir = if rtl { "rtl" } else { "ltr" },
-        csp = esc_attr(&csp(&[])),
+        csp = esc_attr(&csp(if opts.live_reload {
+            &[RELOAD_SHA256]
+        } else {
+            &[]
+        })),
         title = esc_text(&title),
         title_attr = esc_attr(&title),
         base = BASE_CSS,
@@ -132,6 +138,11 @@ pub fn presentation_html(deck: &Deck, opts: &Options) -> Rendered {
         total = deck.slides.len(),
         json = json,
         js = RUNTIME_JS,
+        reload = if opts.live_reload {
+            format!("<script>{RELOAD_JS}</script>")
+        } else {
+            String::new()
+        },
     );
     Rendered {
         text,

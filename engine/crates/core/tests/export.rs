@@ -201,6 +201,7 @@ fn fr_asset_01_02_03_resolver_embed_and_missing() {
         &Options {
             embed: true,
             resolver: Some(&files),
+            ..Default::default()
         },
     );
     let asked = files.asked.borrow();
