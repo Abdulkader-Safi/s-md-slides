@@ -1,0 +1,30 @@
+[package]
+name = "s-md-slides-render"
+version = "0.0.0"
+description = "Native export for s-md-slides decks: PNG, JPEG, GIF and PDF with selectable text"
+keywords = ["slides", "markdown", "pdf", "png", "presentation"]
+categories = ["rendering", "graphics"]
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+s-md-slides = { path = "../core" }
+parley.workspace = true
+skrifa.workspace = true
+resvg.workspace = true
+krilla.workspace = true
+krilla-svg.workspace = true
+jpeg-encoder.workspace = true
+gif.workspace = true
+mermaid-rs-renderer.workspace = true
+ratex-svg.workspace = true
+ratex-parser.workspace = true
+ratex-layout.workspace = true
+ratex-types.workspace = true
+pulldown-cmark.workspace = true
+
+[dev-dependencies]
+resvg.workspace = true
+gif.workspace = true

@@ -180,8 +180,9 @@ pub(crate) fn embed_src(src: &str) -> String {
     }
 }
 
-/// SVG markup for a shape, sized `w` by `h` in its own coordinates.
-pub(crate) fn shape_svg(e: &Element, r: &ResolvedStyle, shape: &str) -> String {
+/// SVG markup for a shape, sized `w` by `h` in its own coordinates. The native
+/// renderer uses it too, so shapes look the same in every export.
+pub fn shape_svg(e: &Element, r: &ResolvedStyle, shape: &str) -> String {
     let (w, h) = (e.w, e.h);
     let mut defs = String::new();
     let fill = match &r.fill {
