@@ -30,7 +30,7 @@ Code: `crates/core/src/kinds.rs` (attributes and bodies per kind), `crates/core/
 Decisions:
 
 - Element bodies are read with pulldown-cmark, which the spec already picks for export. The core's WASM build went from 677 KB to 852 KB. M4 adds the export code and the presentation runtime, so the 1 MB target is getting close; if it trips, the first fallback is the flat front matter reader (about 400 KB).
-- Every element gets `style` (style attributes as written) and `content` (typed kind data: image path, alt text and fit; code language, source and highlighted lines; table header flag; Mermaid or math source; video and embed fields; group items).
+- Every element gets `style` (style attributes as written) and `content` (typed kind data: image path, alt text and fit; code language and source plus highlighted lines; table header flag; Mermaid or math source; video and embed fields; group items).
 - Colors are `#rgb`, `#rrggbb`, `#rrggbbaa` or a theme role, as the spec lists. Named CSS colors such as `red` give `E-ATTR-VALUE`. `fill` and `bg` also take `linear(angle,color,color[,color])`.
 - A theme file named in front matter is read only when the host calls `load_theme(&resolver)`, since the engine never touches files. Until then the default theme applies. A loaded theme survives later edits as long as the front matter still names the same file.
 - `AssetResolver` and `Asset` live in the core now (M3 needs them for themes) rather than waiting for M4's export module.

@@ -1,11 +1,11 @@
 ---
 id: "m3-golden-decks-to-25-2026-11-15"
-status: "todo"
+status: "in-progress"
 priority: "medium"
 assignee: "claude"
 dueDate: null
 created: "2026-11-15T12:00:00.000Z"
-modified: "2026-11-15T12:00:00.000Z"
+modified: "2026-11-16T06:27:42.000Z"
 labels: ["engine", "m3"]
 order: 5
 ---
