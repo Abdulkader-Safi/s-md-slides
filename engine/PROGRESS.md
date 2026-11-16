@@ -27,23 +27,23 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 
 Code: `crates/render` (crate `s-md-slides-render`): `fonts.rs`, `layout.rs` (markdown to parley glyph runs), `flatten.rs` (scene and SVG), `raster.rs`, `pdf.rs`, `gif.rs`, `graphics.rs` (Mermaid and math). Example: `cargo run -p s-md-slides-render --release --example render -- deck.md out-dir`. Reference PNGs: `engine/tests/reference/`. The M0 spikes are gone.
 
-Acceptance boxes ticked: FR-EXP-03 to FR-EXP-06, FR-EL-06 to FR-EL-09. FR-EL-11 (syntax highlighting, a Could) is not built and its card is in the backlog. Exit criteria: every example deck exports to PNG, JPEG, SVG, PDF and GIF; the 11 reference PNGs match within 0.5% on macOS, Windows and Linux in CI; PDF text is selectable (12 pages, ToUnicode maps; `pdftotext` reads Latin and Arabic); a three-step slide's GIF shows each step in order; cancel returns `E-CANCELLED` within 200 ms.
+Acceptance boxes ticked: FR-EXP-03 to FR-EXP-06, FR-EL-06 to FR-EL-09. FR-EL-11 (syntax highlighting, a Could) is not built and its card is in the backlog. Exit criteria: every example deck exports to every format (PNG, JPEG, SVG, PDF, GIF); the 11 reference PNGs match within 0.5% on macOS, Windows and Linux in CI; PDF text is selectable (12 pages, ToUnicode maps; `pdftotext` reads Latin and Arabic); a three-step slide's GIF shows each step in order; cancel returns `E-CANCELLED` within 200 ms.
 
 Decisions:
 
-- PNG, JPEG and GIF draw text as glyph outlines (SVG paths from skrifa) at exactly parley's positions, instead of `<text>` that usvg would shape again. That removes the RLO and whitespace workarounds from the M0 spike and makes the PNG match parley exactly. The PDF keeps the approved path: parley glyphs straight into krilla as real text, krilla-svg for everything else, element by element so stacking order holds.
+- Raster exports (PNG, JPEG, GIF) draw text as glyph outlines (SVG paths from skrifa) at exactly parley's positions, instead of `<text>` that usvg would shape again. That removes the RLO and whitespace workarounds from the M0 spike and makes the PNG match parley exactly. The PDF keeps the approved path: parley glyphs straight into krilla as real text, krilla-svg for everything else, element by element so stacking order holds.
 - `flatten_svg` therefore outputs outlines rather than positioned `<text>` runs. Anything that needs selectable text uses the PDF or the browser SVG from the core.
 - GIFs pause 600 ms (`GIF_HOLD_MS`) after each step and sample by step with the new core method `Timeline::state_at_step`. Without that, steps made of `appear` (zero duration) all show in the first frame, since `state_at(t)` can't tell zero-length steps apart.
 - Mermaid (mermaid-rs-renderer) and math (ratex, KaTeX fonts embedded) run behind `catch_unwind`; a failure shows the source in a code box with `W-DIAGRAM`.
 - Native export never requests URLs: only relative paths go to the resolver, so embeds and remote images become gray boxes or posters.
-- Bundled fonts: Noto Sans, Noto Sans Arabic and Noto Sans Mono, regular and bold (OFL-1.1). Italic is synthesized by parley and drawn as a skew. `Fonts::with_system()` adds installed fonts; tests use `Fonts::bundled()` so output is identical everywhere.
+- Bundled fonts: Noto Sans, Noto Sans Arabic and Noto Sans Mono, each in regular and bold (OFL-1.1). Italic is synthesized by parley and drawn as a skew. `Fonts::with_system()` adds installed fonts; tests use `Fonts::bundled()` so output is identical everywhere.
 - Linux builds of the render crate need the fontconfig library (`libfontconfig1-dev`) for parley's system-font support. CI installs it.
 - Measured on an M-series Mac (release): a 1920x1080 slide renders in about 50 to 240 ms once fonts are warm; the first render of a process takes about 600 ms. The NFR-01 benchmark in M7 measures this properly.
 - Not yet drawn natively: underline and strikethrough decorations, images inside text bodies, raw HTML (dropped).
 
 ## M4 results
 
-Acceptance boxes ticked: FR-ANIM-01 to FR-ANIM-04, FR-DIR-02, FR-EXP-01, FR-EXP-02, FR-EXP-07, FR-ASSET-01 to FR-ASSET-03, plus the export halves of FR-NOTES-01, FR-EL-01, FR-EL-03 to FR-EL-05, FR-STYLE-01 and FR-STYLE-03 to FR-STYLE-05. Still open until M5: FR-EL-06 to FR-EL-09, whose checks need native rendering or PNG posters. Exit criteria: both example decks present fully from one offline HTML file in Chrome, Firefox and Safari; keyboard-only use works; axe-core finds no WCAG 2.2 AA violations on the controls.
+Acceptance boxes ticked: FR-ANIM-01 to FR-ANIM-04, FR-DIR-02, FR-EXP-01, FR-EXP-02, FR-EXP-07, FR-ASSET-01 to FR-ASSET-03, plus the export halves of FR-NOTES-01, FR-EL-01, FR-EL-03 to FR-EL-05, FR-STYLE-01 and FR-STYLE-03 to FR-STYLE-05. Still open until M5: FR-EL-06 to FR-EL-09, whose checks need native rendering or PNG posters. Exit criteria: both example decks present fully from one offline HTML file in every browser the spec names; keyboard-only use works; axe-core finds no WCAG 2.2 AA violations on the controls.
 
 Code: `crates/core/src/timeline.rs`, `crates/core/src/export/` (sanitizer, slide HTML, browser SVG, presentation), the runtime in `runtime/` (TypeScript, built into `crates/core/src/runtime/`), example decks in `examples/`, and the export example `cargo run -p s-md-slides --example export -- deck.md out.html --embed`.
 
