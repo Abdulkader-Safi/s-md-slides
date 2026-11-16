@@ -10,7 +10,7 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 | M1 format core                | done (PR #2)        |
 | M2 operations                 | done (PR #3)        |
 | M3 elements and style         | done (PR #4)        |
-| M4 animation and HTML export  | not started         |
+| M4 animation and HTML export  | in progress (PR #5) |
 | M5 native render              | not started         |
 | M6 CLI                        | not started         |
 | M7 conformance, docs, release | not started         |
@@ -22,6 +22,24 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 - 2026-11-15: one branch and one PR per milestone. Commits after each task.
 - 2026-11-16: keep serde-saphyr (about 400 KB of WASM) and nested inline themes. Spec 04 set a 150 KB limit for it; the build spec only replaces it above 1.5 MB total, and the core is 677 KB. The flat front matter reader stays the fallback if a later milestone trips the size gate. Decided by the user.
 - 2026-11-15: approved after review. Native PDF export draws text by passing parley glyph runs straight to krilla (`draw_glyphs` with parley's cluster ranges, ligature continuations merged, glyph y offsets negated). krilla-svg draws everything that is not text. PNG export keeps the flattened SVG through resvg.
+
+## M4 results
+
+Code: `crates/core/src/timeline.rs`, `crates/core/src/export/` (sanitizer, slide HTML, browser SVG, presentation), the runtime in `runtime/` (TypeScript, built into `crates/core/src/runtime/`), example decks in `examples/`, and the export example `cargo run -p s-md-slides --example export -- deck.md out.html --embed`.
+
+Decisions:
+
+- Each timeline entry carries its from and to state. Rust's `state_at` and the runtime both blend them with ease-out cubic, frame by frame. Spec 04 says the runtime emits CSS animations; one shared formula in data form is a stronger match for FR-ANIM-04 (HTML, GIF and hosts play the same numbers), and the runtime stays at 7 KB.
+- Steps: elements without `order` animate when the slide appears (step 0). Each distinct `order` is one click. An element with both `enter` and `exit` exits on the click after its entrance; one with only `exit` exits at its `order`. The spec doesn't say how `exit` is timed.
+- Fly effects start or end just off the canvas edge (fly-left from x = -w, and so on). `scale` grows from half size while fading in.
+- A slide's transition length is its `dur=` attribute (default 400 ms). The deck default transition is front matter `transition:`, else fade.
+- Headings inside a text box use the box's `size`, set in the heading font, instead of the browser's 2em for h1. A box with `size=72` shows its `# Title` at 72 px, as the spec's examples expect.
+- Mermaid and math show their source in a labeled box in HTML and browser SVG. Drawing them needs the native renderer (M5) or the host (Obsidian renders them itself, per spec).
+- Asset URLs and embed `src` are scheme-checked at export: `javascript:` and other unsafe schemes become the gray placeholder, and embeds must be https. YouTube links are rewritten to youtube-nocookie.
+- The CSP pins the runtime by its SHA-256 (`crates/core/src/runtime/runtime.sha256`, written by the build). CI rebuilds the runtime and fails if the committed copy differs.
+- Presentation controls stay fully opaque. They faded to 35% when idle at first, which failed axe's color contrast check on dark slides.
+- WASM: the size probe now calls every export, so the linker keeps them. The core measures 953 KB with the runtime, under the 1 MB target.
+- The browser check (`node runtime/test/check.mjs`) exports both example decks with embedded assets into a temp folder with no assets beside them, then checks the clicks, effects, transitions, rtl keys, reduced motion, presenter view, CSP errors and axe-core in headless Chrome and Firefox (`BROWSER=firefox FIREFOX_PATH=...`). Safari needs its "Allow remote automation" setting, which only the user can turn on.
 
 ## M3 results
 
