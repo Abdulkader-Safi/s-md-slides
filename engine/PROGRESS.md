@@ -12,7 +12,7 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 | M3 elements and style         | done (PR #4)        |
 | M4 animation and HTML export  | done (PR #5)        |
 | M5 native render              | done (PR #6)        |
-| M6 CLI                        | not started         |
+| M6 CLI                        | done (PR #7)        |
 | M7 conformance, docs, release | not started         |
 
 ## Decisions
@@ -22,6 +22,21 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 - 2026-11-15: one branch and one PR per milestone. Commits after each task.
 - 2026-11-16: keep serde-saphyr (about 400 KB of WASM) and nested inline themes. Spec 04 set a 150 KB limit for it; the build spec only replaces it above 1.5 MB total, and the core is 677 KB. The flat front matter reader stays the fallback if a later milestone trips the size gate. Decided by the user.
 - 2026-11-15: approved after review. Native PDF export draws text by passing parley glyph runs straight to krilla (`draw_glyphs` with parley's cluster ranges, ligature continuations merged, glyph y offsets negated). krilla-svg draws everything that is not text. PNG export keeps the flattened SVG through resvg.
+
+## M6 results
+
+Code: `crates/cli` (crate `s-md-slides-cli`, binary `s-md-slides`): `validate`, `export`, `serve`, `apply`, and the deck-folder resolver.
+
+Acceptance boxes ticked: FR-CLI-01 to FR-CLI-04. Exit criteria: a Vim-style save (write a new file, rename it over the deck) reached a connected browser in 133 ms, and the page reloaded on the same slide with the new text (checked in headless Chrome; the test suite checks the event arrives within 500 ms). The deck's modified time never changes because of `serve`. `/../secret` and percent-encoded `..` return 404; other methods return 405.
+
+Decisions:
+
+- `serve` keeps live-reload connections open and writes `event: reload` to each when the deck, one of its assets or its theme file changes (100 ms debounce, recursive watch on the deck's folder, other files ignored). The reload script is part of the runtime build with its own SHA-256 in the CSP, added through the new export option `live_reload`.
+- Errors in the deck show as an overlay above the slides; the presentation still renders what parses.
+- File serving: GET only, files under the deck's folder after resolving symlinks, no `..` segments, no directory listing. A host other than 127.0.0.1, localhost or ::1 prints a network warning.
+- `export` writes next to the deck by default (`deck.pdf`, `deck-3.png`); `-o` names a file, or a folder when several images are written. `--to png|jpeg|gif` without `--slide` exports every slide. It exits 1 if the deck has errors, after writing.
+- `apply` accepts one op or a list, prints the inverse batch on stdout, and writes through a temp file plus rename, so a crash never leaves half a deck.
+- Not built: exit code 4 on Ctrl-C. The standard library has no signal handler and the spec's dependency list has none, so Ctrl-C kills the process normally. The library still returns `E-CANCELLED` through `Progress`, and the CLI maps that to 4. Adding the `ctrlc` crate would close this; it needs a yes.
 
 ## M5 results
 

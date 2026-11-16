@@ -33,6 +33,8 @@ pub struct Options<'a> {
     /// Where asset bytes come from. Without one, paths stay relative and nothing is
     /// checked or embedded.
     pub resolver: Option<&'a dyn AssetResolver>,
+    /// Add the live-reload script `s-md-slides serve` uses (listens on `/events`).
+    pub live_reload: bool,
 }
 
 /// Output text plus the problems found while making it (missing assets, removed HTML).

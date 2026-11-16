@@ -1,0 +1,1 @@
+"use strict";(()=>{new EventSource("/events").addEventListener("reload",()=>location.reload());})();

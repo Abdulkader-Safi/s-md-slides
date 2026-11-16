@@ -1,11 +1,11 @@
 ---
 id: "m6-serve-command-2026-11-15"
-status: "todo"
+status: "done"
 priority: "medium"
 assignee: "claude"
 dueDate: null
 created: "2026-11-15T12:00:00.000Z"
-modified: "2026-11-15T12:00:00.000Z"
+modified: "2026-11-16T08:27:42.000Z"
 labels: ["engine", "m6"]
 order: 3
 ---
@@ -16,6 +16,10 @@ notify, tiny_http, SSE reload keeping the current slide, diagnostics overlay, 12
 
 ## Done when
 
-- [ ] A Vim edit reaches the browser within 500 ms on the same slide
-- [ ] The deck's modified time never changes
-- [ ] `/../secret` returns 404
+- [x] A Vim edit reaches the browser within 500 ms on the same slide
+- [x] The deck's modified time never changes
+- [x] `/../secret` returns 404
+
+## Result
+
+Done 2026-11-16 in `crates/cli`. Checked by `crates/cli/tests/cli.rs`.
