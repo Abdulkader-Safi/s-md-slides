@@ -2,4 +2,191 @@
 import type { ZTo } from "./ZTo";
 import type { JsonValue } from "./serde_json/JsonValue";
 
-export type Op = { "op": "add_slide", index: number, layout?: string | null, raw?: string | null, } | { "op": "remove_slide", index: number, } | { "op": "duplicate_slide", index: number, } | { "op": "move_slide", from: number, to: number, } | { "op": "add_element", slide: number, index?: number | null, kind?: string | null, attrs?: { [key in string]: JsonValue } | null, body?: string | null, raw?: string | null, } | { "op": "remove_element", id: string, } | { "op": "duplicate_element", id: string, dx?: number | null, dy?: number | null, } | { "op": "set_geometry", id: string, x?: number | null, y?: number | null, w?: number | null, h?: number | null, rot?: number | null, } | { "op": "set_attrs", id: string, set?: { [key in string]: JsonValue }, remove?: Array<string>, } | { "op": "set_body", id: string, text: string, } | { "op": "set_z", id: string, to: ZTo, } | { "op": "set_notes", slide: number, text: string | null, } | { "op": "set_slide_attrs", slide: number, set?: { [key in string]: JsonValue }, remove?: Array<string>, } | { "op": "set_front_matter", key: string, value: JsonValue | null, } | { "op": "add_definition", raw: string, } | { "op": "remove_definition", id: string, } | { "op": "group", ids: Array<string>, id?: string | null, } | { "op": "ungroup", id: string, } | { "op": "replace", at: number, old: string, new: string, } | { "op": "batch", ops: Array<Op>, };
+/**
+ * One edit to a deck. Apply it with `Deck::apply`, which returns the inverse.
+ */
+export type Op = { "op": "add_slide", 
+/**
+ * 0-based slide index to insert before. Past the last slide appends.
+ */
+index: number, 
+/**
+ * Layout id. The new slide gets one element per placeholder.
+ */
+layout?: string | null, 
+/**
+ * Slide source text to insert as is, without the `---` separator.
+ */
+raw?: string | null, } | { "op": "remove_slide", 
+/**
+ * 0-based index of the slide to remove.
+ */
+index: number, } | { "op": "duplicate_slide", 
+/**
+ * 0-based index of the slide to copy.
+ */
+index: number, } | { "op": "move_slide", 
+/**
+ * 0-based index of the slide to move.
+ */
+from: number, 
+/**
+ * 0-based index the slide ends up at.
+ */
+to: number, } | { "op": "add_element", 
+/**
+ * 0-based index of the slide to add to.
+ */
+slide: number, 
+/**
+ * Stacking index (0 is the back). `None` puts it on top.
+ */
+index?: number | null, 
+/**
+ * Element kind, such as `text`. Use with `attrs` and `body`, not with `raw`.
+ */
+kind?: string | null, 
+/**
+ * Attributes to write, as in `SetAttrs`. `x`, `y`, `w` and `h` are required for built-in kinds.
+ */
+attrs?: { [key in string]: JsonValue } | null, 
+/**
+ * Markdown body.
+ */
+body?: string | null, 
+/**
+ * Source text for one element: its directive line and body.
+ */
+raw?: string | null, } | { "op": "remove_element", 
+/**
+ * Id of the element to remove.
+ */
+id: string, } | { "op": "duplicate_element", 
+/**
+ * Id of the element to copy.
+ */
+id: string, 
+/**
+ * Horizontal offset in canvas units. `None` keeps `x`.
+ */
+dx?: number | null, 
+/**
+ * Vertical offset in canvas units. `None` keeps `y`.
+ */
+dy?: number | null, } | { "op": "set_geometry", 
+/**
+ * Id of the element to change.
+ */
+id: string, 
+/**
+ * New left edge in canvas units. `None` keeps it.
+ */
+x?: number | null, 
+/**
+ * New top edge in canvas units. `None` keeps it.
+ */
+y?: number | null, 
+/**
+ * New width in canvas units. `None` keeps it.
+ */
+w?: number | null, 
+/**
+ * New height in canvas units. `None` keeps it.
+ */
+h?: number | null, 
+/**
+ * New rotation in degrees. `None` keeps it.
+ */
+rot?: number | null, } | { "op": "set_attrs", 
+/**
+ * Id of the element to change.
+ */
+id: string, 
+/**
+ * Attributes to set, by key.
+ */
+set?: { [key in string]: JsonValue }, 
+/**
+ * Keys to remove.
+ */
+remove?: Array<string>, } | { "op": "set_body", 
+/**
+ * Id of the element to change.
+ */
+id: string, 
+/**
+ * New markdown body.
+ */
+text: string, } | { "op": "set_z", 
+/**
+ * Id of the element to move.
+ */
+id: string, 
+/**
+ * New stacking index or a relative step.
+ */
+to: ZTo, } | { "op": "set_notes", 
+/**
+ * 0-based slide index.
+ */
+slide: number, 
+/**
+ * Notes markdown. `None` removes the notes.
+ */
+text: string | null, } | { "op": "set_slide_attrs", 
+/**
+ * 0-based slide index.
+ */
+slide: number, 
+/**
+ * Attributes to set, by key. Values work as in `SetAttrs`.
+ */
+set?: { [key in string]: JsonValue }, 
+/**
+ * Keys to remove.
+ */
+remove?: Array<string>, } | { "op": "set_front_matter", 
+/**
+ * Front matter key, such as `title` or `canvas`.
+ */
+key: string, 
+/**
+ * New value. `None` removes the key.
+ */
+value: JsonValue | null, } | { "op": "add_definition", 
+/**
+ * Source text of the block, starting with its `<!-- master -->` or `<!-- layout -->` line.
+ */
+raw: string, } | { "op": "remove_definition", 
+/**
+ * Id of the master or layout to remove.
+ */
+id: string, } | { "op": "group", 
+/**
+ * Ids of the elements to group, all on one slide.
+ */
+ids: Array<string>, 
+/**
+ * Id for the new group. `None` generates one.
+ */
+id?: string | null, } | { "op": "ungroup", 
+/**
+ * Id of the group to remove.
+ */
+id: string, } | { "op": "replace", 
+/**
+ * Byte offset into `deck.text()` where `old` starts.
+ */
+at: number, 
+/**
+ * Bytes expected at `at`.
+ */
+old: string, 
+/**
+ * Bytes to put in their place.
+ */
+new: string, } | { "op": "batch", 
+/**
+ * Ops to apply in order.
+ */
+ops: Array<Op>, };

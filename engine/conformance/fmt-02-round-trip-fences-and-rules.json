@@ -1,0 +1,11 @@
+{
+  "covers": [
+    "FR-FMT-02"
+  ],
+  "expect_diagnostics": [],
+  "expect_read_only": false,
+  "expect_text": "<!-- code id=c1 x=0 y=0 w=10 h=10 -->\n```md\n---\n<!-- text id=no x=1 y=1 w=1 h=1 -->\n```\n<!-- text id=t1 x=0 y=0 w=10 h=10 -->\n***\n___\n",
+  "input": "<!-- code id=c1 x=0 y=0 w=10 h=10 -->\n```md\n---\n<!-- text id=no x=1 y=1 w=1 h=1 -->\n```\n<!-- text id=t1 x=0 y=0 w=10 h=10 -->\n***\n___\n",
+  "name": "fmt-02-round-trip-fences-and-rules",
+  "ops": []
+}

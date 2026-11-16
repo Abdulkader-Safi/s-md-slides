@@ -1,0 +1,11 @@
+{
+  "covers": [
+    "FR-FMT-05"
+  ],
+  "expect_diagnostics": [],
+  "expect_read_only": false,
+  "expect_text": "# no version\n",
+  "input": "# no version\n",
+  "name": "fmt-05-missing-version-is-1",
+  "ops": []
+}

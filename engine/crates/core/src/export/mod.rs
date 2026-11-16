@@ -40,7 +40,9 @@ pub struct Options<'a> {
 /// Output text plus the problems found while making it (missing assets, removed HTML).
 #[derive(Debug, Clone, PartialEq)]
 pub struct Rendered {
+    /// The exported HTML or SVG.
     pub text: String,
+    /// Problems found while exporting.
     pub diagnostics: Vec<Diagnostic>,
 }
 

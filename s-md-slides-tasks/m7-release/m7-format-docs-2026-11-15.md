@@ -1,11 +1,11 @@
 ---
 id: "m7-format-docs-2026-11-15"
-status: "todo"
+status: "done"
 priority: "low"
 assignee: "claude"
 dueDate: null
 created: "2026-11-15T12:00:00.000Z"
-modified: "2026-11-15T12:00:00.000Z"
+modified: "2026-11-16T09:36:05.000Z"
 labels: ["engine", "m7"]
 order: 2
 ---
@@ -16,4 +16,8 @@ order: 2
 
 ## Done when
 
-- [ ] Every example parses with no diagnostics
+- [x] Every example parses with no diagnostics
+
+## Result
+
+Done 2026-11-16: `engine/docs/format.md`, every example parsed by `crates/core/tests/docs.rs`.

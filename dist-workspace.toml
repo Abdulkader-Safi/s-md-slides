@@ -1,0 +1,28 @@
+[workspace]
+members = ["cargo:engine"]
+
+# Config for 'dist'
+[dist]
+# The preferred dist version to use in CI (Cargo.toml SemVer syntax)
+cargo-dist-version = "0.34.0"
+# CI backends to support
+ci = "github"
+# The installers to generate for each app
+installers = ["shell", "powershell"]
+# Target platforms to build apps for (Rust target-triple syntax)
+targets = ["aarch64-apple-darwin", "aarch64-unknown-linux-gnu", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+# Path that installers should place binaries in
+install-path = "CARGO_HOME"
+# Where to host releases
+hosting = "github"
+# Whether to install an updater program
+install-updater = false
+# Ship the license, the third-party notices and the bundled fonts' license with
+# every binary (the Noto fonts are compiled into it).
+include = ["THIRD_PARTY_NOTICES.html", "engine/crates/render/assets/fonts/OFL.txt"]
+# Actions pinned to commits (v6.1.0, v7.0.2, v8.0.2): the release job can write.
+github-action-commits = { "actions/checkout" = "d23441a48e516b6c34aea4fa41551a30e30af803", "actions/upload-artifact" = "cf430e030ddbb5b0abf93d22962f4752f3646cd9", "actions/download-artifact" = "9000827ccba6bdab643e8b6fd33ac0654aef8333" }
+
+# The render crate finds system fonts through fontconfig on Linux.
+[dist.dependencies.apt]
+libfontconfig1-dev = "*"

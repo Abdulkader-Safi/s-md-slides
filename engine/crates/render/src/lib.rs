@@ -20,6 +20,8 @@
 //! # let _ = (image, doc);
 //! ```
 
+#![deny(missing_docs)]
+
 mod flatten;
 mod fonts;
 mod gif;
@@ -36,13 +38,16 @@ use s_md_slides::{AssetResolver, Deck, Diagnostic, EngineError, Severity};
 /// What a progress callback asks for.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Control {
+    /// Keep going.
     Continue,
+    /// Stop the export with `E-CANCELLED`.
     Cancel,
 }
 
 /// Progress for long exports (PDF pages, GIF frames). Returning `Cancel` stops the
 /// export within one page or frame with `E-CANCELLED` (FR-EXP-06).
 pub trait Progress {
+    /// Called after each page or frame with how many are done out of `total`.
     fn report(&mut self, done: u32, total: u32) -> Control;
 }
 
@@ -65,7 +70,9 @@ impl Progress for NoProgress {
 /// could not be drawn).
 #[derive(Debug, Clone)]
 pub struct Output {
+    /// The exported file.
     pub bytes: Vec<u8>,
+    /// Problems found while exporting.
     pub diagnostics: Vec<Diagnostic>,
 }
 

@@ -4,6 +4,7 @@ exclude = ["fuzz"]
 members = ["crates/core", "crates/render", "crates/cli", "crates/wasm-probe"]
 
 [workspace.package]
+version = "0.1.0"
 edition = "2024"
 rust-version = "1.95"
 license = "MIT"
@@ -54,3 +55,8 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = "debuginfo"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"

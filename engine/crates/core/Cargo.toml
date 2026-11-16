@@ -1,8 +1,8 @@
 [package]
 name = "s-md-slides"
-version = "0.0.0"
+version.workspace = true
 description = "Free-canvas slide decks stored in one readable markdown file"
-readme = "../../README.md"
+readme = "../../../README.md"
 keywords = ["slides", "markdown", "presentation"]
 categories = ["parser-implementations", "text-processing"]
 edition.workspace = true
@@ -26,3 +26,8 @@ proptest.workspace = true
 insta = { workspace = true, features = ["json"] }
 serde_json.workspace = true
 roxmltree.workspace = true
+criterion.workspace = true
+
+[[bench]]
+name = "deck"
+harness = false

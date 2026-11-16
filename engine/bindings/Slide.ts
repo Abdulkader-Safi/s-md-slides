@@ -3,7 +3,34 @@ import type { Attr } from "./Attr";
 import type { Element } from "./Element";
 import type { MasterSetting } from "./MasterSetting";
 
-export type Slide = { index: number, layout?: string, master: MasterSetting, hide: Array<string>, bg?: string, transition?: string, 
+/**
+ * One slide: its directive settings, elements and notes.
+ */
+export type Slide = { 
+/**
+ * 0-based position in the deck.
+ */
+index: number, 
+/**
+ * Layout id from `layout=`.
+ */
+layout?: string, 
+/**
+ * Which master the slide draws behind its elements.
+ */
+master: MasterSetting, 
+/**
+ * Ids of master elements this slide hides, from `hide=`.
+ */
+hide: Array<string>, 
+/**
+ * Background as written in `bg=`: a color, a role, a `linear(...)` gradient or an image path.
+ */
+bg?: string, 
+/**
+ * Transition from `transition=`: `none`, `fade` or `push`. `None` uses the deck default.
+ */
+transition?: string, 
 /**
  * Transition length in milliseconds (`dur=` on the slide directive).
  */
@@ -15,4 +42,8 @@ attrs: Array<Attr>,
 /**
  * File order is stacking order.
  */
-elements: Array<Element>, notes?: string, };
+elements: Array<Element>, 
+/**
+ * Speaker notes as raw markdown. `None` when the slide has no `<!-- notes -->`.
+ */
+notes?: string, };

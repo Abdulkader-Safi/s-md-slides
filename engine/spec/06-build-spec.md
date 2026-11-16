@@ -247,10 +247,10 @@ Throwaway spikes in a `spikes/` folder, deleted or folded in after.
 - [x] **FR-CLI-01** `s-md-slides validate <deck>` prints diagnostics and exits non-zero on errors. Check: a broken deck exits 1 with `file:line:col` messages.
 - [x] **FR-CLI-02** `s-md-slides export <deck> --to html|pdf|png|jpeg|gif [--slide N] [--scale 2] [--embed]`. Check: each format writes the expected file. `--slide` limits image formats to one slide.
 - [x] **FR-CLI-03** `s-md-slides serve <deck>` serves the HTML presentation on 127.0.0.1, watches the deck and its assets, and reloads open browsers on change, keeping the current slide. Preview only, it never writes the deck. `--host` and `--port` override. Check: editing the deck in Vim updates the open browser on the same slide within 500 ms. The deck's modified time never changes because of the server.
-- [ ] **FR-AGENT-01** The repo ships `AGENTS.md` and a Claude skill (`skills/s-md-slides/SKILL.md`) covering the format, the canvas presets, the operation list, the CLI and how the desktop app's MCP tools map to operations. Check: a fresh Claude Code session given only the skill writes a five-slide deck that `validate` passes with no errors.
-- [ ] **FR-AGENT-02** A written format spec (`docs/format.md`) with the full grammar and one example per element type, plus a sample deck suite used by the tests. Check: every example in the spec is in the test suite and parses with no diagnostics.
+- [x] **FR-AGENT-01** The repo ships `AGENTS.md` and a Claude skill (`skills/s-md-slides/SKILL.md`) covering the format, the canvas presets, the operation list, the CLI and how the desktop app's MCP tools map to operations. Check: a fresh Claude Code session given only the skill writes a five-slide deck that `validate` passes with no errors.
+- [x] **FR-AGENT-02** A written format spec (`docs/format.md`) with the full grammar and one example per element type, plus a sample deck suite used by the tests. Check: every example in the spec is in the test suite and parses with no diagnostics.
 - [ ] **FR-PKG-01** The engine repo publishes three crates to crates.io: `s-md-slides` (core), `s-md-slides-render` (native export) and `s-md-slides-cli` (the `s-md-slides` binary), all on one version number. Check: `cargo add s-md-slides` runs the 10-line README example, and `cargo install s-md-slides-cli` gives a working `s-md-slides` command.
-- [ ] **FR-PKG-03** Conformance vectors: the engine repo ships a `conformance/` folder of JSON cases (input deck, operations, expected output text, expected model, expected diagnostics, timeline samples), versioned with the format and released with each engine version. Any implementation (the npm WASM wrapper or a TypeScript port) proves it matches by passing all of them. Check: the vectors cover every FR-FMT, FR-OPS and FR-ANIM-04 acceptance case, and the native core passes 100% of them in CI.
+- [x] **FR-PKG-03** Conformance vectors: the engine repo ships a `conformance/` folder of JSON cases (input deck, operations, expected output text, expected model, expected diagnostics, timeline samples), versioned with the format and released with each engine version. Any implementation (the npm WASM wrapper or a TypeScript port) proves it matches by passing all of them. Check: the vectors cover every FR-FMT, FR-OPS and FR-ANIM-04 acceptance case, and the native core passes 100% of them in CI.
 
 ### v1 Should and Could (not blocking the first release)
 - [x] **FR-FMT-08** A plain markdown file with no directives must open as a deck: each `---`-separated section becomes a slide with one text element filling the safe area. Check: a three-section note opens as three slides, each with its text visible.
@@ -267,16 +267,16 @@ Throwaway spikes in a `spikes/` folder, deleted or folded in after.
 - [x] **FR-CLI-04** `s-md-slides apply <deck> <ops.json>` applies a batch of operations and writes the deck (for scripts and agents). Check: a JSON batch of moves changes only those lines.
 
 ### Non-functional
-- [ ] **NFR-01** Performance: parse plus serialize of a 200-slide, 2,000-element deck under 50 ms native on an M1. One op plus serialize under 5 ms. One 1920 x 1080 PNG under 300 ms. `serve` reload under 500 ms. Measured by criterion and the M6 test.
-- [ ] **NFR-02** Size: the core's WASM build under 1 MB uncompressed, never above 1.5 MB, enforced by `scripts/wasm-size.sh` in CI.
-- [ ] **NFR-03** Round-trip: every golden deck and conformance case saves byte-identical, and every op touches only its targets' spans.
-- [ ] **NFR-04** Privacy and security: no network in core or render. `serve` binds 127.0.0.1 by default, serves only the deck folder, never writes. Exports are sanitized and carry the CSP.
+- [x] **NFR-01** Performance: parse plus serialize of a 200-slide, 2,000-element deck under 50 ms native on an M1. One op plus serialize under 5 ms. One 1920 x 1080 PNG under 300 ms. `serve` reload under 500 ms. Measured by criterion and the M6 test.
+- [x] **NFR-02** Size: the core's WASM build under 1 MB uncompressed, never above 1.5 MB, enforced by `scripts/wasm-size.sh` in CI.
+- [x] **NFR-03** Round-trip: every golden deck and conformance case saves byte-identical, and every op touches only its targets' spans.
+- [x] **NFR-04** Privacy and security: no network in core or render. `serve` binds 127.0.0.1 by default, serves only the deck folder, never writes. Exports are sanitized and carry the CSP.
 - [ ] **NFR-05** Robustness: `fuzz_parse` and `fuzz_ops` each pass 10 million runs with no panic before release.
-- [ ] **NFR-06** Platforms: CI green on macOS, Windows and Linux at the MSRV, plus the `wasm32-unknown-unknown` core build.
-- [ ] **NFR-07** Accessibility and locale: axe-core finds no WCAG 2.2 AA violations in the presentation. Keyboard-only use, alt text, reading order and reduced motion work. Arabic and mixed text render correctly in every format.
-- [ ] **NFR-08** Stability: semver on all three crates. A deck with unknown keys from a newer minor version loads and saves without loss. A `s-md-slides: 2` deck opens read-only.
-- [ ] **NFR-09** License: MIT. `cargo-deny` passes with no GPL or AGPL. Third-party notices generated by `cargo-about`.
-- [ ] **NFR-10** Docs: every public item documented on docs.rs, TypeScript types generated, `docs/format.md` and the skill match the code (their examples are tests).
+- [x] **NFR-06** Platforms: CI green on macOS, Windows and Linux at the MSRV, plus the `wasm32-unknown-unknown` core build.
+- [x] **NFR-07** Accessibility and locale: axe-core finds no WCAG 2.2 AA violations in the presentation. Keyboard-only use, alt text, reading order and reduced motion work. Arabic and mixed text render correctly in every format.
+- [x] **NFR-08** Stability: semver on all three crates. A deck with unknown keys from a newer minor version loads and saves without loss. A `s-md-slides: 2` deck opens read-only.
+- [x] **NFR-09** License: MIT. `cargo-deny` passes with no GPL or AGPL. Third-party notices generated by `cargo-about`.
+- [x] **NFR-10** Docs: every public item documented on docs.rs, TypeScript types generated, `docs/format.md` and the skill match the code (their examples are tests).
 
 ## 10. Standard states
 - Undo and redo: FR-OPS-02, FR-OPS-04 (hosts keep the stack).

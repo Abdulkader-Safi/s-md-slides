@@ -1,0 +1,17 @@
+{
+  "covers": [
+    "FR-FMT-07"
+  ],
+  "expect_diagnostics": [],
+  "expect_read_only": false,
+  "expect_text": "<!-- text x=1 y=1 w=100 h=100 id=t2 -->\nA2\n<!-- text id=t1 x=1 y=1 w=1 h=1 -->\nB\n",
+  "input": "<!-- text x=1 y=1 w=100 h=100 -->\nA\n<!-- text id=t1 x=1 y=1 w=1 h=1 -->\nB\n",
+  "name": "fmt-07-id-written-on-edit",
+  "ops": [
+    {
+      "id": "t2",
+      "op": "set_body",
+      "text": "A2"
+    }
+  ]
+}

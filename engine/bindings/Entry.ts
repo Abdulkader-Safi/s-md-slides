@@ -5,7 +5,19 @@ import type { State } from "./State";
 /**
  * One element's animation within a step.
  */
-export type Entry = { id: string, phase: Phase, effect: string, 
+export type Entry = { 
+/**
+ * Id of the animated element.
+ */
+id: string, 
+/**
+ * Entrance or exit.
+ */
+phase: Phase, 
+/**
+ * Effect name, such as `fade` or `fly-left`.
+ */
+effect: string, 
 /**
  * Milliseconds after the step starts.
  */
@@ -13,4 +25,12 @@ delay: number,
 /**
  * Milliseconds; 0 for `appear`.
  */
-dur: number, from: State, to: State, };
+dur: number, 
+/**
+ * State when the effect starts.
+ */
+from: State, 
+/**
+ * State when the effect ends.
+ */
+to: State, };

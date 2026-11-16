@@ -3,8 +3,24 @@
 /**
  * Animation attributes: `enter`, `exit`, `order`, `delay` and `dur` (milliseconds).
  */
-export type Anim = { enter?: string, exit?: string, 
+export type Anim = { 
+/**
+ * Entrance effect from `enter=`, such as `fade` or `fly-left`.
+ */
+enter?: string, 
+/**
+ * Exit effect from `exit=`.
+ */
+exit?: string, 
 /**
  * Build step (1 and up). `None` plays when the slide appears.
  */
-order?: number, delay: number, dur: number, };
+order?: number, 
+/**
+ * Milliseconds to wait after the step starts. 0 by default.
+ */
+delay: number, 
+/**
+ * Effect length in milliseconds. 400 by default.
+ */
+dur: number, };

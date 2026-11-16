@@ -5,4 +5,31 @@ import type { LineEnding } from "./LineEnding";
 import type { Master } from "./Master";
 import type { Slide } from "./Slide";
 
-export type Deck = { version: number, front: FrontMatter, masters: Array<Master>, layouts: Array<Layout>, slides: Array<Slide>, line_ending: LineEnding, };
+/**
+ * A parsed deck. It keeps the source text, and every edit splices that text.
+ */
+export type Deck = { 
+/**
+ * Format version from the `s-md-slides` front matter key. Above [`frontmatter::FORMAT_VERSION`] the deck is read-only.
+ */
+version: number, 
+/**
+ * Front matter as read.
+ */
+front: FrontMatter, 
+/**
+ * Masters in file order.
+ */
+masters: Array<Master>, 
+/**
+ * Layouts in file order.
+ */
+layouts: Array<Layout>, 
+/**
+ * Slides in file order.
+ */
+slides: Array<Slide>, 
+/**
+ * The file's most common line ending, used for new lines.
+ */
+line_ending: LineEnding, };

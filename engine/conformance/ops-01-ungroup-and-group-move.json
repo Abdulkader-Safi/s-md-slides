@@ -1,0 +1,23 @@
+{
+  "covers": [
+    "FR-OPS-01",
+    "FR-OPS-02",
+    "FR-EL-10"
+  ],
+  "expect_diagnostics": [],
+  "expect_read_only": false,
+  "expect_text": "<!-- text id=a x=150 y=100 w=100 h=100 -->\nA\n<!-- text id=b x=350 y=100 w=100 h=100 -->\nB\n",
+  "input": "<!-- text id=a x=100 y=100 w=100 h=100 -->\nA\n<!-- text id=b x=300 y=100 w=100 h=100 -->\nB\n<!-- group id=g1 items=a,b -->\n",
+  "name": "ops-01-ungroup-and-group-move",
+  "ops": [
+    {
+      "id": "g1",
+      "op": "set_geometry",
+      "x": 150
+    },
+    {
+      "id": "g1",
+      "op": "ungroup"
+    }
+  ]
+}

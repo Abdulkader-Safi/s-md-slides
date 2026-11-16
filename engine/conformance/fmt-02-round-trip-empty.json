@@ -1,0 +1,11 @@
+{
+  "covers": [
+    "FR-FMT-02"
+  ],
+  "expect_diagnostics": [],
+  "expect_read_only": false,
+  "expect_text": "",
+  "input": "",
+  "name": "fmt-02-round-trip-empty",
+  "ops": []
+}

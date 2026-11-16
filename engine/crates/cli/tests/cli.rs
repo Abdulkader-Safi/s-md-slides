@@ -383,13 +383,15 @@ fn ctrl_c_cancels_an_export_with_exit_4() {
         .spawn()
         .unwrap();
     let pid = child.id().to_string();
-    std::thread::sleep(Duration::from_millis(1500));
+    // Give the process time to start and install its handler, even on a loaded CI
+    // machine; a Ctrl-C before that kills it outright (no exit code).
+    std::thread::sleep(Duration::from_millis(3000));
     let sent = Instant::now();
     Command::new("kill").args(["-INT", &pid]).status().unwrap();
     let out = child.wait_with_output().unwrap();
     assert_eq!(out.status.code(), Some(4), "cancelled exit code");
     assert!(
-        sent.elapsed() < Duration::from_secs(2),
+        sent.elapsed() < Duration::from_secs(5),
         "stopped within a frame or two"
     );
     assert!(

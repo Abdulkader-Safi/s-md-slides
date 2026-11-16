@@ -4,7 +4,15 @@ import type { AssetKind } from "./AssetKind";
 /**
  * A file the deck points at, by its path as written (relative to the deck).
  */
-export type AssetRef = { path: string, kind: AssetKind, 
+export type AssetRef = { 
+/**
+ * Path as written, relative to the deck.
+ */
+path: string, 
+/**
+ * How the asset is used.
+ */
+kind: AssetKind, 
 /**
  * Element ids, `slide:N` (0-based) for backgrounds, or `front` for the theme.
  */

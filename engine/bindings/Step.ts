@@ -8,4 +8,12 @@ export type Step = {
 /**
  * Milliseconds from the start of the timeline.
  */
-start: number, duration: number, entries: Array<Entry>, };
+start: number, 
+/**
+ * Milliseconds the step lasts: its longest delay plus duration.
+ */
+duration: number, 
+/**
+ * Animations in this step.
+ */
+entries: Array<Entry>, };

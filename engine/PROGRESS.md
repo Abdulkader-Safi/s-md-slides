@@ -13,7 +13,7 @@ Build spec: [spec/06-build-spec.md](spec/06-build-spec.md). Task board: `../s-md
 | M4 animation and HTML export  | done (PR #5)        |
 | M5 native render              | done (PR #6)        |
 | M6 CLI                        | done (PR #7)        |
-| M7 conformance, docs, release | not started         |
+| M7 conformance, docs, release | done (PR #9)        |
 
 ## Decisions
 
@@ -43,7 +43,7 @@ Decisions:
 
 Code: `crates/render` (crate `s-md-slides-render`): `fonts.rs`, `layout.rs` (markdown to parley glyph runs), `flatten.rs` (scene and SVG), `raster.rs`, `pdf.rs`, `gif.rs`, `graphics.rs` (Mermaid and math). Example: `cargo run -p s-md-slides-render --release --example render -- deck.md out-dir`. Reference PNGs: `engine/tests/reference/`. The M0 spikes are gone.
 
-Acceptance boxes ticked: FR-EXP-03 to FR-EXP-06, FR-EL-06 to FR-EL-09. FR-EL-11 (syntax highlighting, a Could) is not built and its card is in the backlog. Exit criteria: every example deck exports to every format (PNG, JPEG, SVG, PDF, GIF); the 11 reference PNGs match within 0.5% on macOS, Windows and Linux in CI; PDF text is selectable (12 pages, ToUnicode maps; `pdftotext` reads Latin and Arabic); a three-step slide's GIF shows each step in order; cancel returns `E-CANCELLED` within 200 ms.
+Acceptance boxes ticked: FR-EXP-03 to FR-EXP-06, FR-EL-06 to FR-EL-09. FR-EL-11 (syntax highlighting, a Could) is not built and its card is in the backlog. Exit criteria: every example deck exports to every format (PNG, JPEG, SVG, PDF, GIF); the 11 reference PNGs match within 0.5% on all three CI operating systems; PDF text is selectable (12 pages, ToUnicode maps; `pdftotext` reads Latin and Arabic); a three-step slide's GIF shows each step in order; cancel returns `E-CANCELLED` within 200 ms.
 
 Decisions:
 
@@ -202,7 +202,7 @@ parley 0.13 and krilla 0.8 depend on different versions of the font stack (skrif
 | jpeg-encoder 0.7.1 | (MIT OR Apache-2.0) AND IJG | OK, IJG needs an attribution line in the notices |
 | notify 8.2.2 | CC0-1.0 | OK |
 
-No GPL or AGPL anywhere. cargo-deny in M7 needs EUPL-1.2 on its deny list so giallo can't slip back in.
+No GPL or AGPL anywhere. cargo-deny (M7) allows only a list of permissive licenses, so EUPL-1.2 (and giallo) cannot slip back in.
 
 ### WASM size spike (done)
 
@@ -233,3 +233,28 @@ Open questions for M1:
 - Removing the first element of the file when the next line is `---` is refused, because the file would then start with `---` and read as front matter. A deck can't have an empty first slide followed by a separator unless it has front matter. Options: always write front matter when this happens, or accept the refusal.
 - Undo of an attribute edit restores the whole directive line as written (`SetDirective`). The spec's op list has no such op. M2 either keeps it as an internal op in the JSON schema or makes `SetAttrs` carry raw values.
 - In-memory ids for elements without `id=` are assigned by file order on every scan, so removing an element with an explicit id can shift the ids of id-less elements. M1 needs a stable mapping (FR-FMT-07).
+
+### M7 benchmarks (NFR-01), measured 2026-11-16 on an Apple M2 Pro
+
+`cargo bench -p s-md-slides --bench deck` and `cargo bench -p s-md-slides-render --bench png`.
+
+| Check | Budget | Measured |
+| --- | --- | --- |
+| Parse plus save, 200 slides and 2,000 elements (155 KB) | 50 ms | 4.5 to 4.8 ms |
+| One op plus save on that deck | 5 ms | 1.9 ms |
+| One 1920 x 1080 PNG | 300 ms | 45 ms |
+| `serve` reload | 500 ms | checked by the M6 test |
+
+The op number started at 7.0 ms. Every op re-parses the whole deck to check its structure, so an op costs one parse. Profiling showed the parser cloning each element's attributes and hashing every attribute key to find duplicates; moving instead of cloning and scanning instead of hashing took parse from 6.4 to 4.5 ms. What is left is mostly allocation (37% of parse time goes to malloc, free and copies: about 25 small strings per element).
+
+That still left one op at 5.0 ms, which would miss 5 ms on an M1. The user chose a fast path (2026-11-16): when an edit stays inside one line of a slide and cannot move a `---` line or a code fence (a move, resize, restyle or slide setting), the engine clones the deck, re-parses only that slide's section, shifts the byte offsets of the sections after it, and re-runs the deck-wide id and reference passes. Diagnostics keep full-parse order because the parse records where each section's problems start and end. Anything else (new lines, definitions sections, one-section decks) takes the full parse as before. One op plus save dropped to 1.9 ms; most of what is left is the clone and dropping the old deck.
+
+Safety: debug builds compare every fast result with a full parse (the whole model including byte spans, plus the diagnostics) and panic on any difference. That runs in the 10,000-case op proptest and every test. `cargo fuzz --release` turns debug assertions off, so the nightly job adds an hour of `fuzz_ops` with `--debug-assertions`. The release fuzz run found a bug after 16,000 runs, and a replay with debug assertions showed the cause: when an edit fixed a broken attribute, the fast path moved only some of the recorded diagnostic positions, and a later edit read past the end of the list. Fixed, with a regression test. A unit test edits every golden deck, conformance input and example and checks the fast path fires for most edits.
+
+### M7 release flow (changed 2026-11-16, at the user's request)
+
+Releases follow the user's flow from another project. Publishing to crates.io is manual, from the user's Mac with the saved token: core, then render, then the CLI. Pushing the `vX` tag then runs `release.yml`, generated by cargo-dist 0.34 from `dist-workspace.toml` at the repo root (the Cargo workspace is in `engine/`). It builds the CLI for five targets (macOS on Apple silicon and Intel, Linux x86_64 and ARM, Windows), with shell and PowerShell installers and checksums, and creates the GitHub release. Each archive carries the license, the third-party notices and the bundled fonts' OFL. A small `conformance.yml` attaches the conformance zip once the release is published. CI has no crates.io token and no publish step. The hand-written release workflow from earlier in M7 is gone.
+
+### 0.1.0 shipped before the 10-million-run fuzz gate (user's call, 2026-11-16)
+
+NFR-05 asks for 10 million runs of each fuzz target before release. The user chose to release 0.1.0 without waiting. At release, `fuzz_parse` had passed about 4 million runs and `fuzz_ops` about 1.5 million on the final code, plus an hour of `fuzz_ops` with debug assertions comparing every fast edit with a full parse. Both fuzz bugs found that day are fixed with regression tests. The runs keep going, and the nightly workflow keeps fuzzing; anything found goes into 0.1.1.

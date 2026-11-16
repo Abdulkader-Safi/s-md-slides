@@ -1,0 +1,117 @@
+{
+  "covers": [
+    "FR-OPS-04"
+  ],
+  "expect_diagnostics": [],
+  "expect_read_only": false,
+  "expect_text": "<!-- text id=e0 x=0 y=0 w=10 h=10 -->\n0\n<!-- text id=e1 x=10 y=0 w=10 h=10 -->\n1\n<!-- text id=e2 x=20 y=0 w=10 h=10 -->\n2\n<!-- text id=e3 x=30 y=0 w=10 h=10 -->\n3\n<!-- text id=e4 x=40 y=0 w=10 h=10 -->\n4\n<!-- text id=e5 x=50 y=0 w=10 h=10 -->\n5\n<!-- text id=e6 x=60 y=0 w=10 h=10 -->\n6\n<!-- text id=e7 x=70 y=0 w=10 h=10 -->\n7\n<!-- text id=e8 x=80 y=0 w=10 h=10 -->\n8\n<!-- text id=e9 x=90 y=0 w=10 h=10 -->\n9\n<!-- text id=e10 x=100 y=0 w=10 h=10 -->\n10\n<!-- text id=e11 x=110 y=0 w=10 h=10 -->\n11\n<!-- text id=e12 x=120 y=0 w=10 h=10 -->\n12\n<!-- text id=e13 x=130 y=0 w=10 h=10 -->\n13\n<!-- text id=e14 x=140 y=0 w=10 h=10 -->\n14\n<!-- text id=e15 x=150 y=0 w=10 h=10 -->\n15\n<!-- text id=e16 x=160 y=0 w=10 h=10 -->\n16\n<!-- text id=e17 x=170 y=0 w=10 h=10 -->\n17\n<!-- text id=e18 x=180 y=0 w=10 h=10 -->\n18\n<!-- text id=e19 x=190 y=0 w=10 h=10 -->\n19\n",
+  "input": "<!-- text id=e0 x=0 y=0 w=10 h=10 -->\n0\n<!-- text id=e1 x=0 y=0 w=10 h=10 -->\n1\n<!-- text id=e2 x=0 y=0 w=10 h=10 -->\n2\n<!-- text id=e3 x=0 y=0 w=10 h=10 -->\n3\n<!-- text id=e4 x=0 y=0 w=10 h=10 -->\n4\n<!-- text id=e5 x=0 y=0 w=10 h=10 -->\n5\n<!-- text id=e6 x=0 y=0 w=10 h=10 -->\n6\n<!-- text id=e7 x=0 y=0 w=10 h=10 -->\n7\n<!-- text id=e8 x=0 y=0 w=10 h=10 -->\n8\n<!-- text id=e9 x=0 y=0 w=10 h=10 -->\n9\n<!-- text id=e10 x=0 y=0 w=10 h=10 -->\n10\n<!-- text id=e11 x=0 y=0 w=10 h=10 -->\n11\n<!-- text id=e12 x=0 y=0 w=10 h=10 -->\n12\n<!-- text id=e13 x=0 y=0 w=10 h=10 -->\n13\n<!-- text id=e14 x=0 y=0 w=10 h=10 -->\n14\n<!-- text id=e15 x=0 y=0 w=10 h=10 -->\n15\n<!-- text id=e16 x=0 y=0 w=10 h=10 -->\n16\n<!-- text id=e17 x=0 y=0 w=10 h=10 -->\n17\n<!-- text id=e18 x=0 y=0 w=10 h=10 -->\n18\n<!-- text id=e19 x=0 y=0 w=10 h=10 -->\n19\n",
+  "name": "ops-04-batch-of-20-moves",
+  "ops": [
+    {
+      "op": "batch",
+      "ops": [
+        {
+          "id": "e0",
+          "op": "set_geometry",
+          "x": 0.0
+        },
+        {
+          "id": "e1",
+          "op": "set_geometry",
+          "x": 10.0
+        },
+        {
+          "id": "e2",
+          "op": "set_geometry",
+          "x": 20.0
+        },
+        {
+          "id": "e3",
+          "op": "set_geometry",
+          "x": 30.0
+        },
+        {
+          "id": "e4",
+          "op": "set_geometry",
+          "x": 40.0
+        },
+        {
+          "id": "e5",
+          "op": "set_geometry",
+          "x": 50.0
+        },
+        {
+          "id": "e6",
+          "op": "set_geometry",
+          "x": 60.0
+        },
+        {
+          "id": "e7",
+          "op": "set_geometry",
+          "x": 70.0
+        },
+        {
+          "id": "e8",
+          "op": "set_geometry",
+          "x": 80.0
+        },
+        {
+          "id": "e9",
+          "op": "set_geometry",
+          "x": 90.0
+        },
+        {
+          "id": "e10",
+          "op": "set_geometry",
+          "x": 100.0
+        },
+        {
+          "id": "e11",
+          "op": "set_geometry",
+          "x": 110.0
+        },
+        {
+          "id": "e12",
+          "op": "set_geometry",
+          "x": 120.0
+        },
+        {
+          "id": "e13",
+          "op": "set_geometry",
+          "x": 130.0
+        },
+        {
+          "id": "e14",
+          "op": "set_geometry",
+          "x": 140.0
+        },
+        {
+          "id": "e15",
+          "op": "set_geometry",
+          "x": 150.0
+        },
+        {
+          "id": "e16",
+          "op": "set_geometry",
+          "x": 160.0
+        },
+        {
+          "id": "e17",
+          "op": "set_geometry",
+          "x": 170.0
+        },
+        {
+          "id": "e18",
+          "op": "set_geometry",
+          "x": 180.0
+        },
+        {
+          "id": "e19",
+          "op": "set_geometry",
+          "x": 190.0
+        }
+      ]
+    }
+  ]
+}

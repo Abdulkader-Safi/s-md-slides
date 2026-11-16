@@ -1,0 +1,86 @@
+{
+  "covers": [
+    "FR-FMT-08"
+  ],
+  "expect_diagnostics": [],
+  "expect_model": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [],
+            "body": "# One\n\ntext\n",
+            "h": 972.0,
+            "id": "t1",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      },
+      {
+        "elements": [
+          {
+            "attrs": [],
+            "body": "# Two\n",
+            "h": 972.0,
+            "id": "t2",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 1,
+        "master": "inherit"
+      },
+      {
+        "elements": [
+          {
+            "attrs": [],
+            "body": "# Three\n",
+            "h": 972.0,
+            "id": "t3",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 2,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "expect_read_only": false,
+  "expect_text": "# One\n\ntext\n\n---\n\n# Two\n\n---\n\n# Three\n",
+  "input": "# One\n\ntext\n\n---\n\n# Two\n\n---\n\n# Three\n",
+  "name": "fmt-08-plain-markdown-slides",
+  "ops": []
+}

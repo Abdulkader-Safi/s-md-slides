@@ -6,7 +6,54 @@ import type { Dir } from "./Dir";
 import type { Kind } from "./Kind";
 import type { Style } from "./Style";
 
-export type Element = { id: string, kind: Kind, x: number, y: number, w: number, h: number, rot: number, opacity: number, locked: boolean, name?: string, dir?: Dir, 
+/**
+ * One box on a slide or master: its directive plus its markdown body.
+ */
+export type Element = { 
+/**
+ * Element id, unique in the deck. Written in the file or assigned in memory until the element is first edited.
+ */
+id: string, 
+/**
+ * What the element is.
+ */
+kind: Kind, 
+/**
+ * Left edge in canvas units.
+ */
+x: number, 
+/**
+ * Top edge in canvas units.
+ */
+y: number, 
+/**
+ * Width in canvas units.
+ */
+w: number, 
+/**
+ * Height in canvas units. 0 for a horizontal line or arrow written without `h`.
+ */
+h: number, 
+/**
+ * Rotation in degrees. 0 when not written.
+ */
+rot: number, 
+/**
+ * Opacity from 0 to 1. 1 when not written.
+ */
+opacity: number, 
+/**
+ * True when `locked` is set, so editors should not move the element.
+ */
+locked: boolean, 
+/**
+ * Display name from `name=`, for editors' layer lists.
+ */
+name?: string, 
+/**
+ * Text direction from `dir=`. `None` follows the deck; see [`Deck::resolved_dir`].
+ */
+dir?: Dir, 
 /**
  * Every attribute as written, in order (known ones included).
  */

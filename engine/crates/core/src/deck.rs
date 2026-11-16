@@ -10,20 +10,28 @@ use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use std::ops::Range;
 
+/// Files larger than this many bytes open read-only.
 pub const MAX_FILE_BYTES: usize = 20 * 1024 * 1024;
+/// Decks with more slides than this open read-only.
 pub const MAX_SLIDES: usize = 5_000;
+/// Slides with more elements than this open read-only.
 pub const MAX_ELEMENTS_PER_SLIDE: usize = 2_000;
+/// Attribute values longer than this many bytes are an `E-LIMIT` error.
 pub const MAX_ATTR_VALUE_BYTES: usize = 4 * 1024;
 
+/// Line ending style. New lines use the file's most common one.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum LineEnding {
+    /// `\n`.
     Lf,
+    /// `\r\n`.
     Crlf,
 }
 
 impl LineEnding {
+    /// The line ending as text.
     pub fn as_str(self) -> &'static str {
         match self {
             LineEnding::Lf => "\n",
@@ -32,20 +40,32 @@ impl LineEnding {
     }
 }
 
+/// Element kind, from the directive's first word.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(into = "String")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, type = "string"))]
 pub enum Kind {
+    /// Markdown text box.
     Text,
+    /// One markdown image.
     Image,
+    /// Rectangle, ellipse, line or arrow.
     Shape,
+    /// One fenced code block.
     Code,
+    /// One markdown table.
     Table,
+    /// One Mermaid diagram.
     Diagram,
+    /// One LaTeX block.
     Math,
+    /// Video file, with an optional poster.
     Video,
+    /// An https page in an iframe.
     Embed,
+    /// A set of elements on the same slide that move together.
     Group,
+    /// A kind the engine does not know, kept because the directive has an `id=`.
     Unknown(String),
 }
 
@@ -65,6 +85,7 @@ impl Kind {
             other => Kind::Unknown(other.to_string()),
         }
     }
+    /// The kind as written in a directive, such as `text`.
     pub fn name(&self) -> &str {
         match self {
             Kind::Text => "text",
@@ -109,20 +130,32 @@ impl ElementSrc {
     }
 }
 
+/// One box on a slide or master: its directive plus its markdown body.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Element {
+    /// Element id, unique in the deck. Written in the file or assigned in memory until the element is first edited.
     pub id: String,
+    /// What the element is.
     pub kind: Kind,
+    /// Left edge in canvas units.
     pub x: f64,
+    /// Top edge in canvas units.
     pub y: f64,
+    /// Width in canvas units.
     pub w: f64,
+    /// Height in canvas units. 0 for a horizontal line or arrow written without `h`.
     pub h: f64,
+    /// Rotation in degrees. 0 when not written.
     pub rot: f64,
+    /// Opacity from 0 to 1. 1 when not written.
     pub opacity: f64,
+    /// True when `locked` is set, so editors should not move the element.
     pub locked: bool,
+    /// Display name from `name=`, for editors' layer lists.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
+    /// Text direction from `dir=`. `None` follows the deck; see [`Deck::resolved_dir`].
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dir: Option<Dir>,
     /// Every attribute as written, in order (known ones included).
@@ -160,12 +193,16 @@ impl Element {
     }
 }
 
+/// Which master a slide uses, from `master=` on its slide directive.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(into = "String")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, type = "string"))]
 pub enum MasterSetting {
+    /// No `master=` (or `master=inherit`): the layout's master, else the deck's first master.
     Inherit,
+    /// `master=none`: no master is drawn.
     None,
+    /// A master id.
     Id(String),
 }
 
@@ -218,17 +255,24 @@ pub(crate) struct DefSrc {
     pub section: usize,
 }
 
+/// One slide: its directive settings, elements and notes.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Slide {
+    /// 0-based position in the deck.
     pub index: usize,
+    /// Layout id from `layout=`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub layout: Option<String>,
+    /// Which master the slide draws behind its elements.
     pub master: MasterSetting,
+    /// Ids of master elements this slide hides, from `hide=`.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub hide: Vec<String>,
+    /// Background as written in `bg=`: a color, a role, a `linear(...)` gradient or an image path.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bg: Option<String>,
+    /// Transition from `transition=`: `none`, `fade` or `push`. `None` uses the deck default.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transition: Option<String>,
     /// Transition length in milliseconds (`dur=` on the slide directive).
@@ -239,56 +283,81 @@ pub struct Slide {
     pub attrs: Vec<Attr>,
     /// File order is stacking order.
     pub elements: Vec<Element>,
+    /// Speaker notes as raw markdown. `None` when the slide has no `<!-- notes -->`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub notes: Option<String>,
     #[serde(skip)]
     pub(crate) src: SlideSrc,
 }
 
+/// A master: elements drawn behind every slide that uses it.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Master {
+    /// Master id from `id=`.
     pub id: String,
+    /// Attributes of the `<!-- master -->` directive as written.
     pub attrs: Vec<Attr>,
+    /// Master elements in stacking order. Their text can use `{slide}`, `{total}` and `{title}`.
     pub elements: Vec<Element>,
     #[serde(skip)]
     pub(crate) src: DefSrc,
 }
 
+/// A named position in a layout. A slide added from the layout gets one element per placeholder.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Placeholder {
+    /// Placeholder id, unique within its layout.
     pub id: String,
+    /// Kind of element the placeholder makes, from `kind=`. `text` when not written.
     pub kind: String,
+    /// Left edge in canvas units.
     pub x: f64,
+    /// Top edge in canvas units.
     pub y: f64,
+    /// Width in canvas units.
     pub w: f64,
+    /// Height in canvas units.
     pub h: f64,
+    /// Attributes of the `<!-- placeholder -->` directive as written, style included.
     pub attrs: Vec<Attr>,
 }
 
+/// A layout: placeholder positions on a master.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Layout {
+    /// Layout id from `id=`.
     pub id: String,
+    /// Master id from `master=`. `None` uses the deck's first master.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub master: Option<String>,
+    /// Attributes of the `<!-- layout -->` directive as written.
     pub attrs: Vec<Attr>,
+    /// Placeholders in file order.
     pub placeholders: Vec<Placeholder>,
     #[serde(skip)]
     pub(crate) src: DefSrc,
 }
 
+/// A parsed deck. It keeps the source text, and every edit splices that text.
 #[derive(Debug, Clone, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Deck {
     #[serde(skip)]
     pub(crate) source: String,
+    /// Format version from the `s-md-slides` front matter key. Above [`frontmatter::FORMAT_VERSION`] the deck is read-only.
     pub version: u32,
+    /// Front matter as read.
     pub front: FrontMatter,
+    /// Masters in file order.
     pub masters: Vec<Master>,
+    /// Layouts in file order.
     pub layouts: Vec<Layout>,
+    /// Slides in file order.
     pub slides: Vec<Slide>,
+    /// The file's most common line ending, used for new lines.
     pub line_ending: LineEnding,
     #[serde(skip)]
     pub(crate) diagnostics: Vec<Diagnostic>,
@@ -307,12 +376,33 @@ pub struct Deck {
     /// Path of the theme file loaded through `load_theme`, if any.
     #[serde(skip)]
     pub(crate) theme_path: Option<String>,
+    /// Where each phase's diagnostics end, so a one-line edit can replace just its
+    /// section's diagnostics in the same order a full parse gives.
+    #[serde(skip)]
+    pub(crate) marks: DiagMarks,
+}
+
+/// Diagnostic counts after each parse phase. A full parse emits, in order: front
+/// matter, then the syntax problems of every section, then an unclosed fence, then
+/// each section's build problems, then id and reference problems (the tail).
+#[derive(Debug, Clone, Default, PartialEq)]
+pub(crate) struct DiagMarks {
+    /// After front matter.
+    head: usize,
+    /// After each section's syntax problems.
+    syntax: Vec<usize>,
+    /// Where section building starts (after the unclosed-fence problem, if any).
+    built: usize,
+    /// After each section's build problems.
+    build: Vec<usize>,
 }
 
 /// Result of [`Deck::parse`]: always a deck, plus whatever went wrong.
 #[derive(Debug, Clone)]
 pub struct Parsed {
+    /// The deck, read as far as it could be.
     pub deck: Deck,
+    /// Problems found, with line and column.
     pub diagnostics: Vec<Diagnostic>,
 }
 
@@ -359,6 +449,70 @@ fn fence_marker(text: &str) -> Option<(u8, usize)> {
     }
     let n = t.bytes().take_while(|&x| x == c).count();
     (n >= 3).then_some((c, n))
+}
+
+/// Split `lines` (which cover `span`) into sections at `---` lines outside code
+/// fences, parsing every directive line. Returns the sections, the start of a fence
+/// that never closes, and the diagnostic count after each section's syntax problems.
+fn scan(
+    cx: &mut Ctx,
+    lines: &[Line],
+    span: Range<usize>,
+) -> (Vec<Section>, Option<usize>, Vec<usize>) {
+    let src = cx.src;
+    let end = span.end;
+    let mut sections = Vec::new();
+    let mut syntax = Vec::new();
+    let mut cur = Section {
+        span,
+        directives: Vec::new(),
+    };
+    let mut fence: Option<(u8, usize, usize)> = None;
+    for l in lines {
+        let text = &src[l.start..l.end];
+        if let Some((c, n, _)) = fence {
+            if let Some((c2, n2)) = fence_marker(text)
+                && c2 == c
+                && n2 >= n
+                && text.trim().bytes().all(|x| x == c)
+            {
+                fence = None;
+            }
+            continue;
+        }
+        if let Some((c, n)) = fence_marker(text) {
+            fence = Some((c, n, l.start));
+            continue;
+        }
+        if is_separator(text) {
+            cur.span.end = l.start;
+            sections.push(std::mem::replace(
+                &mut cur,
+                Section {
+                    span: l.next..end,
+                    directives: Vec::new(),
+                },
+            ));
+            syntax.push(cx.diags.len());
+            continue;
+        }
+        if let Some(d) = parse_directive(text, l.start) {
+            if let Some(at) = d.error_at {
+                cx.push(
+                    Severity::Error,
+                    "E-ATTR-SYNTAX",
+                    "This attribute can't be read. Use key=value, key=\"quoted value\" or a bare key.".into(),
+                    at,
+                    None,
+                    None,
+                );
+            }
+            cur.directives.push((l.start..l.end, l.next, d));
+        }
+    }
+    sections.push(cur);
+    syntax.push(cx.diags.len());
+    (sections, fence.map(|(_, _, at)| at), syntax)
 }
 
 fn is_separator(text: &str) -> bool {
@@ -463,10 +617,12 @@ impl Deck {
         self.read_only
     }
 
+    /// Canvas size from front matter.
     pub fn canvas(&self) -> Canvas {
         self.front.canvas
     }
 
+    /// Slide at a 0-based index.
     pub fn slide(&self, index: usize) -> Option<&Slide> {
         self.slides.get(index)
     }
@@ -479,6 +635,7 @@ impl Deck {
             .chain(self.slides.iter().flat_map(|s| &s.elements))
     }
 
+    /// The element with this id, on a slide or a master.
     pub fn element(&self, id: &str) -> Option<&Element> {
         self.elements().find(|e| e.id == id)
     }
@@ -515,6 +672,7 @@ impl Deck {
             bom: 0,
             theme: Default::default(),
             theme_path: None,
+            marks: DiagMarks::default(),
         };
         if src.len() > MAX_FILE_BYTES {
             cx.push(
@@ -594,55 +752,12 @@ impl Deck {
         }
 
         // Split into sections at `---` lines outside code fences.
-        let mut sections = Vec::new();
-        let mut cur = Section {
-            span: lines.get(first).map_or(src.len(), |l| l.start)..src.len(),
-            directives: Vec::new(),
-        };
-        let mut fence: Option<(u8, usize, usize)> = None;
-        for l in lines.iter().skip(first) {
-            let text = &src[l.start..l.end];
-            if let Some((c, n, _)) = fence {
-                if let Some((c2, n2)) = fence_marker(text)
-                    && c2 == c
-                    && n2 >= n
-                    && text.trim().bytes().all(|x| x == c)
-                {
-                    fence = None;
-                }
-                continue;
-            }
-            if let Some((c, n)) = fence_marker(text) {
-                fence = Some((c, n, l.start));
-                continue;
-            }
-            if is_separator(text) {
-                cur.span.end = l.start;
-                sections.push(std::mem::replace(
-                    &mut cur,
-                    Section {
-                        span: l.next..src.len(),
-                        directives: Vec::new(),
-                    },
-                ));
-                continue;
-            }
-            if let Some(d) = parse_directive(text, l.start) {
-                if let Some(at) = d.error_at {
-                    cx.push(
-                        Severity::Error,
-                        "E-ATTR-SYNTAX",
-                        "This attribute can't be read. Use key=value, key=\"quoted value\" or a bare key.".into(),
-                        at,
-                        None,
-                        None,
-                    );
-                }
-                cur.directives.push((l.start..l.end, l.next, d));
-            }
-        }
-        sections.push(cur);
-        if let Some((_, _, at)) = fence {
+        deck.marks.head = cx.diags.len();
+        let start = lines.get(first).map_or(src.len(), |l| l.start);
+        let (mut sections, fence, syntax) =
+            scan(&mut cx, &lines[first.min(lines.len())..], start..src.len());
+        deck.marks.syntax = syntax;
+        if let Some(at) = fence {
             cx.push(
                 Severity::Error,
                 "E-UNCLOSED-FENCE",
@@ -659,7 +774,9 @@ impl Deck {
             && src[sections[0].span.clone()].trim().is_empty()
         {
             sections.clear();
+            deck.marks.syntax.clear();
         }
+        deck.marks.built = cx.diags.len();
         let mut slide_sections = 0;
         for sec in sections {
             let defs = sec
@@ -672,6 +789,7 @@ impl Deck {
                     slide: None,
                 });
                 build_definitions(&mut cx, &mut deck, sec);
+                deck.marks.build.push(cx.diags.len());
             } else {
                 if slide_sections == MAX_SLIDES {
                     cx.push(
@@ -690,8 +808,10 @@ impl Deck {
                     span: sec.span.clone(),
                     slide: Some(deck.slides.len()),
                 });
-                let slide = build_slide(&mut cx, &mut deck, sec);
+                let index = deck.slides.len();
+                let slide = build_slide(&mut cx, &mut deck, sec, index);
                 deck.slides.push(slide);
+                deck.marks.build.push(cx.diags.len());
             }
         }
         assign_ids(&mut cx, &mut deck, carry);
@@ -718,9 +838,8 @@ fn body_ranges(src: &str, from: usize, to: usize) -> (Range<usize>, usize) {
     (from..trim_blank_tail(src, from..to), to)
 }
 
-fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
+fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section, index: usize) -> Slide {
     let src = cx.src;
-    let index = deck.slides.len();
     let mut slide = Slide {
         index,
         layout: None,
@@ -862,13 +981,15 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
     }
 
     let mut notes_seen = false;
-    for k in 0..boundaries.len() {
-        let to = boundaries
-            .get(k + 1)
-            .map_or(sec.span.end, |(l, _, _)| l.start);
-        let (line, next, d) = &boundaries[k];
+    let ends: Vec<usize> = boundaries
+        .iter()
+        .skip(1)
+        .map(|(l, _, _)| l.start)
+        .chain([sec.span.end])
+        .collect();
+    for ((line, next, d), to) in boundaries.into_iter().zip(ends) {
         if d.kind == "notes" {
-            let (body, _) = body_ranges(src, *next, to);
+            let (body, _) = body_ranges(src, next, to);
             let text = &src[body.clone()];
             match &mut slide.src.notes {
                 Some(n) => n.count += 1,
@@ -922,7 +1043,7 @@ fn build_slide(cx: &mut Ctx, deck: &mut Deck, sec: Section) -> Slide {
             deck.read_only = true;
             break;
         }
-        let e = build_element(cx, line.clone(), *next, to, d, Some(index));
+        let e = build_element(cx, line, next, to, d, Some(index));
         slide.elements.push(e);
     }
     slide
@@ -1082,7 +1203,7 @@ fn build_definitions(cx: &mut Ctx, deck: &mut Deck, sec: Section) {
                 let Some(Open::Master(mi)) = open else {
                     continue;
                 };
-                let e = build_element(cx, line.clone(), *next, to, d, None);
+                let e = build_element(cx, line.clone(), *next, to, d.clone(), None);
                 deck.masters[mi].elements.push(e);
             }
         }
@@ -1150,7 +1271,7 @@ fn build_element(
     line: Range<usize>,
     next: usize,
     to: usize,
-    d: &Directive,
+    d: Directive,
     slide: Option<usize>,
 ) -> Element {
     let src = cx.src;
@@ -1159,9 +1280,9 @@ fn build_element(
     let label = written_id.clone();
     let label = label.as_deref();
 
-    let mut seen = HashSet::new();
-    for a in &d.attrs {
-        if !seen.insert(a.key.as_str()) {
+    // Elements have about ten attributes: a scan beats hashing each key.
+    for (i, a) in d.attrs.iter().enumerate() {
+        if d.attrs[..i].iter().any(|b| b.key == a.key) {
             cx.push(
                 Severity::Warning,
                 "W-DUP-ATTR",
@@ -1205,7 +1326,7 @@ fn build_element(
         );
     let g = geometry(
         cx,
-        d,
+        &d,
         !shape_line,
         known && kind != Kind::Group,
         label,
@@ -1284,7 +1405,7 @@ fn build_element(
     let (body, end) = body_ranges(src, next, to);
     let (style, content, anim) = crate::kinds::check(
         &kind,
-        d,
+        &d,
         &src[body.clone()],
         body.start,
         &mut |sev, code, msg, at| cx.push(sev, code, msg, at, label, slide),
@@ -1301,7 +1422,7 @@ fn build_element(
         locked,
         name: d.get("name").and_then(|a| a.value.clone()),
         dir,
-        attrs: d.attrs.clone(),
+        attrs: d.attrs,
         style,
         content,
         anim,
@@ -1320,7 +1441,6 @@ fn build_element(
 /// Give every element a deck-unique id. Written ids win; duplicates and elements without
 /// one get an in-memory id (kind letter plus counter), reused from `carry` when possible.
 fn assign_ids(cx: &mut Ctx, deck: &mut Deck, carry: &Carry) {
-    let mut used: HashSet<String> = HashSet::new();
     let mut needs: Vec<usize> = Vec::new();
     let mut all: Vec<&mut Element> = deck
         .masters
@@ -1328,6 +1448,7 @@ fn assign_ids(cx: &mut Ctx, deck: &mut Deck, carry: &Carry) {
         .flat_map(|m| m.elements.iter_mut())
         .chain(deck.slides.iter_mut().flat_map(|s| s.elements.iter_mut()))
         .collect();
+    let mut used: HashSet<String> = HashSet::with_capacity(all.len());
     for (i, e) in all.iter_mut().enumerate() {
         match &e.src.written_id {
             Some(id) if valid_id(id) && !used.contains(id) => {
@@ -1482,4 +1603,187 @@ pub fn first_strong(text: &str) -> Dir {
         }
     }
     Dir::Ltr
+}
+
+/// Move a byte offset by `d` (an edit earlier in the file changed its length).
+fn sh(x: &mut usize, d: isize) {
+    *x = x.wrapping_add_signed(d);
+}
+
+fn sh_range(r: &mut Range<usize>, d: isize) {
+    sh(&mut r.start, d);
+    sh(&mut r.end, d);
+}
+
+fn sh_attrs(attrs: &mut [Attr], d: isize) {
+    for a in attrs {
+        sh_range(&mut a.span, d);
+        if let Some(v) = &mut a.value_span {
+            sh_range(v, d);
+        }
+    }
+}
+
+fn sh_elements(elements: &mut [Element], d: isize) {
+    for e in elements {
+        sh_attrs(&mut e.attrs, d);
+        if let Some(l) = &mut e.src.line {
+            sh_range(l, d);
+        }
+        sh(&mut e.src.insert_at, d);
+        sh_range(&mut e.src.body, d);
+        sh(&mut e.src.end, d);
+    }
+}
+
+fn sh_slide(s: &mut Slide, d: isize) {
+    sh_attrs(&mut s.attrs, d);
+    sh_elements(&mut s.elements, d);
+    sh_range(&mut s.src.span, d);
+    if let Some(r) = &mut s.src.directive {
+        sh_range(r, d);
+    }
+    sh(&mut s.src.content_start, d);
+    if let Some(n) = &mut s.src.notes {
+        sh(&mut n.start, d);
+        sh_range(&mut n.body, d);
+        sh(&mut n.end, d);
+    }
+}
+
+impl Deck {
+    /// The deck after replacing `range` with `text` (giving the source `next`), built
+    /// by re-parsing only the edited slide when the edit stays inside one line of a
+    /// slide and cannot change where sections or code fences are. Everything else is
+    /// kept and shifted. Returns `None` when a full parse is needed. The result equals
+    /// `Deck::build(next, carry)`; debug builds check that on every edit.
+    pub(crate) fn rebuild_line(
+        &self,
+        range: &Range<usize>,
+        text: &str,
+        next: &str,
+        carry: &Carry,
+    ) -> Option<Deck> {
+        let old = &self.source[range.clone()];
+        let newline = |t: &str| t.contains(['\n', '\r']);
+        // The first three bytes can make or break a byte order mark, which moves where
+        // the first section starts.
+        if self.read_only
+            || range.start < 3
+            || newline(old)
+            || newline(text)
+            || self.sections.len() < 2
+        {
+            return None;
+        }
+        if self.marks.syntax.len() != self.sections.len()
+            || self.marks.build.len() != self.sections.len()
+        {
+            return None;
+        }
+        let k = self
+            .sections
+            .iter()
+            .position(|s| s.span.start <= range.start && range.end <= s.span.end)?;
+        let slide = self.sections[k].slide?;
+        // The edited line, before and after, must not be a separator or a fence line.
+        let line_of = |src: &str, at: usize, end: usize| {
+            let start = src[..at].rfind('\n').map_or(0, |i| i + 1);
+            let stop = src[end..].find('\n').map_or(src.len(), |i| end + i);
+            src[start..stop].trim_end_matches('\r').to_string()
+        };
+        let delta = text.len() as isize - old.len() as isize;
+        let after = range.end.wrapping_add_signed(delta);
+        for line in [
+            line_of(&self.source, range.start, range.end),
+            line_of(next, range.start, after),
+        ] {
+            if is_separator(&line) || fence_marker(&line).is_some() {
+                return None;
+            }
+        }
+
+        let span =
+            self.sections[k].span.start..self.sections[k].span.end.wrapping_add_signed(delta);
+        let mut cx = Ctx {
+            src: next,
+            index: LineIndex::new(next),
+            diags: Vec::new(),
+            canvas: self.front.canvas,
+        };
+        let lines = split_lines(&next[..span.end], span.start);
+        let (mut secs, fence, _) = scan(&mut cx, &lines, span.clone());
+        if secs.len() != 1 || fence.is_some() {
+            return None;
+        }
+        let sec = secs.pop()?;
+        if sec
+            .directives
+            .first()
+            .is_some_and(|(_, _, d)| d.kind == "master" || d.kind == "layout")
+        {
+            return None;
+        }
+        let syntax = std::mem::take(&mut cx.diags);
+
+        let mut deck = self.clone();
+        deck.source = next.to_string();
+        let built = build_slide(&mut cx, &mut deck, sec, slide);
+        if deck.read_only {
+            return None;
+        }
+        let build = std::mem::take(&mut cx.diags);
+        deck.slides[slide] = built;
+        deck.sections[k].span = span;
+        for j in k + 1..deck.sections.len() {
+            sh_range(&mut deck.sections[j].span, delta);
+            match deck.sections[j].slide {
+                Some(s) => sh_slide(&mut deck.slides[s], delta),
+                None => {
+                    for m in deck.masters.iter_mut().filter(|m| m.src.section == j) {
+                        sh_attrs(&mut m.attrs, delta);
+                        sh_elements(&mut m.elements, delta);
+                        sh_range(&mut m.src.block, delta);
+                    }
+                    for l in deck.layouts.iter_mut().filter(|l| l.src.section == j) {
+                        sh_attrs(&mut l.attrs, delta);
+                        for p in &mut l.placeholders {
+                            sh_attrs(&mut p.attrs, delta);
+                        }
+                        sh_range(&mut l.src.block, delta);
+                    }
+                }
+            }
+        }
+
+        // Diagnostics: keep everything outside this section, in full-parse order.
+        let m = &self.marks;
+        let old_diags = &self.diagnostics;
+        let s0 = if k == 0 { m.head } else { m.syntax[k - 1] };
+        let b0 = if k == 0 { m.built } else { m.build[k - 1] };
+        let tail = *m.build.last()?;
+        let mut diags = Vec::with_capacity(old_diags.len());
+        diags.extend_from_slice(&old_diags[..s0]);
+        diags.extend(syntax.iter().cloned());
+        diags.extend_from_slice(&old_diags[m.syntax[k]..b0]);
+        diags.extend(build.iter().cloned());
+        diags.extend_from_slice(&old_diags[m.build[k]..tail]);
+        let ds = syntax.len() as isize - (m.syntax[k] - s0) as isize;
+        let db = build.len() as isize - (m.build[k] - b0) as isize;
+        for x in deck.marks.syntax.iter_mut().skip(k) {
+            sh(x, ds);
+        }
+        sh(&mut deck.marks.built, ds);
+        // The whole build phase comes after every section's syntax problems, so all
+        // build marks move by the syntax change; this section's and later ones also
+        // move by the build change.
+        for (j, x) in deck.marks.build.iter_mut().enumerate() {
+            sh(x, if j < k { ds } else { ds + db });
+        }
+        cx.diags = diags;
+        assign_ids(&mut cx, &mut deck, carry);
+        check_refs(&mut cx, &deck);
+        deck.diagnostics = cx.diags;
+        Some(deck)
+    }
 }

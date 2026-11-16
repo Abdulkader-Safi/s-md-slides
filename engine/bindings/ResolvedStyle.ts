@@ -4,11 +4,35 @@ import type { Dir } from "./Dir";
 /**
  * Final style values for drawing an element: roles resolved, defaults filled in.
  */
-export type ResolvedStyle = { font: string, size: number, 
+export type ResolvedStyle = { 
+/**
+ * Font family, with roles resolved.
+ */
+font: string, 
+/**
+ * Font size in canvas units.
+ */
+size: number, 
 /**
  * Text color as #hex.
  */
-color: string, weight: number, align: string, valign: string, "line-height": number, 
+color: string, 
+/**
+ * Font weight from 100 to 900.
+ */
+weight: number, 
+/**
+ * `left`, `center`, `right`, `justify`, `start` or `end`. `start` by default.
+ */
+align: string, 
+/**
+ * `top`, `middle` or `bottom`. `top` by default.
+ */
+valign: string, 
+/**
+ * Line height as a multiple of the font size.
+ */
+"line-height": number, 
 /**
  * Top, right, bottom, left.
  */
@@ -16,4 +40,20 @@ padding: [number, number, number, number],
 /**
  * #hex or `linear(angle,#hex,#hex)`; `None` for no fill.
  */
-fill?: string, stroke?: string, "stroke-width": number, radius: number, dir: Dir, };
+fill?: string, 
+/**
+ * Outline color as #hex; `None` for no outline.
+ */
+stroke?: string, 
+/**
+ * Outline width in canvas units.
+ */
+"stroke-width": number, 
+/**
+ * Corner radius in canvas units.
+ */
+radius: number, 
+/**
+ * Text direction with `auto` resolved.
+ */
+dir: Dir, };

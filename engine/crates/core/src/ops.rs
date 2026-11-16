@@ -18,147 +18,207 @@ use std::ops::Range;
 #[serde(untagged)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum ZTo {
+    /// Stacking index in the slide. 0 is the back.
     Index(usize),
+    /// A relative move.
     Step(ZStep),
 }
 
+/// A relative stacking move for `SetZ`.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum ZStep {
+    /// To the top of the slide.
     Front,
+    /// To the bottom of the slide.
     Back,
+    /// One place up.
     Forward,
+    /// One place down.
     Backward,
 }
 
+/// One edit to a deck. Apply it with `Deck::apply`, which returns the inverse.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum Op {
     /// Insert a slide before `index` (or at the end). Empty, from a layout, or raw text.
     AddSlide {
+        /// 0-based slide index to insert before. Past the last slide appends.
         index: usize,
+        /// Layout id. The new slide gets one element per placeholder.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         layout: Option<String>,
+        /// Slide source text to insert as is, without the `---` separator.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         raw: Option<String>,
     },
+    /// Remove a slide and everything on it.
     RemoveSlide {
+        /// 0-based index of the slide to remove.
         index: usize,
     },
     /// Copy a slide right after itself, with fresh element ids.
     DuplicateSlide {
+        /// 0-based index of the slide to copy.
         index: usize,
     },
+    /// Move a slide to a new position.
     MoveSlide {
+        /// 0-based index of the slide to move.
         from: usize,
+        /// 0-based index the slide ends up at.
         to: usize,
     },
     /// Add an element at `index` in the slide's stacking order (default: the top).
     /// Either `kind` plus `attrs` and `body`, or `raw` source text for one element.
     AddElement {
+        /// 0-based index of the slide to add to.
         slide: usize,
+        /// Stacking index (0 is the back). `None` puts it on top.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         index: Option<usize>,
+        /// Element kind, such as `text`. Use with `attrs` and `body`, not with `raw`.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         kind: Option<String>,
+        /// Attributes to write, as in `SetAttrs`. `x`, `y`, `w` and `h` are required for built-in kinds.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         attrs: Option<Map<String, Value>>,
+        /// Markdown body.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         body: Option<String>,
+        /// Source text for one element: its directive line and body.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         raw: Option<String>,
     },
+    /// Remove an element. Removing a group keeps its members.
     RemoveElement {
+        /// Id of the element to remove.
         id: String,
     },
     /// Copy an element right above itself with a fresh id, offset by `dx`, `dy`.
     DuplicateElement {
+        /// Id of the element to copy.
         id: String,
+        /// Horizontal offset in canvas units. `None` keeps `x`.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         dx: Option<f64>,
+        /// Vertical offset in canvas units. `None` keeps `y`.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         dy: Option<f64>,
     },
     /// Move, resize or rotate. On a group it moves and scales the members.
     SetGeometry {
+        /// Id of the element to change.
         id: String,
+        /// New left edge in canvas units. `None` keeps it.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         x: Option<f64>,
+        /// New top edge in canvas units. `None` keeps it.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         y: Option<f64>,
+        /// New width in canvas units. `None` keeps it.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         w: Option<f64>,
+        /// New height in canvas units. `None` keeps it.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         h: Option<f64>,
+        /// New rotation in degrees. `None` keeps it.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         rot: Option<f64>,
     },
     /// Set and remove attributes. Values: string, number, `true` for a bare flag, a
     /// list for comma-separated values; `false` or `null` removes the key.
     SetAttrs {
+        /// Id of the element to change.
         id: String,
+        /// Attributes to set, by key.
         #[serde(default, skip_serializing_if = "Map::is_empty")]
         set: Map<String, Value>,
+        /// Keys to remove.
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         remove: Vec<String>,
     },
+    /// Replace an element's markdown body.
     SetBody {
+        /// Id of the element to change.
         id: String,
+        /// New markdown body.
         text: String,
     },
+    /// Change an element's place in its slide's stacking order.
     SetZ {
+        /// Id of the element to move.
         id: String,
+        /// New stacking index or a relative step.
         to: ZTo,
     },
     /// Set the slide's speaker notes, or remove them with `null`.
     SetNotes {
+        /// 0-based slide index.
         slide: usize,
+        /// Notes markdown. `None` removes the notes.
         #[serde(default)]
         text: Option<String>,
     },
     /// Edit the `<!-- slide -->` directive (bg, layout, master, hide, transition).
     SetSlideAttrs {
+        /// 0-based slide index.
         slide: usize,
+        /// Attributes to set, by key. Values work as in `SetAttrs`.
         #[serde(default, skip_serializing_if = "Map::is_empty")]
         set: Map<String, Value>,
+        /// Keys to remove.
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         remove: Vec<String>,
     },
     /// Set a top-level front matter key, or remove it with `null`.
     SetFrontMatter {
+        /// Front matter key, such as `title` or `canvas`.
         key: String,
+        /// New value. `None` removes the key.
         #[serde(default)]
         value: Option<Value>,
     },
     /// Add a master or layout block given as source text.
     AddDefinition {
+        /// Source text of the block, starting with its `<!-- master -->` or `<!-- layout -->` line.
         raw: String,
     },
     /// Remove a master or layout. Refused while a slide or layout uses it.
     RemoveDefinition {
+        /// Id of the master or layout to remove.
         id: String,
     },
     /// Group elements on one slide under a new `group` element.
     Group {
+        /// Ids of the elements to group, all on one slide.
         ids: Vec<String>,
+        /// Id for the new group. `None` generates one.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         id: Option<String>,
     },
+    /// Remove a group element and keep its members.
     Ungroup {
+        /// Id of the group to remove.
         id: String,
     },
     /// Low-level: replace the bytes `old` found at byte offset `at` with `new`. Fails if
     /// the bytes there are not `old`. Every inverse is one of these, so undo restores the
     /// exact bytes. Offsets are UTF-8 byte offsets into `deck.text()`.
     Replace {
+        /// Byte offset into `deck.text()` where `old` starts.
         at: usize,
+        /// Bytes expected at `at`.
         old: String,
+        /// Bytes to put in their place.
         new: String,
     },
     /// All or nothing. The inverse is one `Batch`.
     Batch {
+        /// Ops to apply in order.
         ops: Vec<Op>,
     },
 }
@@ -413,7 +473,30 @@ impl Deck {
                 }
             })
             .collect();
-        let mut candidate = Deck::build(&next, &carry);
+        let mut candidate = match self.rebuild_line(&p.range, &p.text, &next, &carry) {
+            Some(fast) => {
+                // The fast path must give exactly what a full parse gives.
+                #[cfg(debug_assertions)]
+                {
+                    let full = Deck::build(&next, &carry);
+                    let (f, g) = (format!("{fast:?}"), format!("{full:?}"));
+                    if f != g {
+                        let at = f.bytes().zip(g.bytes()).take_while(|(a, b)| a == b).count();
+                        let cut = |t: &str| {
+                            let from = t.floor_char_boundary(at.saturating_sub(200));
+                            t[from..t.floor_char_boundary((at + 200).min(t.len()))].to_string()
+                        };
+                        panic!(
+                            "one-line rebuild differs from a full parse at byte {at}\nfast: {}\nfull: {}",
+                            cut(&f),
+                            cut(&g)
+                        );
+                    }
+                }
+                fast
+            }
+            None => Deck::build(&next, &carry),
+        };
         // A theme file loaded by the host stays loaded while front matter still names it.
         if let Some(path) = &self.theme_path
             && candidate.front.theme.as_ref().and_then(Value::as_str) == Some(path.as_str())
@@ -1655,5 +1738,147 @@ impl Kind {
             "group" => Kind::Group,
             _ => return None,
         })
+    }
+}
+
+#[cfg(test)]
+mod fast_path {
+    use super::*;
+    use crate::deck::{Carry, Kind};
+
+    /// Every golden deck and conformance input, edited one line at a time: each edit
+    /// goes through `splice`, which in debug builds asserts the fast result equals a
+    /// full parse. The fast path must also actually fire for most of these edits.
+    #[test]
+    fn one_line_edits_match_a_full_parse() {
+        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
+        let mut texts = Vec::new();
+        for dir in ["tests/decks", "conformance", "examples"] {
+            for f in std::fs::read_dir(format!("{root}/{dir}"))
+                .unwrap()
+                .flatten()
+            {
+                if !f.path().is_file() {
+                    continue;
+                }
+                let t = std::fs::read_to_string(f.path()).unwrap();
+                match f.path().extension().and_then(|e| e.to_str()) {
+                    Some("md") => texts.push(t),
+                    Some("json") => {
+                        let v: serde_json::Value = serde_json::from_str(&t).unwrap();
+                        texts.push(v["input"].as_str().unwrap().to_string());
+                    }
+                    _ => {}
+                }
+            }
+        }
+        let (mut fast, mut total) = (0, 0);
+        for text in texts {
+            let mut deck = Deck::build(&text, &Carry::new());
+            if deck.read_only {
+                continue;
+            }
+            let ids: Vec<String> = deck
+                .elements()
+                .filter(|e| e.kind != Kind::Group)
+                .map(|e| e.id.clone())
+                .collect();
+            for id in ids {
+                for op in [
+                    Op::SetGeometry {
+                        id: id.clone(),
+                        x: Some(7.0),
+                        y: Some(9.5),
+                        w: None,
+                        h: None,
+                        rot: Some(3.0),
+                    },
+                    Op::SetAttrs {
+                        id: id.clone(),
+                        set: [
+                            ("color".to_string(), serde_json::json!("#123456")),
+                            ("zz".to_string(), serde_json::json!("x")),
+                        ]
+                        .into_iter()
+                        .collect(),
+                        remove: vec!["opacity".into()],
+                    },
+                ] {
+                    total += 1;
+                    let before = deck.clone();
+                    if let Ok(Step::Edit(p)) = deck.plan(&op) {
+                        let mut next = deck.source.clone();
+                        next.replace_range(p.range.clone(), &p.text);
+                        if deck
+                            .rebuild_line(&p.range, &p.text, &next, &deck.carry())
+                            .is_some()
+                        {
+                            fast += 1;
+                        }
+                    }
+                    if let Ok(undo) = deck.apply(op) {
+                        deck.apply(undo).unwrap();
+                        assert_eq!(deck.text(), before.text());
+                    }
+                }
+            }
+            for i in 0..deck.slides.len() {
+                let op = Op::SetSlideAttrs {
+                    slide: i,
+                    set: [("bg".to_string(), serde_json::json!("#000"))]
+                        .into_iter()
+                        .collect(),
+                    remove: vec![],
+                };
+                if let Ok(undo) = deck.apply(op) {
+                    deck.apply(undo).unwrap();
+                }
+            }
+        }
+        // Fuzz find: an edit that fixes (or adds) a syntax problem in one slide moves
+        // every later diagnostic mark, including the build marks of earlier slides.
+        let text = "<!-- text id=a x=1 y=1 w=1 h=1 -->\nA\n---\n<!-- text id=b x=1 =y w=1 h=1 -->\nB\n---\n<!-- text id=c x=5000 y=1 w=1 h=1 -->\nC\n";
+        let mut deck = Deck::build(text, &Carry::new());
+        let at = text.find("=y").unwrap();
+        for (old, new) in [("=y", "y=2"), ("y=2", "=y"), ("=y", "y=3")] {
+            let at = deck.text()[at..].find(old).unwrap() + at;
+            deck.apply(Op::Replace {
+                at,
+                old: old.into(),
+                new: new.into(),
+            })
+            .unwrap();
+            for id in ["a", "b", "c"] {
+                let undo = deck
+                    .apply(Op::SetGeometry {
+                        id: id.into(),
+                        x: Some(9.0),
+                        y: None,
+                        w: None,
+                        h: None,
+                        rot: None,
+                    })
+                    .unwrap();
+                deck.apply(undo).unwrap();
+            }
+        }
+
+        // Fuzz find: an edit at the start of the file that makes a byte order mark.
+        let mut deck = Deck::build(
+            "p =\n---\n<!-- text id=a x=1 y=1 w=1 h=1 -->\n",
+            &Carry::new(),
+        );
+        deck.apply(Op::Replace {
+            at: 0,
+            old: String::new(),
+            new: "\u{feff}".into(),
+        })
+        .unwrap();
+
+        assert!(total > 100, "{total}");
+        assert!(
+            fast * 2 > total,
+            "fast path fired for only {fast} of {total} edits"
+        );
     }
 }

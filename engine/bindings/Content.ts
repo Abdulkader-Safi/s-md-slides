@@ -3,8 +3,88 @@
 /**
  * What the engine reads from an element's kind-specific attributes and body.
  */
-export type Content = { "type": "image", path: string, alt: string, fit: string, crop: [number, number, number, number] | null, } | { "type": "shape", shape: string, arrow_start: string | null, arrow_end: string | null, } | { "type": "code", lang: string, code: string, 
+export type Content = { "type": "image", 
+/**
+ * Image path as written in the markdown image.
+ */
+path: string, 
+/**
+ * Alt text. Empty gives a `W-NO-ALT` warning.
+ */
+alt: string, 
+/**
+ * `fit=`: `contain`, `cover` or `fill`.
+ */
+fit: string, 
+/**
+ * `crop=x,y,w,h` in image pixels.
+ */
+crop: [number, number, number, number] | null, } | { "type": "shape", 
+/**
+ * `kind=`: `rect`, `ellipse`, `line` or `arrow`. `rect` when not written.
+ */
+shape: string, 
+/**
+ * `arrow-start=` as written, such as `triangle`. `None` draws no head at the start.
+ */
+arrow_start: string | null, 
+/**
+ * `arrow-end=` as written. `None` leaves the default: a head on arrows, none on lines.
+ */
+arrow_end: string | null, } | { "type": "code", 
+/**
+ * Language tag of the fence, such as `rust`. Empty when missing.
+ */
+lang: string, 
+/**
+ * Code inside the fence.
+ */
+code: string, 
 /**
  * Highlighted lines as inclusive 1-based ranges.
  */
-lines: Array<[number, number]>, } | { "type": "table", header: boolean, } | { "type": "diagram", source: string, } | { "type": "math", source: string, } | { "type": "video", src: string, poster: string | null, autoplay: boolean, loop: boolean, muted: boolean, } | { "type": "embed", src: string, poster: string | null, } | { "type": "group", items: Array<string>, };
+lines: Array<[number, number]>, } | { "type": "table", 
+/**
+ * False when `header=false`: the first row is styled like the others.
+ */
+header: boolean, } | { "type": "diagram", 
+/**
+ * Mermaid source inside the fence.
+ */
+source: string, } | { "type": "math", 
+/**
+ * LaTeX source, trimmed.
+ */
+source: string, } | { "type": "video", 
+/**
+ * Video path from `src=`.
+ */
+src: string, 
+/**
+ * `poster=`: still image shown in PDF and image exports.
+ */
+poster: string | null, 
+/**
+ * `autoplay` flag.
+ */
+autoplay: boolean, 
+/**
+ * `loop` flag.
+ */
+loop: boolean, 
+/**
+ * `muted` flag.
+ */
+muted: boolean, } | { "type": "embed", 
+/**
+ * Page address from `src=`. Must start with `https://`.
+ */
+src: string, 
+/**
+ * `poster=`: still image shown in exports other than HTML.
+ */
+poster: string | null, } | { "type": "group", 
+/**
+ * Member ids from `items=`, in order.
+ */
+items: Array<string>, };

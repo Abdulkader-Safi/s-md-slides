@@ -3,4 +3,52 @@
 /**
  * Style attributes as written (literal values or theme roles).
  */
-export type Style = { font?: string, size?: string, color?: string, weight?: string, align?: string, valign?: string, "line-height"?: string, padding?: string, fill?: string, stroke?: string, "stroke-width"?: string, radius?: string, };
+export type Style = { 
+/**
+ * `font=`: a family name or a font role (`heading`, `body`, `code`).
+ */
+font?: string, 
+/**
+ * `size=`: font size in canvas units.
+ */
+size?: string, 
+/**
+ * `color=`: text color, a hex color or a theme role.
+ */
+color?: string, 
+/**
+ * `weight=`: `normal`, `bold` or 100 to 900.
+ */
+weight?: string, 
+/**
+ * `align=`: `left`, `center`, `right`, `justify`, `start` or `end`.
+ */
+align?: string, 
+/**
+ * `valign=`: `top`, `middle` or `bottom`.
+ */
+valign?: string, 
+/**
+ * `line-height=`: a multiple of the font size.
+ */
+"line-height"?: string, 
+/**
+ * `padding=`: one to four numbers in canvas units, comma-separated.
+ */
+padding?: string, 
+/**
+ * `fill=`: a color, a role or a `linear(...)` gradient.
+ */
+fill?: string, 
+/**
+ * `stroke=`: outline color, a hex color or a role.
+ */
+stroke?: string, 
+/**
+ * `stroke-width=`: outline width in canvas units.
+ */
+"stroke-width"?: string, 
+/**
+ * `radius=`: corner radius in canvas units.
+ */
+radius?: string, };

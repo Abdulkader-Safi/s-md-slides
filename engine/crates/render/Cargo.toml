@@ -1,7 +1,8 @@
 [package]
 name = "s-md-slides-render"
-version = "0.0.0"
+version.workspace = true
 description = "Native export for s-md-slides decks: PNG, JPEG, GIF and PDF with selectable text"
+readme = "../../../README.md"
 keywords = ["slides", "markdown", "pdf", "png", "presentation"]
 categories = ["rendering", "graphics"]
 edition.workspace = true
@@ -10,7 +11,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-s-md-slides = { path = "../core" }
+s-md-slides = { path = "../core", version = "=0.1.0" }
 parley.workspace = true
 skrifa.workspace = true
 resvg.workspace = true
@@ -28,3 +29,8 @@ pulldown-cmark.workspace = true
 [dev-dependencies]
 resvg.workspace = true
 gif.workspace = true
+criterion.workspace = true
+
+[[bench]]
+name = "png"
+harness = false

@@ -2,12 +2,16 @@
 
 use serde::Serialize;
 
+/// How bad a diagnostic is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))]
 pub enum Severity {
+    /// Something is wrong. Codes start with `E-`.
     Error,
+    /// Probably a mistake, but the deck still works. Codes start with `W-`.
     Warning,
+    /// For information only.
     Info,
 }
 
@@ -15,13 +19,17 @@ pub enum Severity {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Diagnostic {
+    /// How bad the problem is.
     pub severity: Severity,
     /// Stable code such as `E-ATTR-VALUE` or `W-OFF-CANVAS`.
     pub code: &'static str,
     /// One English sentence.
     pub message: String,
+    /// 1-based line.
     pub line: u32,
+    /// 1-based column, counted in characters.
     pub column: u32,
+    /// Id of the element the problem is in, if any.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub element: Option<String>,
     /// 0-based slide index.
@@ -33,10 +41,14 @@ pub struct Diagnostic {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct EngineError {
+    /// Stable code such as `E-NOT-FOUND`.
     pub code: &'static str,
+    /// One English sentence that says what to do.
     pub message: String,
+    /// Id of the element the op failed on, if any.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub element: Option<String>,
+    /// 0-based index of the slide the op failed on, if any.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub slide: Option<usize>,
 }

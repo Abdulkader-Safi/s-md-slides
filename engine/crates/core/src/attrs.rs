@@ -26,6 +26,7 @@ pub const KNOWN_KINDS: &[&str] = &[
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export, optional_fields))]
 pub struct Attr {
+    /// Attribute name as written, such as `x` or `stroke-width`.
     pub key: String,
     /// Unescaped value. `None` for a bare key such as `locked`.
     pub value: Option<String>,
@@ -40,7 +41,9 @@ pub struct Attr {
 /// A parsed directive line. Offsets are absolute byte offsets into the source.
 #[derive(Debug, Clone)]
 pub struct Directive {
+    /// Directive kind, the first word after `<!--`, such as `text` or `slide`.
     pub kind: String,
+    /// Attribute tokens in file order, duplicates included.
     pub attrs: Vec<Attr>,
     /// Where a new attribute goes: right after the last good token.
     pub insert_at: usize,
@@ -85,7 +88,7 @@ pub fn parse_directive(line: &str, base: usize) -> Option<Directive> {
     }
     let kind = t[kind_start..i].to_string();
     let mut insert_at = i;
-    let mut attrs = Vec::new();
+    let mut attrs = Vec::with_capacity(8);
     let mut error_at = None;
     'tokens: loop {
         while i < end && (b[i] == b' ' || b[i] == b'\t') {

@@ -4,7 +4,11 @@ import type { Severity } from "./Severity";
 /**
  * One problem, with a 1-based line and column (column counts characters, not bytes).
  */
-export type Diagnostic = { severity: Severity, 
+export type Diagnostic = { 
+/**
+ * How bad the problem is.
+ */
+severity: Severity, 
 /**
  * Stable code such as `E-ATTR-VALUE` or `W-OFF-CANVAS`.
  */
@@ -12,7 +16,19 @@ code: string,
 /**
  * One English sentence.
  */
-message: string, line: number, column: number, element?: string, 
+message: string, 
+/**
+ * 1-based line.
+ */
+line: number, 
+/**
+ * 1-based column, counted in characters.
+ */
+column: number, 
+/**
+ * Id of the element the problem is in, if any.
+ */
+element?: string, 
 /**
  * 0-based slide index.
  */

@@ -1,0 +1,25 @@
+{
+  "covers": [
+    "FR-FMT-05"
+  ],
+  "expect_diagnostics": [
+    {
+      "code": "E-VERSION",
+      "column": 1,
+      "line": 2,
+      "severity": "error"
+    }
+  ],
+  "expect_error": "E-READ-ONLY",
+  "expect_read_only": true,
+  "expect_text": "---\ns-md-slides: 2\n---\n<!-- text id=t1 x=1 y=1 w=1 h=1 -->\n",
+  "input": "---\ns-md-slides: 2\n---\n<!-- text id=t1 x=1 y=1 w=1 h=1 -->\n",
+  "name": "fmt-05-newer-version-read-only",
+  "ops": [
+    {
+      "id": "t1",
+      "op": "set_geometry",
+      "x": 5.0
+    }
+  ]
+}

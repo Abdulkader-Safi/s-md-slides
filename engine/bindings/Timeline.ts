@@ -9,7 +9,11 @@ export type Timeline = {
 /**
  * State of animated elements before anything plays. Other elements are visible.
  */
-initial: { [key in string]: State }, steps: Array<Step>, 
+initial: { [key in string]: State }, 
+/**
+ * Steps in order: step 0, then one per click.
+ */
+steps: Array<Step>, 
 /**
  * Total milliseconds.
  */
