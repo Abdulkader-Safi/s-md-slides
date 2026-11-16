@@ -2,24 +2,30 @@ name: conformance
 
 # Attach the conformance vectors (FR-PKG-03) to each GitHub release that
 # release.yml (cargo-dist) creates. Separate file because `dist generate`
-# rewrites release.yml.
+# rewrites release.yml. It runs when the Release workflow finishes: a release
+# created with the Actions token does not start other workflows by itself.
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
 
 permissions:
   contents: write
 
 jobs:
   attach:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Zip and attach
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ github.event.workflow_run.head_branch }}
         run: |
+          case "$TAG" in v[0-9]*) ;; *) echo "not a version tag: $TAG"; exit 0 ;; esac
           cd engine
           zip -qr "conformance-${TAG#v}.zip" conformance
           gh release upload "$TAG" "conformance-${TAG#v}.zip" --clobber
