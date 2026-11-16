@@ -1,0 +1,322 @@
+{
+  "covers": [
+    "FR-FMT-01"
+  ],
+  "expect_diagnostics": [],
+  "expect_model": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto",
+      "extra": {
+        "team": "growth"
+      },
+      "title": "Q3 review"
+    },
+    "layouts": [
+      {
+        "attrs": [
+          {
+            "key": "id",
+            "value": "title-body"
+          },
+          {
+            "key": "master",
+            "value": "brand"
+          }
+        ],
+        "id": "title-body",
+        "master": "brand",
+        "placeholders": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "title"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "80"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              }
+            ],
+            "h": 200.0,
+            "id": "title",
+            "kind": "text",
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 80.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "body"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "320"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "640"
+              }
+            ],
+            "h": 640.0,
+            "id": "body",
+            "kind": "text",
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 320.0
+          }
+        ]
+      }
+    ],
+    "line_ending": "lf",
+    "masters": [
+      {
+        "attrs": [
+          {
+            "key": "id",
+            "value": "brand"
+          }
+        ],
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "logo"
+              },
+              {
+                "key": "x",
+                "value": "1720"
+              },
+              {
+                "key": "y",
+                "value": "40"
+              },
+              {
+                "key": "w",
+                "value": "160"
+              },
+              {
+                "key": "h",
+                "value": "60"
+              }
+            ],
+            "body": "![Brand logo](assets/logo.svg)\n",
+            "content": {
+              "alt": "Brand logo",
+              "fit": "contain",
+              "path": "assets/logo.svg",
+              "type": "image"
+            },
+            "h": 60.0,
+            "id": "logo",
+            "kind": "image",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 160.0,
+            "x": 1720.0,
+            "y": 40.0
+          }
+        ],
+        "id": "brand"
+      }
+    ],
+    "slides": [
+      {
+        "attrs": [
+          {
+            "key": "layout",
+            "value": "title-body"
+          },
+          {
+            "key": "transition",
+            "value": "fade"
+          }
+        ],
+        "elements": [
+          {
+            "anim": {
+              "delay": 0,
+              "dur": 400,
+              "enter": "fade"
+            },
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t1"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "80"
+              },
+              {
+                "key": "w",
+                "value": "1680"
+              },
+              {
+                "key": "h",
+                "value": "200"
+              },
+              {
+                "key": "enter",
+                "value": "fade"
+              }
+            ],
+            "body": "# Quarterly review\n",
+            "h": 200.0,
+            "id": "t1",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1680.0,
+            "x": 120.0,
+            "y": 80.0
+          },
+          {
+            "anim": {
+              "delay": 300,
+              "dur": 400,
+              "enter": "fly-right"
+            },
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t2"
+              },
+              {
+                "key": "x",
+                "value": "120"
+              },
+              {
+                "key": "y",
+                "value": "320"
+              },
+              {
+                "key": "w",
+                "value": "760"
+              },
+              {
+                "key": "h",
+                "value": "560"
+              },
+              {
+                "key": "dir",
+                "value": "rtl"
+              },
+              {
+                "key": "enter",
+                "value": "fly-right"
+              },
+              {
+                "key": "delay",
+                "value": "300"
+              }
+            ],
+            "body": "- مبيعات أعلى بنسبة ١٢٪\n- Second point\n",
+            "dir": "rtl",
+            "h": 560.0,
+            "id": "t2",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 760.0,
+            "x": 120.0,
+            "y": 320.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "s1"
+              },
+              {
+                "key": "kind",
+                "value": "arrow"
+              },
+              {
+                "key": "x",
+                "value": "900"
+              },
+              {
+                "key": "y",
+                "value": "600"
+              },
+              {
+                "key": "w",
+                "value": "200"
+              },
+              {
+                "key": "h",
+                "value": "0"
+              },
+              {
+                "key": "stroke",
+                "value": "#e11"
+              }
+            ],
+            "body": "",
+            "content": {
+              "shape": "arrow",
+              "type": "shape"
+            },
+            "h": 0.0,
+            "id": "s1",
+            "kind": "shape",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "style": {
+              "stroke": "#e11"
+            },
+            "w": 200.0,
+            "x": 900.0,
+            "y": 600.0
+          }
+        ],
+        "index": 0,
+        "layout": "title-body",
+        "master": "inherit",
+        "notes": "Mention the Kuwait numbers first.\n",
+        "transition": "fade"
+      }
+    ],
+    "version": 1
+  },
+  "expect_read_only": false,
+  "expect_text": "---\ns-md-slides: 1\ntitle: Q3 review\ncanvas: 16:9\ndir: auto\nteam: growth\n---\n\n<!-- master id=brand -->\n<!-- image id=logo x=1720 y=40 w=160 h=60 -->\n![Brand logo](assets/logo.svg)\n\n<!-- layout id=title-body master=brand -->\n<!-- placeholder id=title x=120 y=80 w=1680 h=200 -->\n<!-- placeholder id=body x=120 y=320 w=1680 h=640 -->\n\n---\n\n<!-- slide layout=title-body transition=fade -->\n\n<!-- text id=t1 x=120 y=80 w=1680 h=200 enter=fade -->\n# Quarterly review\n\n<!-- text id=t2 x=120 y=320 w=760 h=560 dir=rtl enter=fly-right delay=300 -->\n- مبيعات أعلى بنسبة ١٢٪\n- Second point\n\n<!-- shape id=s1 kind=arrow x=900 y=600 w=200 h=0 stroke=#e11 -->\n\n<!-- notes -->\nMention the Kuwait numbers first.\n",
+  "input": "---\ns-md-slides: 1\ntitle: Q3 review\ncanvas: 16:9\ndir: auto\nteam: growth\n---\n\n<!-- master id=brand -->\n<!-- image id=logo x=1720 y=40 w=160 h=60 -->\n![Brand logo](assets/logo.svg)\n\n<!-- layout id=title-body master=brand -->\n<!-- placeholder id=title x=120 y=80 w=1680 h=200 -->\n<!-- placeholder id=body x=120 y=320 w=1680 h=640 -->\n\n---\n\n<!-- slide layout=title-body transition=fade -->\n\n<!-- text id=t1 x=120 y=80 w=1680 h=200 enter=fade -->\n# Quarterly review\n\n<!-- text id=t2 x=120 y=320 w=760 h=560 dir=rtl enter=fly-right delay=300 -->\n- مبيعات أعلى بنسبة ١٢٪\n- Second point\n\n<!-- shape id=s1 kind=arrow x=900 y=600 w=200 h=0 stroke=#e11 -->\n\n<!-- notes -->\nMention the Kuwait numbers first.\n",
+  "name": "fmt-01-sample-deck-model",
+  "ops": []
+}

@@ -1,0 +1,18 @@
+{
+  "covers": [
+    "FR-FMT-08",
+    "FR-FMT-07"
+  ],
+  "expect_diagnostics": [],
+  "expect_read_only": false,
+  "expect_text": "# One\n---\n<!-- text id=t2 x=200 y=54 w=1728 h=972 -->\n# Two\n",
+  "input": "# One\n---\n# Two\n",
+  "name": "fmt-08-edit-implicit-text",
+  "ops": [
+    {
+      "id": "t2",
+      "op": "set_geometry",
+      "x": 200.0
+    }
+  ]
+}

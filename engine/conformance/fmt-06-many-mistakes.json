@@ -1,0 +1,72 @@
+{
+  "covers": [
+    "FR-FMT-06"
+  ],
+  "expect_diagnostics": [
+    {
+      "code": "E-FRONTMATTER",
+      "column": 8,
+      "line": 2,
+      "severity": "error"
+    },
+    {
+      "code": "E-ATTR-SYNTAX",
+      "column": 20,
+      "line": 4,
+      "severity": "error"
+    },
+    {
+      "code": "E-UNCLOSED-FENCE",
+      "column": 1,
+      "line": 9,
+      "severity": "error"
+    },
+    {
+      "code": "E-ATTR-MISSING",
+      "column": 19,
+      "line": 4,
+      "severity": "error"
+    },
+    {
+      "code": "E-ATTR-MISSING",
+      "column": 19,
+      "line": 4,
+      "severity": "error"
+    },
+    {
+      "code": "E-ATTR-MISSING",
+      "column": 19,
+      "line": 4,
+      "severity": "error"
+    },
+    {
+      "code": "E-ATTR-VALUE",
+      "column": 26,
+      "line": 5,
+      "severity": "error"
+    },
+    {
+      "code": "W-NOTES-ORDER",
+      "column": 1,
+      "line": 8,
+      "severity": "warning"
+    },
+    {
+      "code": "W-DUP-ATTR",
+      "column": 20,
+      "line": 8,
+      "severity": "warning"
+    },
+    {
+      "code": "E-DUP-ID",
+      "column": 1,
+      "line": 5,
+      "severity": "error"
+    }
+  ],
+  "expect_read_only": false,
+  "expect_text": "---\ntitle: [unclosed\n---\n<!-- text id=a x=1 =y w=1 h=1 -->\n<!-- text id=a x=1 y=1 w=-1 h=1 -->\n<!-- notes -->\nn\n<!-- text id=z x=1 x=2 y=1 w=1 h=1 -->\n```\n---\n",
+  "input": "---\ntitle: [unclosed\n---\n<!-- text id=a x=1 =y w=1 h=1 -->\n<!-- text id=a x=1 y=1 w=-1 h=1 -->\n<!-- notes -->\nn\n<!-- text id=z x=1 x=2 y=1 w=1 h=1 -->\n```\n---\n",
+  "name": "fmt-06-many-mistakes",
+  "ops": []
+}

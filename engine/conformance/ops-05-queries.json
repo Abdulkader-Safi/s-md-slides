@@ -1,0 +1,56 @@
+{
+  "covers": [
+    "FR-OPS-05"
+  ],
+  "expect_diagnostics": [],
+  "expect_read_only": false,
+  "expect_text": "<!-- shape id=low kind=rect x=0 y=0 w=200 h=200 -->\n<!-- shape id=high kind=rect x=100 y=100 w=200 h=200 -->\n<!-- shape id=spin kind=rect x=500 y=500 w=200 h=20 rot=90 -->\n<!-- text id=t1 x=0 y=0 w=10 h=10 -->\nFind the Chart\n<!-- notes -->\nChart notes\n",
+  "input": "<!-- shape id=low kind=rect x=0 y=0 w=200 h=200 -->\n<!-- shape id=high kind=rect x=100 y=100 w=200 h=200 -->\n<!-- shape id=spin kind=rect x=500 y=500 w=200 h=20 rot=90 -->\n<!-- text id=t1 x=0 y=0 w=10 h=10 -->\nFind the Chart\n<!-- notes -->\nChart notes\n",
+  "name": "ops-05-queries",
+  "ops": [],
+  "queries": [
+    {
+      "elements_at": [
+        0.0,
+        150.0,
+        150.0
+      ],
+      "expect": [
+        "high",
+        "low"
+      ]
+    },
+    {
+      "elements_at": [
+        0.0,
+        600.0,
+        590.0
+      ],
+      "expect": [
+        "spin"
+      ]
+    },
+    {
+      "elements_at": [
+        0.0,
+        690.0,
+        510.0
+      ],
+      "expect": []
+    },
+    {
+      "expect": [
+        {
+          "element": "t1",
+          "field": "body",
+          "slide": 0
+        },
+        {
+          "field": "notes",
+          "slide": 0
+        }
+      ],
+      "search": "chart"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "covers": [
+    "FR-FMT-04"
+  ],
+  "expect_diagnostics": [],
+  "expect_read_only": false,
+  "expect_text": "---\nfoo: bar\n---\n<!-- text id=t1 x=9 y=2 w=3 h=4 foo=bar -->\nHi\n<!-- widget id=w1 spin=fast x=5 -->\n",
+  "input": "---\nfoo: bar\n---\n<!-- text id=t1 x=1 y=2 w=3 h=4 foo=bar -->\nHi\n<!-- widget id=w1 spin=fast -->\n",
+  "name": "fmt-04-unknowns-survive-a-move",
+  "ops": [
+    {
+      "id": "t1",
+      "op": "set_geometry",
+      "x": 9.0
+    },
+    {
+      "id": "w1",
+      "op": "set_geometry",
+      "x": 5.0
+    }
+  ]
+}

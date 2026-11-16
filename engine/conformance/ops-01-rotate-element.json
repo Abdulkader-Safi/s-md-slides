@@ -1,0 +1,18 @@
+{
+  "covers": [
+    "FR-OPS-01",
+    "FR-OPS-02"
+  ],
+  "expect_diagnostics": [],
+  "expect_read_only": false,
+  "expect_text": "---\ntitle: Ops\n---\n\n<!-- master id=brand -->\n<!-- image id=logo x=1720 y=40 w=160 h=60 -->\n![logo](a.png)\n\n<!-- layout id=tb master=brand -->\n<!-- placeholder id=title x=120 y=80 w=1680 h=200 -->\n<!-- placeholder id=body x=120 y=320 w=1680 h=640 -->\n\n---\n\n<!-- text id=t1 x=100 y=100 w=800 h=200 -->\n# One\n\n<!-- shape id=s1 kind=rect x=10 y=10 w=50 h=50 rot=45 -->\n\n---\n\n<!-- slide bg=#000 -->\n<!-- text id=t2 x=0 y=0 w=100 h=100 -->\nTwo\n\n<!-- notes -->\nSay two.\n",
+  "input": "---\ntitle: Ops\n---\n\n<!-- master id=brand -->\n<!-- image id=logo x=1720 y=40 w=160 h=60 -->\n![logo](a.png)\n\n<!-- layout id=tb master=brand -->\n<!-- placeholder id=title x=120 y=80 w=1680 h=200 -->\n<!-- placeholder id=body x=120 y=320 w=1680 h=640 -->\n\n---\n\n<!-- text id=t1 x=100 y=100 w=800 h=200 -->\n# One\n\n<!-- shape id=s1 kind=rect x=10 y=10 w=50 h=50 -->\n\n---\n\n<!-- slide bg=#000 -->\n<!-- text id=t2 x=0 y=0 w=100 h=100 -->\nTwo\n\n<!-- notes -->\nSay two.\n",
+  "name": "ops-01-rotate-element",
+  "ops": [
+    {
+      "id": "s1",
+      "op": "set_geometry",
+      "rot": 45
+    }
+  ]
+}

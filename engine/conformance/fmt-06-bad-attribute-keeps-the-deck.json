@@ -1,0 +1,173 @@
+{
+  "covers": [
+    "FR-FMT-06"
+  ],
+  "expect_diagnostics": [
+    {
+      "code": "E-ATTR-VALUE",
+      "column": 18,
+      "line": 7,
+      "severity": "error"
+    }
+  ],
+  "expect_model": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "a"
+              },
+              {
+                "key": "x",
+                "value": "1"
+              },
+              {
+                "key": "y",
+                "value": "1"
+              },
+              {
+                "key": "w",
+                "value": "1"
+              },
+              {
+                "key": "h",
+                "value": "1"
+              }
+            ],
+            "body": "A\n",
+            "h": 1.0,
+            "id": "a",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1.0,
+            "x": 1.0,
+            "y": 1.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      },
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "b"
+              },
+              {
+                "key": "x",
+                "value": "1"
+              },
+              {
+                "key": "y",
+                "value": "1"
+              },
+              {
+                "key": "w",
+                "value": "1"
+              },
+              {
+                "key": "h",
+                "value": "1"
+              }
+            ],
+            "body": "B\n",
+            "h": 1.0,
+            "id": "b",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1.0,
+            "x": 1.0,
+            "y": 1.0
+          }
+        ],
+        "index": 1,
+        "master": "inherit"
+      },
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "c"
+              },
+              {
+                "key": "x",
+                "value": "abc"
+              },
+              {
+                "key": "y",
+                "value": "1"
+              },
+              {
+                "key": "w",
+                "value": "1"
+              },
+              {
+                "key": "h",
+                "value": "1"
+              }
+            ],
+            "body": "C\n",
+            "h": 1.0,
+            "id": "c",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1.0,
+            "x": 0.0,
+            "y": 1.0
+          }
+        ],
+        "index": 2,
+        "master": "inherit"
+      },
+      {
+        "elements": [
+          {
+            "attrs": [],
+            "body": "D\n",
+            "h": 972.0,
+            "id": "t1",
+            "implicit": true,
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1728.0,
+            "x": 96.0,
+            "y": 54.0
+          }
+        ],
+        "index": 3,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "expect_read_only": false,
+  "expect_text": "<!-- text id=a x=1 y=1 w=1 h=1 -->\nA\n---\n<!-- text id=b x=1 y=1 w=1 h=1 -->\nB\n---\n<!-- text id=c x=abc y=1 w=1 h=1 -->\nC\n---\nD\n",
+  "input": "<!-- text id=a x=1 y=1 w=1 h=1 -->\nA\n---\n<!-- text id=b x=1 y=1 w=1 h=1 -->\nB\n---\n<!-- text id=c x=abc y=1 w=1 h=1 -->\nC\n---\nD\n",
+  "name": "fmt-06-bad-attribute-keeps-the-deck",
+  "ops": []
+}

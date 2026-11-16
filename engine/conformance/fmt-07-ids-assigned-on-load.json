@@ -1,0 +1,96 @@
+{
+  "covers": [
+    "FR-FMT-07"
+  ],
+  "expect_diagnostics": [],
+  "expect_model": {
+    "front": {
+      "canvas": {
+        "height": 1080,
+        "width": 1920
+      },
+      "dir": "auto"
+    },
+    "layouts": [],
+    "line_ending": "lf",
+    "masters": [],
+    "slides": [
+      {
+        "elements": [
+          {
+            "attrs": [
+              {
+                "key": "x",
+                "value": "1"
+              },
+              {
+                "key": "y",
+                "value": "1"
+              },
+              {
+                "key": "w",
+                "value": "100"
+              },
+              {
+                "key": "h",
+                "value": "100"
+              }
+            ],
+            "body": "A\n",
+            "h": 100.0,
+            "id": "t2",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 100.0,
+            "x": 1.0,
+            "y": 1.0
+          },
+          {
+            "attrs": [
+              {
+                "key": "id",
+                "value": "t1"
+              },
+              {
+                "key": "x",
+                "value": "1"
+              },
+              {
+                "key": "y",
+                "value": "1"
+              },
+              {
+                "key": "w",
+                "value": "1"
+              },
+              {
+                "key": "h",
+                "value": "1"
+              }
+            ],
+            "body": "B\n",
+            "h": 1.0,
+            "id": "t1",
+            "kind": "text",
+            "locked": false,
+            "opacity": 1.0,
+            "rot": 0.0,
+            "w": 1.0,
+            "x": 1.0,
+            "y": 1.0
+          }
+        ],
+        "index": 0,
+        "master": "inherit"
+      }
+    ],
+    "version": 1
+  },
+  "expect_read_only": false,
+  "expect_text": "<!-- text x=1 y=1 w=100 h=100 -->\nA\n<!-- text id=t1 x=1 y=1 w=1 h=1 -->\nB\n",
+  "input": "<!-- text x=1 y=1 w=100 h=100 -->\nA\n<!-- text id=t1 x=1 y=1 w=1 h=1 -->\nB\n",
+  "name": "fmt-07-ids-assigned-on-load",
+  "ops": []
+}

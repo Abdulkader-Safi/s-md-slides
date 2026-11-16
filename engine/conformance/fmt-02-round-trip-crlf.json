@@ -1,0 +1,11 @@
+{
+  "covers": [
+    "FR-FMT-02"
+  ],
+  "expect_diagnostics": [],
+  "expect_read_only": false,
+  "expect_text": "---\r\ntitle: Windows\r\n---\r\n<!-- text id=t1 x=1 y=2 w=3 h=4 -->\r\nHello\r\n",
+  "input": "---\r\ntitle: Windows\r\n---\r\n<!-- text id=t1 x=1 y=2 w=3 h=4 -->\r\nHello\r\n",
+  "name": "fmt-02-round-trip-crlf",
+  "ops": []
+}
