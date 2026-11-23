@@ -33,7 +33,6 @@ cargo fmt --all
 scripts/wasm-size.sh                                      # core WASM size, fails above 1.5 MB
 cd runtime && npm ci && npm run build                     # rebuild the presentation runtime
 node runtime/test/check.mjs                               # browser checks in Chrome (BROWSER=firefox too)
-cargo +nightly fuzz run fuzz_parse                        # or fuzz_ops, from fuzz/
 ```
 
 Regenerate expected outputs only after a deliberate change, then review the diff:
