@@ -258,3 +258,7 @@ Releases follow the user's flow from another project. Publishing to crates.io is
 ### 0.1.0 shipped before the 10-million-run fuzz gate (user's call, 2026-11-16)
 
 NFR-05 asks for 10 million runs of each fuzz target before release. The user chose to release 0.1.0 without waiting. At release, `fuzz_parse` had passed about 4 million runs and `fuzz_ops` about 1.5 million on the final code, plus an hour of `fuzz_ops` with debug assertions comparing every fast edit with a full parse. Both fuzz bugs found that day are fixed with regression tests. The runs keep going, and the nightly workflow keeps fuzzing; anything found goes into 0.1.1.
+
+### Fuzzing removed (user's decision, 2026-11-23)
+
+The user removed fuzzing: the `fuzz/` targets and the nightly workflow, which had been failing. NFR-05 is dropped. Parse and edit safety still rest on the proptest (10,000 random decks with every op, undo checked byte for byte), the golden decks, the 54 conformance cases, and the debug check that compares every one-line fast edit with a full parse in all tests. Before removal, fuzzing had run about 5 million parse cases and 2 million edit cases on the 0.1.0 code, and found two bugs in the fast edit path, both fixed with regression tests.

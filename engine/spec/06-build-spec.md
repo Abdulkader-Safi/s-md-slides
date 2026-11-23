@@ -271,7 +271,7 @@ Throwaway spikes in a `spikes/` folder, deleted or folded in after.
 - [x] **NFR-02** Size: the core's WASM build under 1 MB uncompressed, never above 1.5 MB, enforced by `scripts/wasm-size.sh` in CI.
 - [x] **NFR-03** Round-trip: every golden deck and conformance case saves byte-identical, and every op touches only its targets' spans.
 - [x] **NFR-04** Privacy and security: no network in core or render. `serve` binds 127.0.0.1 by default, serves only the deck folder, never writes. Exports are sanitized and carry the CSP.
-- [ ] **NFR-05** Robustness: `fuzz_parse` and `fuzz_ops` each pass 10 million runs with no panic before release.
+- [ ] ~~**NFR-05** Robustness: `fuzz_parse` and `fuzz_ops` each pass 10 million runs with no panic before release.~~ Dropped by the user on 2026-11-23, with fuzzing removed from the repo. See PROGRESS.md.
 - [x] **NFR-06** Platforms: CI green on macOS, Windows and Linux at the MSRV, plus the `wasm32-unknown-unknown` core build.
 - [x] **NFR-07** Accessibility and locale: axe-core finds no WCAG 2.2 AA violations in the presentation. Keyboard-only use, alt text, reading order and reduced motion work. Arabic and mixed text render correctly in every format.
 - [x] **NFR-08** Stability: semver on all three crates. A deck with unknown keys from a newer minor version loads and saves without loss. A `s-md-slides: 2` deck opens read-only.
